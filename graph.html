@@ -1,0 +1,574 @@
+<div id="graph-container" style="height: 800px; overflow: auto;">
+    <div id="graph"></div>
+    <div id="popup" class="popup">
+        <div class="popup-header">
+            <h3 id="popup-title"></h3>
+            <span class="popup-close">✕</span>
+        </div>
+        <div id="popup-content" class="popup-content">
+            <div id="common-info">
+                <p><strong>Input dims:</strong> <span id="input-dims"></span></p>
+                <p><strong>Output dims:</strong> <span id="output-dims"></span></p>
+            </div>
+            <div id="module-template" style="display:none;">
+                <p><strong>Type:</strong> <span id="module-type"></span></p>
+                <p><strong>Attributes:</strong></p>
+                <pre id="module-attributes"></pre>
+                <p><strong>Parameters:</strong></p>
+                <pre id="module-parameters"></pre>
+                <p><strong>Extra Repr:</strong></p>
+                <pre id="module-extra-repr"></pre>
+            </div>
+            <div id="tensor-op-template" style="display:none;">
+                <p><strong>Parameters:</strong></p>
+                <pre id="tensor-parameters"></pre>
+            </div>
+            <p id="no-info" style="display:none;">No further information available for this node.</p>
+        </div>
+    </div>
+    <div id="popup-content"></div>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/@dagrejs/dagre@1.0.2/dist/dagre.js"></script>
+    <script>
+        (function() {
+            const adj_list = ${adj_list_json};
+            const module_info = ${module_info_json};
+            const tensor_op_info = ${tensor_op_info_json};
+            const module_name_to_base_name = ${module_name_to_base_name_json};
+            const parent_module_to_nodes = ${parent_module_to_nodes_json};
+            const parent_module_to_depth = ${parent_module_to_depth_json};
+            
+            function waitForLibs(callback) {
+                if (typeof d3 !== 'undefined' && typeof dagre !== 'undefined') {
+                    callback();
+                } else {
+                    setTimeout(function() { waitForLibs(callback) }, 100);
+                }
+            }
+            
+            function calculateBoundingBox(nodeGroup, nodePositions) {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                nodeGroup.forEach(nodeName => {
+                    const node = nodePositions[nodeName];
+                    if (node) {
+                        minX = Math.min(minX, node.x - node.width / 2);
+                        minY = Math.min(minY, node.y - node.height / 2);
+                        maxX = Math.max(maxX, node.x + node.width / 2);
+                        maxY = Math.max(maxY, node.y + node.height / 2);
+                    }
+                });
+                return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+            }
+            waitForLibs(function() {
+                createGraph();
+            });
+
+            function findErrorNode(nodes) {
+                return nodes.find(node => adj_list[node].failed);
+            }
+            
+                        
+            function createGraph() {
+                const g = new dagre.graphlib.Graph();
+    
+                g.setGraph({});
+    
+                g.setDefaultEdgeLabel(function() { return {}; });
+    
+                Object.keys(adj_list).forEach(node => {
+                    g.setNode(node, { label: node, width: 100, height: 30,
+                        class: adj_list[node].failed ? 'failed' : 
+                               adj_list[node].is_module ? 'module' : 
+                               'operation' });
+                });
+    
+                Object.entries(adj_list).forEach(([node, data]) => {
+                    data.edges.forEach(child => {
+                        g.setEdge(node, child, { label: data.output_dims, labelpos: 'c' });
+                    });
+                });
+    
+                dagre.layout(g);
+    
+                const inputNodes = new Set(Object.keys(adj_list).filter(node => 
+                    !Object.values(adj_list).some(data => data.edges.includes(node))
+                ));
+    
+                const svg = d3.select("#graph")
+                    .append("svg")
+                    .attr("width", "100%")
+                    .attr("height", "800px")
+                    .style("background-color", "#f3f3eb");
+    
+                const inner = svg.append("g");
+    
+                const zoom = d3.zoom().on("zoom", function(event) {
+                    inner.attr("transform", event.transform);
+                    closePopup();
+                });
+    
+                svg.call(zoom);
+    
+                const nodes = inner.selectAll(".node")
+                    .data(g.nodes())
+                    .enter()
+                    .append("g")
+                    .attr("class", function(v) {
+                        let classes = "node";
+                        if (adj_list[v].failed) classes += " error";
+                        if (inputNodes.has(v)) classes += " input";
+                        else if (adj_list[v].is_module) classes += " module";
+                        else classes += " operation";
+                        return classes;
+                    })
+                    .attr("transform", function(v) {
+                        const node = g.node(v);
+                        return `translate(${node.x}, ${node.y})`;
+                    });
+
+                inner.selectAll(".node")
+                    .filter(function(v) {
+                        return !inputNodes.has(v) && v !== "output"
+                    })
+                    .on("click", showPopup);
+
+
+                const nodeShapes = nodes.append("rect")
+                    .attr("width", function(v) { return g.node(v).width; })
+                    .attr("height", function(v) { return g.node(v).height; })
+                    .attr("x", function(v) { return -g.node(v).width / 2; })
+                    .attr("y", function(v) { return -g.node(v).height / 2; })
+                    .attr("class", function(v) { 
+                        if (inputNodes.has(v)) return "input";
+                        if (v === "output") return "output";
+                        if (adj_list[v].failed) return "failed";
+                        return adj_list[v].is_module ? "module" : "operation";
+                    });
+    
+                nodes.append("text")
+                    .attr("class", "node-label")
+                    .text(function(v) { return v; })
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "central");
+    
+                nodes.filter(function(v) {
+                    return !inputNodes.has(v) && v !== "output"
+                }).append("text")
+                    .attr("class", "type-indicator")
+                    .attr("text-anchor", "end")
+                    .attr("dominant-baseline", "hanging")
+                    .attr("transform", function(v) {
+                        const node = g.node(v);
+                        return `translate(${node.width / 2 - 3}, ${-node.height / 2 + 3})`;
+                    })
+                    .text(function(v) {
+                        return adj_list[v].is_module ? (module_name_to_base_name[v] === v ? "Module" : "Module (Reused)") : "Tensor Op";
+                    });
+
+                nodes.on("mouseover", function() {
+                    const rect = d3.select(this).select("rect");
+                    const currentColor = d3.color(rect.style("fill"));
+                    rect.style("fill", currentColor.brighter(0.4));
+                })
+                .on("mouseout", function() {
+                    const rect = d3.select(this).select("rect");
+                    rect.style("fill", null);
+                });
+
+                function showPopup(event, d) {
+                    d = module_name_to_base_name[d];
+                    event.stopPropagation();
+                    
+                    const popup = d3.select("#popup");
+                    const clickedElement = d3.select(this).select("rect").node();
+                    const moduleTemplate = d3.select("#module-template");
+                    const tensorOpTemplate = d3.select("#tensor-op-template");
+                    const noInfoMessage = d3.select("#no-info");
+                    
+                    const nodeData = adj_list[d];
+
+                    d3.select("#popup-title").text(d);
+
+                    d3.select("#input-dims").text(nodeData.input_dims);
+                    d3.select("#output-dims").text(nodeData.output_dims);
+
+                    moduleTemplate.style("display", "none");
+                    tensorOpTemplate.style("display", "none");
+                    noInfoMessage.style("display", "none");
+
+                    if (nodeData.is_module && module_info[d]) {
+                        const info = module_info[d];
+                        moduleTemplate.style("display", "block").classed("content-shown", true);
+
+                        d3.select("#module-type").text(info.type || 'N/A');
+                        d3.select("#module-attributes").text(JSON.stringify(info.attributes, null, 2));
+                        d3.select("#module-parameters").text(JSON.stringify(info.parameters, null, 2));
+                        d3.select("#module-extra-repr").text(info.extra_repr || 'N/A');
+                    } else if (!nodeData.is_module && tensor_op_info[d]) {
+                        const info = tensor_op_info[d];
+                        tensorOpTemplate.style("display", "block").classed("content-shown", true);
+
+                        d3.select("#tensor-parameters").text(JSON.stringify(info, null, 2));
+                    } else {
+                        noInfoMessage.style("display", "block").classed("content-shown", true);
+                    }
+
+                    const boundingBox = clickedElement.getBoundingClientRect();
+                    const containerRect = d3.select("#graph-container").node().getBoundingClientRect();
+
+                    const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
+                    const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
+
+                    popup.style("left", `${x}px`)
+                        .style("top", `${y}px`)
+                        .style("display", "flex");
+                }
+
+                const maxDepth = Math.max(...Object.keys(parent_module_to_depth).map(key => parent_module_to_depth[key]));
+                
+                // Collect node positions after layout
+                const nodePositions = {};
+                g.nodes().forEach(v => {
+                    nodePositions[v] = g.node(v);
+                });
+
+                
+                // Create boundary boxes for parent modules
+                const boundaryBoxes = inner.selectAll(".boundary-box")
+                    .data(Object.entries(parent_module_to_nodes))
+                    .enter()
+                    .append("g")
+                    .attr("class", "boundary-box");
+                
+                boundaryBoxes.each(function([parentModule, childNodes]) {
+                    const group = d3.select(this);
+                    const bbox = calculateBoundingBox(childNodes, nodePositions);
+                    
+                    const depth = parent_module_to_depth[parentModule];
+                    
+                    const baseHorizontalPadding = 10;  // Increased horizontal padding
+                    const baseVerticalPadding = 3;     // Kept vertical padding the same
+                    const horizontalPadding = depth * baseHorizontalPadding;
+                    const verticalPadding = depth * baseVerticalPadding;
+                
+                    bbox.x -= horizontalPadding;
+                    bbox.y -= verticalPadding;
+                    bbox.width += 2 * horizontalPadding;
+                    bbox.height += 2 * verticalPadding;
+                
+                    // Create boundary box
+                    group.append("rect")
+                        .attr("x", bbox.x)
+                        .attr("y", bbox.y)
+                        .attr("width", bbox.width)
+                        .attr("height", bbox.height)
+                        .attr("fill-opacity", 0.0)
+                        .attr("stroke", "black")
+                        .attr("stroke-width", 1)
+                        .attr("rx", 5)
+                        .attr("ry", 5);
+                    
+                    // Create rotated text
+                    const textGroup = group.append("g")
+                        .attr("transform", `translate(${bbox.x}, ${bbox.y + bbox.height / 2})`);
+                
+                    const text = textGroup.append("text")
+                        .text(parentModule)
+                        .attr("transform", "rotate(-90)")
+                        .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "central")
+                        .attr("font-size", 7)
+                        .attr("fill", "#333");
+                
+                    // Get text bounding box
+                    const textBox = text.node().getBBox();
+                
+                    // Create background for text
+                    const padding = 1;
+                    textGroup.insert("rect", "text")
+                        .attr("x", -textBox.width / 2 - padding)
+                        .attr("y", -textBox.height / 2 - padding)
+                        .attr("width", textBox.width + 2 * padding)
+                        .attr("height", textBox.height + 2 * padding)
+                        .attr("transform", "rotate(-90)")
+                        .attr("fill", "#f3f3eb");
+                });
+
+                
+                const line = d3.line()
+                    .x(d => d.x)
+                    .y(d => d.y)
+                    .curve(d3.curveBasis);
+                
+                                
+                // Update the arrowhead definition in the existing JavaScript code
+                svg.append("defs").append("marker")
+                    .attr("id", "arrowhead")
+                    .attr("viewBox", "0 -5 10 10")
+                    .attr("refX", 8)  // Changed from 10 to 8
+                    .attr("refY", 0)
+                    .attr("markerWidth", 6)
+                    .attr("markerHeight", 6)
+                    .attr("orient", "auto")
+                    .append("path")
+                    .attr("d", "M0,-5L10,0L0,5")
+                    .attr("fill", "#333");
+                
+                // Update the edge creation code
+                const edges = inner.selectAll(".edge")
+                    .data(g.edges())
+                    .enter()
+                    .append("path")
+                    .attr("class", "edge")
+                    .attr("d", function(e) {
+                        const edge = g.edge(e);
+                        const points = edge.points;
+                        if (points.length >= 2) {
+                            const lastTwoPoints = points.slice(-2);
+                            const vectorX = lastTwoPoints[1].x - lastTwoPoints[0].x;
+                            const vectorY = lastTwoPoints[1].y - lastTwoPoints[0].y;
+                            const vectorLength = Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                            const normalizedX = vectorX / vectorLength;
+                            const normalizedY = vectorY / vectorLength;
+                            const newEndX = lastTwoPoints[1].x - normalizedX * 1;
+                            const newEndY = lastTwoPoints[1].y - normalizedY * 1;
+                            points[points.length - 1] = {x: newEndX, y: newEndY};
+                        }
+                        return line(points);
+                    })
+                    .attr("marker-end", "url(#arrowhead)");
+
+
+                
+                function getPointAtPercentageOfPath(path, percentage) {
+                    const pathLength = path.getTotalLength();
+                    const point = path.getPointAtLength(pathLength * percentage);
+                    return [point.x, point.y];
+                }
+    
+                const edgePaths = {};
+                edges.each(function(e) {
+                    edgePaths[e.v + '-' + e.w] = this;
+                });
+    
+                const edgeLabelGroups = inner.selectAll(".edgeLabelGroup")
+                    .data(g.edges())
+                    .enter()
+                    .append("g")
+                    .attr("class", "edgeLabelGroup")
+                    .attr("transform", function(e) {
+                        const path = edgePaths[e.v + '-' + e.w];
+                        const [x, y] = getPointAtPercentageOfPath(path, 0.5);  // 0.5 represents the midpoint
+                        return `translate(${x},${y})`;
+                    });
+    
+                edgeLabelGroups.each(function(e) {
+                    const group = d3.select(this);
+                    const text = group.append("text")
+                        .attr("class", "edgeLabel")
+                        .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "central")
+                        .text(g.edge(e).label);  // Use g.edge(e) to get the edge data
+    
+                    const bbox = text.node().getBBox();
+                    const padding = 5;
+    
+                    group.insert("rect", "text")
+                        .attr("class", "edgeLabelBackground")
+                        .attr("x", bbox.x - padding)
+                        .attr("y", bbox.y - padding)
+                        .attr("width", bbox.width + 2 * padding)
+                        .attr("height", bbox.height + 2 * padding)
+                        .attr("fill", "#f3f3eb");
+                });
+                                             
+                // Center the graph
+                const graphBounds = inner.node().getBBox();
+                const width = svg.node().clientWidth;
+                const height = svg.node().clientHeight;
+
+                const errorNode = findErrorNode(g.nodes());
+                if (errorNode) {
+                    // Focus on the error node
+                    const node = g.node(errorNode);
+                    const scale = width * 0.1 / node.width; // 10% of canvas width
+                    const translate = [
+                        width / 2 - node.x * scale,
+                        height / 2 - node.y * scale
+                    ];
+                    
+                    svg.call(zoom.transform, d3.zoomIdentity
+                        .translate(translate[0], translate[1])
+                        .scale(scale));
+                } else {
+                    // Show the entire graph
+                    const graphBounds = inner.node().getBBox();
+                    const fullWidth = graphBounds.width;
+                    const fullHeight = graphBounds.height;
+                    const scale = Math.min(width / fullWidth, height / fullHeight) * 0.9; // 90% to add some padding
+                    const translate = [
+                        (width - fullWidth * scale) / 2 - graphBounds.x * scale,
+                        (height - fullHeight * scale) / 2 - graphBounds.y * scale
+                    ];
+                    
+                    svg.call(zoom.transform, d3.zoomIdentity
+                        .translate(translate[0], translate[1])
+                        .scale(scale));
+                }
+            
+    
+                d3.select(".popup-close").on("click", closePopup);
+                svg.on("click", closePopup);
+                svg.call(zoom.on("zoom", function(event) {
+                    inner.attr("transform", event.transform);
+                    closePopup();
+                }));
+    
+                function closePopup() {
+                    d3.select("#popup").style("display", "none");
+                }
+            }
+        })();
+    </script>
+    
+    <style>
+        #graph {
+            width: 100%;
+            height: 100%;
+        }
+        .node rect {
+            stroke: #333;
+            fill: #fff;
+        }
+        .node text {
+            font: 10px "'Roboto', sans-serif";
+            cursor: default;
+            user-select: none;
+        }
+        .edge {
+            stroke: #333333;
+            stroke-width: 1px;
+            fill: none;
+        }
+        .edgeLabel {
+            font: 8px "'Roboto', sans-serif";
+        }
+        .node rect.input { fill: #FF9AFF; }
+        .node rect.output { fill: #FF9AFF; }
+        .node rect.failed { fill: #bd0000; }
+        .node rect.module { fill: #8BDEDB; }
+        .node rect.operation { fill: #FEBC5A; }
+        .edgeLabelGroup {
+            pointer-events: none;
+        }
+        #arrowhead path {
+            fill: #333333;;
+        }
+        .node rect,
+        .node ellipse {
+            transition: fill 0.3s ease;
+        }
+
+        .node .type-indicator {
+            font-size: 5px;
+            fill: rgba(0, 0, 0, 1.0);  /* Dark grey, semi-transparent */
+            pointer-events: none;
+        }
+
+        .node.error rect {
+            stroke: #bd0000;
+            stroke-width: 1px;
+            /* stroke-dasharray: 3, 3; */
+            rx: 5px;
+            ry: 5px;
+        }
+
+        .node.error text {
+            fill: white;
+        }
+
+        #graph-container {
+            position: relative;
+        }
+        .popup {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            width: 300px;
+            max-height: 400px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 5px 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .popup h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .popup-content {
+            padding: 10px;
+            padding-bottom: 10px;
+            overflow-y: auto;
+            overflow-x: auto;
+            flex-grow: 1;
+        }
+
+        .popup pre {
+            white-space: pre;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+
+        .popup-close {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        #popup-title {
+            font-size: 24px;
+        }
+
+        #graph-container {
+            position: relative;
+        }
+
+        pre {
+            margin-bottom: 0;
+        }
+
+        .boundary-box rect {
+            pointer-events: none;
+        }
+        .boundary-box text {
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .boundary-box rect {
+            pointer-events: none;
+        }
+        .boundary-box text {
+            pointer-events: none;
+            user-select: none;
+            font-weight: bold;
+        }
+
+    </style>
+</div>
