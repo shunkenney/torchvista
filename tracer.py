@@ -14,6 +14,15 @@ from collections import defaultdict
 import torch
 import torch.nn as nn
 
+import json
+from IPython.display import display, HTML
+import json
+from pathlib import Path
+from string import Template
+import uuid
+from collections import defaultdict
+
+
 MODULES = {
     nn.AdaptiveAvgPool1d,
     nn.AdaptiveAvgPool2d,
@@ -343,3 +352,22 @@ def trace_model(model, input_tensor):
         raise exception
 
     return adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth
+
+def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth):
+    unique_id = str(uuid.uuid4())
+    template_path = Path('graph.html')
+    with template_path.open('r') as file:
+        template_str = file.read()
+
+    template = Template(template_str)
+        
+    output = template.safe_substitute({
+        'adj_list_json': json.dumps(adj_list),
+        'module_info_json': json.dumps(module_info),
+        'tensor_op_info_json': json.dumps(tensor_op_info),
+        'module_name_to_base_name_json': json.dumps(module_name_to_base_name),
+        'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
+        'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
+        'unique_id': unique_id,
+    })
+    display(HTML(output))
