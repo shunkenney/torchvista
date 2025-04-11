@@ -23,15 +23,63 @@ import uuid
 from collections import defaultdict
 
 
-MODULES = {
-    nn.AdaptiveAvgPool1d,
-    nn.AdaptiveAvgPool2d,
-    nn.AdaptiveAvgPool3d,
-    nn.AdaptiveLogSoftmaxWithLoss,
-    nn.AdaptiveMaxPool1d,
-    nn.AdaptiveMaxPool2d,
-    nn.AdaptiveMaxPool3d,
-}
+def get_all_nn_modules():
+    import inspect
+    import pkgutil
+    import importlib
+    import torch.nn as nn
+
+    try:
+        import torchvision
+    except ImportError:
+        torchvision = None
+    
+    try:
+        import torchaudio
+    except ImportError:
+        torchaudio = None
+    
+    try:
+        import torchtext
+    except ImportError:
+        torchtext = None
+
+    modules_to_scan = [nn, torchvision, torchaudio, torchtext]
+
+    visited = set()
+    module_classes = set()
+
+    def walk_module(mod):
+        if mod in visited:
+            return
+        visited.add(mod)
+
+        try:
+            for name, obj in inspect.getmembers(mod):
+                if inspect.isclass(obj) and issubclass(obj, nn.Module):
+                    module_classes.add(obj)
+        except Exception:
+            return  # Skip modules that can't be introspected
+
+        # Recursively explore submodules
+        if hasattr(mod, '__path__'):
+            for _, subname, ispkg in pkgutil.iter_modules(mod.__path__, mod.__name__ + "."):
+                try:
+                    submod = importlib.import_module(subname)
+                    walk_module(submod)
+                except Exception:
+                    continue  # skip if can't import
+
+    for mod in modules_to_scan:
+        if mod is not None:
+            walk_module(mod)
+
+    return module_classes
+
+
+CONTAINER_MODULES = []
+
+MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
 FUNCTIONS = [
     {'namespace': 'torch', 'function': 'chunk'},
