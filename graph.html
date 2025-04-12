@@ -38,6 +38,7 @@
             const module_name_to_base_name = ${module_name_to_base_name_json};
             const parent_module_to_nodes = ${parent_module_to_nodes_json};
             const parent_module_to_depth = ${parent_module_to_depth_json};
+            const graph_node_name_to_without_suffix = ${graph_node_name_to_without_suffix};
             
             function waitForLibs(callback) {
                 if (typeof d3 !== 'undefined' && typeof dagre !== 'undefined') {
@@ -148,12 +149,7 @@
     
                 nodes.append("text")
                     .attr("class", "node-label")
-                    .text(function(v) {
-                        if (v in module_info) {
-                            return module_info[v]['type'] || v;
-                        }
-                        return v;
-                    })
+                    .text(function(v) { return graph_node_name_to_without_suffix[v] || v;; })
                     .attr("text-anchor", "middle")
                     .attr("dominant-baseline", "central");
     
@@ -168,7 +164,7 @@
                         return `translate(${node.width / 2 - 3}, ${-node.height / 2 + 3})`;
                     })
                     .text(function(v) {
-                        return adj_list[v].is_module ? (module_name_to_base_name[v] === v ? "Module" : "Module (Reused)") : "Tensor Op";
+                        return adj_list[v].is_module ? "Module" : "Tensor Op";
                     });
 
                 nodes.on("mouseover", function() {
@@ -182,7 +178,6 @@
                 });
 
                 function showPopup(event, d) {
-                    d = module_name_to_base_name[d];
                     event.stopPropagation();
                     
                     const popup = d3.select("#popup");
@@ -193,7 +188,7 @@
                     
                     const nodeData = adj_list[d];
 
-                    d3.select("#popup-title").text(d);
+                    d3.select("#popup-title").text(graph_node_name_to_without_suffix[d] || d);
 
                     d3.select("#input-dims").text(nodeData.input_dims);
                     d3.select("#output-dims").text(nodeData.output_dims);

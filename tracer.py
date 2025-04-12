@@ -113,6 +113,7 @@ def trace_model(model, input_tensor):
     parent_module_to_nodes = defaultdict(list)
     parent_module_to_depth = {}
     original_module_forwards = {}
+    graph_node_name_to_without_suffix = {}
     last_tensor_input_id = 0
     last_primitive_input_id = 0
 
@@ -197,6 +198,7 @@ def trace_model(model, input_tensor):
                      [tuple(t.shape) for t in inputs[0]] if isinstance(inputs[0], (list, tuple)) and all(isinstance(t, torch.Tensor) for t in inputs[0]) \
                      else inputs[0]
 
+        graph_node_name_to_without_suffix[op_name] = op_type
         adj_list[op_name] = {
             'edges': [],
             'input_dims': format_dims(input_dims),
@@ -213,6 +215,7 @@ def trace_model(model, input_tensor):
                     if isinstance(t, torch.Tensor) and hasattr(t, '_tensor_source_name'):
                         adj_list[t._tensor_source_name]['edges'].append(op_name)
             elif isinstance(inp, torch.Tensor):
+                graph_node_name_to_without_suffix[f'tensor_{last_tensor_input_id}'] = 'tensor'
                 adj_list[f'tensor_{last_tensor_input_id}'] = {
                     'edges': [op_name],
                     'input_dims': format_dims(inp.shape),
@@ -222,6 +225,7 @@ def trace_model(model, input_tensor):
                 }
                 last_tensor_input_id += 1
             else:
+                graph_node_name_to_without_suffix[f'{type(inp).__name__}_{last_primitive_input_id}'] = f'{type(inp).__name__}'
                 adj_list[f'{type(inp).__name__}_{last_primitive_input_id}'] = {
                     'edges': [op_name],
                     'input_dims': '',
@@ -381,6 +385,7 @@ def trace_model(model, input_tensor):
         traverse_model(model)
 
         input_tensor._tensor_source_name = 'input'
+        graph_node_name_to_without_suffix['input'] = 'input'
         adj_list['input'] = {
             'edges': [],
             'input_dims': tuple(input_tensor.shape),
@@ -397,6 +402,7 @@ def trace_model(model, input_tensor):
             cleanup_tensor_attributes(output)
 
             output_node_name = 'output'
+            graph_node_name_to_without_suffix['output'] = 'output'
             adj_list[output_node_name] = {
                 'edges': [],
                 'input_dims': format_dims(adj_list[last_successful_op]['output_dims']),
@@ -414,12 +420,11 @@ def trace_model(model, input_tensor):
         restore_modules()
         cleanup_tensor_attributes(input_tensor)
 
+    plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix)
     if exception is not None:
         raise exception
 
-    return adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth
-
-def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth):
+def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix):
     unique_id = str(uuid.uuid4())
     template_path = Path('graph.html')
     with template_path.open('r') as file:
@@ -434,6 +439,7 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, 
         'module_name_to_base_name_json': json.dumps(module_name_to_base_name),
         'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
         'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
+        'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
         'unique_id': unique_id,
     })
     display(HTML(output))
