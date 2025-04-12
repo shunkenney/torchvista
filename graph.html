@@ -38,6 +38,7 @@
             const module_name_to_base_name = ${module_name_to_base_name_json};
             const parent_module_to_nodes = ${parent_module_to_nodes_json};
             const parent_module_to_depth = ${parent_module_to_depth_json};
+            const graph_node_name_to_without_suffix = ${graph_node_name_to_without_suffix};
             
             function waitForLibs(callback) {
                 if (typeof d3 !== 'undefined' && typeof dagre !== 'undefined') {
@@ -148,7 +149,7 @@
     
                 nodes.append("text")
                     .attr("class", "node-label")
-                    .text(function(v) { return v; })
+                    .text(function(v) { return graph_node_name_to_without_suffix[v] || v;; })
                     .attr("text-anchor", "middle")
                     .attr("dominant-baseline", "central");
     
@@ -353,7 +354,7 @@
                 });
     
                 const edgeLabelGroups = inner.selectAll(".edgeLabelGroup")
-                    .data(g.edges())
+                    .data(g.edges().filter(e => g.edge(e).label && g.edge(e).label !== ""))
                     .enter()
                     .append("g")
                     .attr("class", "edgeLabelGroup")
