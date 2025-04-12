@@ -113,6 +113,9 @@ def trace_model(model, input_tensor):
     parent_module_to_nodes = defaultdict(list)
     parent_module_to_depth = {}
     original_module_forwards = {}
+    graph_node_name_to_without_suffix = {}
+    last_tensor_input_id = 0
+    last_primitive_input_id = 0
 
     def format_dims(dims):
         if isinstance(dims, tuple):
@@ -188,13 +191,14 @@ def trace_model(model, input_tensor):
         return formatted_args, formatted_kwargs
 
     def pre_trace_op(op_type, inputs, module=None, *args, **kwargs):
-        nonlocal current_op, last_successful_op
+        nonlocal current_op, last_successful_op, last_primitive_input_id, last_tensor_input_id
         op_name, is_module = get_unique_op_name(op_type, module)
         
         input_dims = tuple(inputs[0].shape) if isinstance(inputs[0], torch.Tensor) else \
                      [tuple(t.shape) for t in inputs[0]] if isinstance(inputs[0], (list, tuple)) and all(isinstance(t, torch.Tensor) for t in inputs[0]) \
                      else inputs[0]
 
+        graph_node_name_to_without_suffix[op_name] = op_type
         adj_list[op_name] = {
             'edges': [],
             'input_dims': format_dims(input_dims),
@@ -210,6 +214,28 @@ def trace_model(model, input_tensor):
                 for t in inp:
                     if isinstance(t, torch.Tensor) and hasattr(t, '_tensor_source_name'):
                         adj_list[t._tensor_source_name]['edges'].append(op_name)
+            elif isinstance(inp, torch.Tensor):
+                graph_node_name_to_without_suffix[f'tensor_{last_tensor_input_id}'] = 'tensor'
+                adj_list[f'tensor_{last_tensor_input_id}'] = {
+                    'edges': [op_name],
+                    'input_dims': format_dims(inp.shape),
+                    'output_dims': format_dims(inp.shape),
+                    'failed': False,
+                    'is_module': False,
+                }
+                last_tensor_input_id += 1
+            else:
+                graph_node_name_to_without_suffix[f'{type(inp).__name__}_{last_primitive_input_id}'] = f'{type(inp).__name__}'
+                adj_list[f'{type(inp).__name__}_{last_primitive_input_id}'] = {
+                    'edges': [op_name],
+                    'input_dims': '',
+                    'output_dims': '',
+                    'failed': False,
+                    'is_module': False,
+                }
+                last_primitive_input_id += 1
+                
+                
 
         formatted_args, formatted_kwargs = capture_args(*args, **kwargs)
         func_info_map[op_name] = {
@@ -289,10 +315,6 @@ def trace_model(model, input_tensor):
         def make_wrapped(orig_func, func_name):
             def wrapped(*args, **kwargs):
                 nonlocal current_executing_module, current_executing_function
-                if current_executing_function == '__repr__':
-                    print("__repr__")
-                    print("__repr__")
-                    print("__repr__")
                 if current_executing_module is None and current_executing_function is None:
                     current_executing_function = func_name
                     node_name = pre_trace_op(func_name, args, None, *args, **kwargs)
@@ -363,6 +385,7 @@ def trace_model(model, input_tensor):
         traverse_model(model)
 
         input_tensor._tensor_source_name = 'input'
+        graph_node_name_to_without_suffix['input'] = 'input'
         adj_list['input'] = {
             'edges': [],
             'input_dims': tuple(input_tensor.shape),
@@ -379,6 +402,7 @@ def trace_model(model, input_tensor):
             cleanup_tensor_attributes(output)
 
             output_node_name = 'output'
+            graph_node_name_to_without_suffix['output'] = 'output'
             adj_list[output_node_name] = {
                 'edges': [],
                 'input_dims': format_dims(adj_list[last_successful_op]['output_dims']),
@@ -399,7 +423,7 @@ def trace_model(model, input_tensor):
     if exception is not None:
         raise exception
 
-    return adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth
+    return adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix
 
 def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth):
     unique_id = str(uuid.uuid4())
