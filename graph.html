@@ -167,14 +167,24 @@
                         return adj_list[v].is_module ? "Module" : "Tensor Op";
                     });
 
-                nodes.on("mouseover", function() {
-                    const rect = d3.select(this).select("rect");
-                    const currentColor = d3.color(rect.style("fill"));
-                    rect.style("fill", currentColor.brighter(0.4));
-                })
-                .on("mouseout", function() {
-                    const rect = d3.select(this).select("rect");
-                    rect.style("fill", null);
+                nodes.each(function() {
+                    const nodeGroup = d3.select(this);
+                    const rect = nodeGroup.select("rect");
+                    const originalColor = rect.style("fill");
+                    let isHovered = false;
+                    
+                    // Add hover effect to the entire node group
+                    nodeGroup.on("mouseenter", function() {
+                        if (!isHovered) {
+                            isHovered = true;
+                            const currentColor = d3.color(rect.style("fill") || originalColor);
+                            rect.style("fill", currentColor.brighter(0.4));
+                        }
+                    })
+                    .on("mouseleave", function() {
+                        isHovered = false;
+                        rect.style("fill", originalColor);
+                    });
                 });
 
                 function showPopup(event, d) {
@@ -352,37 +362,21 @@
                     edgePaths[e.v + '-' + e.w] = this;
                 });
     
-                const edgeLabelGroups = inner.selectAll(".edgeLabelGroup")
-                    .data(g.edges().filter(e => g.edge(e).label && g.edge(e).label !== ""))
-                    .enter()
-                    .append("g")
-                    .attr("class", "edgeLabelGroup")
-                    .attr("transform", function(e) {
-                        const path = edgePaths[e.v + '-' + e.w];
-                        const [x, y] = getPointAtPercentageOfPath(path, 0.5);  // 0.5 represents the midpoint
-                        return `translate(${x},${y})`;
-                    });
-    
-                edgeLabelGroups.each(function(e) {
-                    const group = d3.select(this);
-                    const text = group.append("text")
-                        .attr("class", "edgeLabel")
-                        .attr("text-anchor", "middle")
-                        .attr("dominant-baseline", "central")
-                        .text(g.edge(e).label);  // Use g.edge(e) to get the edge data
-    
-                    const bbox = text.node().getBBox();
-                    const padding = 5;
-    
-                    group.insert("rect", "text")
-                        .attr("class", "edgeLabelBackground")
-                        .attr("x", bbox.x - padding)
-                        .attr("y", bbox.y - padding)
-                        .attr("width", bbox.width + 2 * padding)
-                        .attr("height", bbox.height + 2 * padding)
-                        .attr("fill", "#f3f3eb");
+                nodes.each(function(v) {
+                  const nodeGroup = d3.select(this);
+                  const nodeData = g.node(v);
+                  const outputDim = adj_list[v].output_dims;
+                  
+                  if (outputDim && outputDim !== "") {
+                    nodeGroup.append("text")
+                      .attr("class", "dim-label output-dim")
+                      .attr("text-anchor", "middle")
+                      .style("font-size", "6px")
+                      .attr("y", nodeData.height / 2 - 3)
+                      .text("Output dim: " + outputDim);
+                  }
                 });
-                                             
+                                                 
                 // Center the graph
                 const graphBounds = inner.node().getBBox();
                 const width = svg.node().clientWidth;
