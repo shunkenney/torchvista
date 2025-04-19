@@ -21,6 +21,7 @@ from pathlib import Path
 from string import Template
 import uuid
 from collections import defaultdict
+from overrides import FUNCTIONS
 
 
 def get_all_nn_modules():
@@ -81,19 +82,6 @@ CONTAINER_MODULES = []
 
 MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
-FUNCTIONS = [
-    {'namespace': 'torch', 'function': 'chunk'},
-    {'namespace': 'torch', 'function': 'split'},
-    {'namespace': 'torch', 'function': 'stack'},
-    {'namespace': 'torch', 'function': 'matmul'},
-    {'namespace': 'torch', 'function': 'lobpcg'},
-    {'namespace': 'torch', 'function': 'sym_not'},
-    {'namespace': 'torch', 'function': 'unravel_index'},
-    {'namespace': 'torch', 'function': 'sym_int'},
-    {'namespace': 'torch', 'function': 'sym_float'},
-    {'namespace': 'torch', 'function': 'sym_max'},
-]
-
 def trace_model(model, input_tensor):
     adj_list = {}
     op_type_counters = defaultdict(int)
@@ -116,6 +104,8 @@ def trace_model(model, input_tensor):
     graph_node_name_to_without_suffix = {}
     last_tensor_input_id = 0
     last_primitive_input_id = 0
+
+    nodes_to_delete = []
 
     def format_dims(dims):
         if isinstance(dims, tuple):
@@ -191,6 +181,11 @@ def trace_model(model, input_tensor):
         return formatted_args, formatted_kwargs
 
     def pre_trace_op(op_type, inputs, module=None, *args, **kwargs):
+        # This can happen in some discovered operations which don't take any inputs. For these, we don't
+        # have to put nodes in the graph.
+        if not inputs:
+            return
+        
         nonlocal current_op, last_successful_op, last_primitive_input_id, last_tensor_input_id
         op_name, is_module = get_unique_op_name(op_type, module)
         
@@ -254,16 +249,23 @@ def trace_model(model, input_tensor):
         return op_name
 
     def trace_op(op_name, output):
+        # Because some discovered operations don't get added to the adj_list in pre_trace_op
+        if op_name not in adj_list:
+            return output
         nonlocal last_successful_op, current_op
+        last_successful_op = op_name
+        current_op = None
+        # Some operations don't produce any output
+        if output is None or not isinstance(output, torch.Tensor):
+            nodes_to_delete.append(op_name)
+            return output
+        
         output_dims = format_dims(tuple(output.shape) if isinstance(output, torch.Tensor) else output)
         adj_list[op_name]['output_dims'] = output_dims
         adj_list[op_name]['failed'] = False
 
         if isinstance(output, torch.Tensor):
             output._tensor_source_name = op_name
-
-        last_successful_op = op_name
-        current_op = None
 
         return output
 
@@ -320,7 +322,8 @@ def trace_model(model, input_tensor):
                     node_name = pre_trace_op(func_name, args, None, *args, **kwargs)
                     output = orig_func(*args, **kwargs)
                     current_executing_function = None
-                    return trace_op(node_name, output)
+                    output = trace_op(node_name, output)
+                    return output
                 else:
                     return orig_func(*args, **kwargs)
             return wrapped
@@ -380,6 +383,28 @@ def trace_model(model, input_tensor):
             for value in obj.values():
                 cleanup_tensor_attributes(value)
 
+    def cleanup_graph(adj_list, nodes_to_delete):
+        for node in nodes_to_delete:
+            del adj_list[node]
+            for _, l in adj_list.items():
+                if node in l['edges']:
+                    l['edges'].remove(node)
+
+        reachable = set()
+    
+        def dfs(node):
+            if node in reachable:
+                return
+            reachable.add(node)
+            for neighbor in adj_list.get(node, {}).get('edges', []):
+                dfs(neighbor)
+    
+        dfs('input')
+    
+        for node in list(adj_list.keys()):
+            if node not in reachable:
+                del adj_list[node]
+
     try:
         wrap_functions()
         traverse_model(model)
@@ -420,6 +445,7 @@ def trace_model(model, input_tensor):
         restore_modules()
         cleanup_tensor_attributes(input_tensor)
 
+    cleanup_graph(adj_list, nodes_to_delete)
     plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix)
     if exception is not None:
         raise exception
