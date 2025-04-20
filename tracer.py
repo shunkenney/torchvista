@@ -128,7 +128,7 @@ def trace_model(model, input_tensor):
             else:
                 base_name = module_to_node_name[module]
                 module_reuse_count[base_name] = module_reuse_count.get(base_name, 0) + 1
-                reused_name = f"{base_name}_Reused_{module_reuse_count[base_name]}"
+                reused_name = f"{base_name} ({module_reuse_count[base_name]})"
                 node_to_base_name_map[reused_name] = base_name
                 return reused_name, True
         else:
@@ -346,8 +346,29 @@ def trace_model(model, input_tensor):
             try:
                 orig_func = getattr(module, func_name)
                 if callable(orig_func):
-                    wrapped_func = make_wrapped(orig_func, func_name)
                     original_ops[(namespace, func_name)] = orig_func
+            except AttributeError:
+                pass
+
+        for func_info in FUNCTIONS:
+            namespace = func_info['namespace']
+            func_name = func_info['function']
+            
+            if namespace == 'torch':
+                module = torch
+            elif namespace == 'torch.functional':
+                module = torch.functional
+            elif namespace == 'torch.Tensor':
+                module = torch.Tensor
+            elif namespace == 'torch.nn.functional':
+                module = torch.nn.functional
+            else:
+                continue
+
+            try:
+                orig_func = getattr(module, func_name)
+                if callable(orig_func):
+                    wrapped_func = make_wrapped(orig_func, func_name, namespace)
                     setattr(module, func_name, wrapped_func)
             except AttributeError:
                 pass
@@ -362,6 +383,10 @@ def trace_model(model, input_tensor):
                 module = torch.Tensor
             elif namespace == 'torch.nn.functional':
                 module = torch.nn.functional
+            elif namespace == 'torch.nn.init':
+                module = torch.nn.init
+            elif namespace == 'torch.linalg':
+                module = torch.linalg
             else:
                 continue
 
@@ -414,7 +439,7 @@ def trace_model(model, input_tensor):
         adj_list['input'] = {
             'edges': [],
             'input_dims': tuple(input_tensor.shape),
-            'output_dims': tuple(input_tensor.shape),
+            'output_dims': format_dims(tuple(input_tensor.shape)),
             'failed': False,
             'is_module': False,
         }
