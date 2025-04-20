@@ -207,8 +207,8 @@
                     tensorOpTemplate.style("display", "none");
                     noInfoMessage.style("display", "none");
 
-                    if (nodeData.is_module && module_info[d]) {
-                        const info = module_info[d];
+                    if (nodeData.is_module && (module_info[d] || (module_name_to_base_name[d] && module_info[module_name_to_base_name[d]]))) {
+                        const info = module_info[d] ? module_info[d] : module_info[module_name_to_base_name[d]];
                         moduleTemplate.style("display", "block").classed("content-shown", true);
 
                         d3.select("#module-type_${unique_id}").text(info.type || 'N/A');
@@ -233,6 +233,7 @@
                     popup.style("left", `${x}px`)
                         .style("top", `${y}px`)
                         .style("display", "flex");
+                    d3.select("#popup-content_${unique_id}").node().scrollTop = 0;
                 }
 
                 const maxDepth = Math.max(...Object.keys(parent_module_to_depth).map(key => parent_module_to_depth[key]));
@@ -243,7 +244,6 @@
                     nodePositions[v] = g.node(v);
                 });
 
-                
                 // Create boundary boxes for parent modules
                 const boundaryBoxes = inner.selectAll(".boundary-box")
                     .data(Object.entries(parent_module_to_nodes))
@@ -257,16 +257,16 @@
                     
                     const depth = parent_module_to_depth[parentModule];
                     
-                    const baseHorizontalPadding = 10;  // Increased horizontal padding
-                    const baseVerticalPadding = 3;     // Kept vertical padding the same
+                    const baseHorizontalPadding = 10;  // Horizontal padding
+                    const baseVerticalPadding = 5;     // Vertical padding
                     const horizontalPadding = depth * baseHorizontalPadding;
                     const verticalPadding = depth * baseVerticalPadding;
-                
+                    
                     bbox.x -= horizontalPadding;
                     bbox.y -= verticalPadding;
                     bbox.width += 2 * horizontalPadding;
-                    bbox.height += 2 * verticalPadding;
-                
+                    bbox.height += 1.8 * verticalPadding;
+                    
                     // Create boundary box
                     group.append("rect")
                         .attr("x", bbox.x)
@@ -279,32 +279,31 @@
                         .attr("rx", 5)
                         .attr("ry", 5);
                     
-                    // Create rotated text
+                    // Create text on top of the boundary box (not rotated)
                     const textGroup = group.append("g")
-                        .attr("transform", `translate(${bbox.x}, ${bbox.y + bbox.height / 2})`);
-                
+                        .attr("transform", `translate(${bbox.x + 10}, ${bbox.y + 3})`); // Position at top-left with small offset
+                    
+                    // Create text background
                     const text = textGroup.append("text")
                         .text(parentModule)
-                        .attr("transform", "rotate(-90)")
-                        .attr("text-anchor", "middle")
-                        .attr("dominant-baseline", "central")
+                        .attr("text-anchor", "start")
+                        .attr("dominant-baseline", "hanging")
+                        .attr("dy", "-6") // Position text slightly above the box top line
                         .attr("font-size", 7)
                         .attr("fill", "#333");
-                
+                    
                     // Get text bounding box
                     const textBox = text.node().getBBox();
-                
+                    
                     // Create background for text
                     const padding = 1;
                     textGroup.insert("rect", "text")
-                        .attr("x", -textBox.width / 2 - padding)
-                        .attr("y", -textBox.height / 2 - padding)
+                        .attr("x", -padding)
+                        .attr("y", textBox.y - padding)
                         .attr("width", textBox.width + 2 * padding)
                         .attr("height", textBox.height + 2 * padding)
-                        .attr("transform", "rotate(-90)")
                         .attr("fill", "#f3f3eb");
                 });
-
                 
                 const line = d3.line()
                     .x(d => d.x)
