@@ -3,16 +3,23 @@ import torch.nn as nn
 from collections import OrderedDict
 import torch.nn.functional as F
 import inspect
-from IPython.core.ultratb import AutoFormattedTB
-
+# from IPython.core.ultratb import AutoFormattedTB
+from torch.overrides import get_ignored_functions
 import json
+# from IPython.display import display, HTML
 import json
 from pathlib import Path
+from string import Template
 import uuid
 from collections import defaultdict
-
+import types
+from overrides import CONTAINER_MODULES, FUNCTIONS
 import torch
 import torch.nn as nn
+from collections import OrderedDict
+import torch.nn.functional as F
+import inspect
+from IPython.core.ultratb import AutoFormattedTB
 
 import json
 from IPython.display import display, HTML
@@ -21,8 +28,6 @@ from pathlib import Path
 from string import Template
 import uuid
 from collections import defaultdict
-from overrides import FUNCTIONS
-
 
 def get_all_nn_modules():
     import inspect
@@ -77,10 +82,28 @@ def get_all_nn_modules():
 
     return module_classes
 
-
-CONTAINER_MODULES = []
-
 MODULES = get_all_nn_modules() - CONTAINER_MODULES
+
+def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix):
+    unique_id = str(uuid.uuid4())
+    template_path = Path('graph.html')
+    with template_path.open('r') as file:
+        template_str = file.read()
+
+    template = Template(template_str)
+        
+    output = template.safe_substitute({
+        'adj_list_json': json.dumps(adj_list),
+        'module_info_json': json.dumps(module_info),
+        'tensor_op_info_json': json.dumps(tensor_op_info),
+        'module_name_to_base_name_json': json.dumps(module_name_to_base_name),
+        'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
+        'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
+        'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
+        'unique_id': unique_id,
+    })
+    display(HTML(output))
+
 
 def trace_model(model, input_tensor):
     adj_list = {}
@@ -102,6 +125,7 @@ def trace_model(model, input_tensor):
     parent_module_to_depth = {}
     original_module_forwards = {}
     graph_node_name_to_without_suffix = {}
+    node_to_ancestors = defaultdict(list)
     last_tensor_input_id = 0
     last_primitive_input_id = 0
 
@@ -248,24 +272,91 @@ def trace_model(model, input_tensor):
 
         return op_name
 
-    def trace_op(op_name, output):
+    def extract_tensors_from_obj(obj, max_depth=5, current_depth=0):
+        """Recursively extracts all tensors from any object structure.
+        
+        Args:
+            obj: Any object that might contain tensors
+            max_depth: Maximum recursion depth to prevent infinite loops
+            current_depth: Current recursion depth
+            
+        Returns:
+            List of tensors found in the object
+        """
+        if current_depth >= max_depth:
+            return []
+        
+        # Base case: object is a tensor
+        if isinstance(obj, torch.Tensor):
+            return [obj]
+        
+        # Recursive cases
+        tensors = []
+        
+        # Handle lists, tuples, and other iterables
+        if isinstance(obj, (list, tuple, set)):
+            for item in obj:
+                tensors.extend(extract_tensors_from_obj(item, max_depth, current_depth + 1))
+        
+        # Handle dictionaries
+        elif isinstance(obj, dict):
+            for value in obj.values():
+                tensors.extend(extract_tensors_from_obj(value, max_depth, current_depth + 1))
+        
+        # Handle custom objects with accessible attributes
+        elif hasattr(obj, '__dict__'):
+            for attr_name in dir(obj):
+                # Skip private attributes and callable methods
+                if attr_name.startswith('_') or callable(getattr(obj, attr_name, None)):
+                    continue
+                
+                try:
+                    attr_value = getattr(obj, attr_name)
+                    # Avoid problematic attributes like gradients
+                    if attr_name in ['grad', 'grad_fn', '_backward_hooks']:
+                        continue
+                    tensors.extend(extract_tensors_from_obj(attr_value, max_depth, current_depth + 1))
+                except:
+                    # Skip attributes that cause errors
+                    continue
+        
+        return tensors
+
+    def trace_op(op_name, output):            
         # Because some discovered operations don't get added to the adj_list in pre_trace_op
         if op_name not in adj_list:
             return output
         nonlocal last_successful_op, current_op
         last_successful_op = op_name
         current_op = None
-        # Some operations don't produce any output
-        if output is None or not isinstance(output, torch.Tensor):
+        output_tensors = extract_tensors_from_obj(output)
+
+        if not output_tensors:
+            # No tensors found in the output
             nodes_to_delete.append(op_name)
             return output
+
+        # If we found any tensors in the output, keep the node
+        # Try to format the output dimensions in a meaningful way
+        if isinstance(output, torch.Tensor):
+            output_dims = format_dims(tuple(output.shape))
+        elif all(isinstance(t, torch.Tensor) for t in output_tensors):
+            output_dims = [format_dims(tuple(t.shape)) for t in output_tensors]
+        else:
+            output_dims = "complex output with tensors"
         
+        adj_list[op_name]['output_dims'] = output_dims
+        adj_list[op_name]['failed'] = False
+        
+        # Tag each tensor with the source operation
+        for tensor in output_tensors:
+            tensor._tensor_source_name = op_name
+                
         output_dims = format_dims(tuple(output.shape) if isinstance(output, torch.Tensor) else output)
         adj_list[op_name]['output_dims'] = output_dims
         adj_list[op_name]['failed'] = False
 
-        if isinstance(output, torch.Tensor):
-            output._tensor_source_name = op_name
+        node_to_ancestors[op_name] = module_stack[::-1]
 
         return output
 
@@ -314,7 +405,7 @@ def trace_model(model, input_tensor):
                     traverse_model(module, parent=module)
 
     def wrap_functions():
-        def make_wrapped(orig_func, func_name):
+        def make_wrapped(orig_func, func_name, namespace):
             def wrapped(*args, **kwargs):
                 nonlocal current_executing_module, current_executing_function
                 if current_executing_module is None and current_executing_function is None:
@@ -340,6 +431,10 @@ def trace_model(model, input_tensor):
                 module = torch.Tensor
             elif namespace == 'torch.nn.functional':
                 module = torch.nn.functional
+            elif namespace == 'torch.nn.init':
+                module = torch.nn.init
+            elif namespace == 'torch.linalg':
+                module = torch.linalg
             else:
                 continue
 
@@ -362,6 +457,10 @@ def trace_model(model, input_tensor):
                 module = torch.Tensor
             elif namespace == 'torch.nn.functional':
                 module = torch.nn.functional
+            elif namespace == 'torch.nn.init':
+                module = torch.nn.init
+            elif namespace == 'torch.linalg':
+                module = torch.linalg
             else:
                 continue
 
@@ -430,6 +529,79 @@ def trace_model(model, input_tensor):
             if node not in reachable:
                 del adj_list[node]
 
+    def transform_to_nested(adjacency, ancestry):
+        # utility function to get the element in the list before the target, if one is present
+        def get_element_before(lst, target):
+            try:
+                index = lst.index(target)
+                return lst[index - 1] if index - 1 >= 0 else None
+            except ValueError:
+                return None
+    
+        # Finds the lowest common ancestor between 2 paths, assuming that the paths
+        # are ordered from bottom to top
+        def find_lca(path1, path2):
+            lca = None
+            for a, b in zip(path1[::-1],  path2[::-1]):
+                if a == b:
+                    lca = a
+                else:
+                    break
+            return lca
+    
+        # Given two nodes, it adds a link between the correct pair of "representative" nodes
+        # in the newly constructed nested graph
+    
+        def add_link(node1, node2, nodes):
+            ancestry1, ancestry2 = ancestry[node1], ancestry[node2]
+            # Special cases when the LCA cannot be found
+            if not ancestry1 and not ancestry2:
+                nodes[node1]['edges'].append(node2)
+            elif not ancestry1:
+                nodes[node1]['edges'].append(ancestry2[-1])
+            elif not ancestry2:
+                nodes[ancestry1[-1]]['edges'].append(node2)
+            else:
+                # When LCA is likely to be present
+                lca = find_lca(ancestry1, ancestry2)
+                if not lca:
+                    # This can happen if the 2 nodes have completely disjoint hierarchy paths
+                    nodes[ancestry1[-1]]['edges'].append(ancestry2[-1])
+                    return
+        
+                # The node just below the LCA in each node serves as the "representative" node of that node in the newly built graph
+                representative_node1 = get_element_before(ancestry1, lca)
+                representative_node2 = get_element_before(ancestry2, lca)
+                # If the two nodes are in the same subtree at the same level, they
+                # will act as their own representative nodes
+                representative_node1 = node1 if representative_node1 is None else representative_node1
+                representative_node2 = node2 if representative_node2 is None else representative_node2
+                nodes[representative_node1]['edges'].append(representative_node2)
+    
+    
+        # Create the basic object (dict) for each node:
+        nodes = { 
+            subgraph: { 'edges': [], 'subgraphs': {} } 
+                for node, subgraphs in ancestry.items()
+                for subgraph in (node, *subgraphs)
+        }
+        # populate the "edges" attributes between basic nodes (or their "representative" nodes)
+        for node, val in adjacency.items():
+            children = val['edges']
+            for child in children:
+                add_link(node, child, nodes)
+        
+        # keep track of the nodes that are to stay at the root level
+        root = dict(nodes)
+        # populate the "subgraphs" attributes
+        for node, ancestors in ancestry.items():
+            for child, parent in zip((node, *ancestors), ancestors):
+                nodes[parent]['subgraphs'][child] = nodes[child]
+                root.pop(child, None)
+    
+        return root
+    
+        
     try:
         wrap_functions()
         traverse_model(model)
@@ -444,25 +616,31 @@ def trace_model(model, input_tensor):
             'is_module': False,
         }
         node_to_base_name_map['input'] = 'input'
+        node_to_ancestors['input'] = []
+        node_to_ancestors['output'] = []
 
         exception = None
         with torch.no_grad():
             output = model(input_tensor)
+            output_tensors = extract_tensors_from_obj(output)
+            if output_tensors:
+                output_node_name = 'output'
+                graph_node_name_to_without_suffix['output'] = 'output'
+                
+                adj_list[output_node_name] = {
+                    'edges': [],
+                    'input_dims': "",
+                    'output_dims': "",
+                    'failed': False,
+                    'is_module': False,
+                }
+                node_to_base_name_map[output_node_name] = output_node_name
 
-            cleanup_tensor_attributes(output)
+                for output_tensor in output_tensors:
+                    adj_list[output_tensor._tensor_source_name]['edges'].append(output_node_name)
+                for output_tensor in output_tensors:
+                    cleanup_tensor_attributes(output)
 
-            output_node_name = 'output'
-            graph_node_name_to_without_suffix['output'] = 'output'
-            adj_list[output_node_name] = {
-                'edges': [],
-                'input_dims': format_dims(adj_list[last_successful_op]['output_dims']),
-                'output_dims': format_dims(tuple(output.shape) if isinstance(output, torch.Tensor) else output),
-                'failed': False,
-                'is_module': False,
-            }
-            node_to_base_name_map[output_node_name] = output_node_name
-            
-            adj_list[last_successful_op]['edges'].append(output_node_name)
     except Exception as e:
         exception = e
     finally:
@@ -472,25 +650,6 @@ def trace_model(model, input_tensor):
 
     cleanup_graph(adj_list, nodes_to_delete)
     plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix)
+    # adj_list = transform_to_nested(adj_list, node_to_ancestors)
     if exception is not None:
         raise exception
-
-def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix):
-    unique_id = str(uuid.uuid4())
-    template_path = Path('graph.html')
-    with template_path.open('r') as file:
-        template_str = file.read()
-
-    template = Template(template_str)
-        
-    output = template.safe_substitute({
-        'adj_list_json': json.dumps(adj_list),
-        'module_info_json': json.dumps(module_info),
-        'tensor_op_info_json': json.dumps(tensor_op_info),
-        'module_name_to_base_name_json': json.dumps(module_name_to_base_name),
-        'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
-        'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
-        'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
-        'unique_id': unique_id,
-    })
-    display(HTML(output))
