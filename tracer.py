@@ -326,6 +326,7 @@ def trace_model(model, input_tensor):
     def trace_op(op_name, output):            
         # Because some discovered operations don't get added to the adj_list in pre_trace_op
         if op_name not in adj_list:
+            # print('----END TRACE_OP----', op_name)
             return output
         nonlocal last_successful_op, current_op
         last_successful_op = op_name
@@ -352,10 +353,6 @@ def trace_model(model, input_tensor):
         # Tag each tensor with the source operation
         for tensor in output_tensors:
             tensor._tensor_source_name = op_name
-                
-        output_dims = format_dims(tuple(output.shape) if isinstance(output, torch.Tensor) else output)
-        adj_list[op_name]['output_dims'] = output_dims
-        adj_list[op_name]['failed'] = False
 
         node_to_ancestors[op_name] = module_stack[::-1]
 
