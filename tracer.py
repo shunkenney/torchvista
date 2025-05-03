@@ -84,7 +84,7 @@ def get_all_nn_modules():
 
 MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
-def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix):
+def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map):
     unique_id = str(uuid.uuid4())
     template_path = Path('graph.html')
     with template_path.open('r') as file:
@@ -100,6 +100,7 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, 
         'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
         'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
         'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
+        'ancestor_map': json.dumps(ancestor_map),
         'unique_id': unique_id,
     })
     display(HTML(output))
@@ -152,7 +153,7 @@ def trace_model(model, input_tensor):
             else:
                 base_name = module_to_node_name[module]
                 module_reuse_count[base_name] = module_reuse_count.get(base_name, 0) + 1
-                reused_name = f"{base_name} ({module_reuse_count[base_name]})"
+                reused_name = f"{base_name}_{module_reuse_count[base_name]}"
                 node_to_base_name_map[reused_name] = base_name
                 return reused_name, True
         else:
@@ -529,78 +530,15 @@ def trace_model(model, input_tensor):
             if node not in reachable:
                 del adj_list[node]
 
-    def transform_to_nested(adjacency, ancestry):
-        # utility function to get the element in the list before the target, if one is present
-        def get_element_before(lst, target):
-            try:
-                index = lst.index(target)
-                return lst[index - 1] if index - 1 >= 0 else None
-            except ValueError:
-                return None
-    
-        # Finds the lowest common ancestor between 2 paths, assuming that the paths
-        # are ordered from bottom to top
-        def find_lca(path1, path2):
-            lca = None
-            for a, b in zip(path1[::-1],  path2[::-1]):
-                if a == b:
-                    lca = a
-                else:
-                    break
-            return lca
-    
-        # Given two nodes, it adds a link between the correct pair of "representative" nodes
-        # in the newly constructed nested graph
-    
-        def add_link(node1, node2, nodes):
-            ancestry1, ancestry2 = ancestry[node1], ancestry[node2]
-            # Special cases when the LCA cannot be found
-            if not ancestry1 and not ancestry2:
-                nodes[node1]['edges'].append(node2)
-            elif not ancestry1:
-                nodes[node1]['edges'].append(ancestry2[-1])
-            elif not ancestry2:
-                nodes[ancestry1[-1]]['edges'].append(node2)
-            else:
-                # When LCA is likely to be present
-                lca = find_lca(ancestry1, ancestry2)
-                if not lca:
-                    # This can happen if the 2 nodes have completely disjoint hierarchy paths
-                    nodes[ancestry1[-1]]['edges'].append(ancestry2[-1])
-                    return
-        
-                # The node just below the LCA in each node serves as the "representative" node of that node in the newly built graph
-                representative_node1 = get_element_before(ancestry1, lca)
-                representative_node2 = get_element_before(ancestry2, lca)
-                # If the two nodes are in the same subtree at the same level, they
-                # will act as their own representative nodes
-                representative_node1 = node1 if representative_node1 is None else representative_node1
-                representative_node2 = node2 if representative_node2 is None else representative_node2
-                nodes[representative_node1]['edges'].append(representative_node2)
-    
-    
-        # Create the basic object (dict) for each node:
-        nodes = { 
-            subgraph: { 'edges': [], 'subgraphs': {} } 
-                for node, subgraphs in ancestry.items()
-                for subgraph in (node, *subgraphs)
-        }
-        # populate the "edges" attributes between basic nodes (or their "representative" nodes)
-        for node, val in adjacency.items():
-            children = val['edges']
-            for child in children:
-                add_link(node, child, nodes)
-        
-        # keep track of the nodes that are to stay at the root level
-        root = dict(nodes)
-        # populate the "subgraphs" attributes
-        for node, ancestors in ancestry.items():
-            for child, parent in zip((node, *ancestors), ancestors):
-                nodes[parent]['subgraphs'][child] = nodes[child]
-                root.pop(child, None)
-    
-        return root
-    
+    def build_immediate_ancestor_map(ancestor_dict, adj_list):
+        immediate_ancestor_map = {}
+        for node, ancestors in ancestor_dict.items():
+            if ancestors and node in adj_list:
+                immediate_ancestor_map[node] = ancestors[0]
+                for i in range(len(ancestors) - 1):
+                    if ancestors[i] not in immediate_ancestor_map:
+                        immediate_ancestor_map[ancestors[i]] = ancestors[i + 1]
+        return immediate_ancestor_map
         
     try:
         wrap_functions()
@@ -649,7 +587,7 @@ def trace_model(model, input_tensor):
         cleanup_tensor_attributes(input_tensor)
 
     cleanup_graph(adj_list, nodes_to_delete)
-    plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix)
-    # adj_list = transform_to_nested(adj_list, node_to_ancestors)
+    print(adj_list)
+    plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list))
     if exception is not None:
         raise exception
