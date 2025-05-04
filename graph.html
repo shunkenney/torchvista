@@ -62,6 +62,7 @@
                 };
                 var collapsedContainers = new Set();
                 const containerNodes = new Set();
+                var adj_list_collapsed_nodes = {};
 
                 function waitForLibs(callback) {
                     if (typeof d3 !== 'undefined' && typeof dagre !== 'undefined' && typeof Viz !== 'undefined') {
@@ -177,6 +178,7 @@
 
                     // Clear and rebuild the containerNodes set
                     containerNodes.clear();
+                    adj_list_collapsed_nodes = {};
                     for (const value of Object.values(ancestor_map)) {
                         if (value !== null && value !== undefined) {
                             containerNodes.add(value);
@@ -272,6 +274,7 @@
                         for (const edge of data.edges) {
                             let sourceNode = node;
                             let targetNode = edge.target;
+                            let dims = edge.dims;
                             let skipEdge = false;
 
                             // Check if source node is inside a collapsed container
@@ -296,12 +299,21 @@
 
                             if (!skipEdge && sourceNode !== targetNode) {
                                 dotSource += `  "${sourceNode}" -> "${targetNode}";\n`;
+                                if (!(sourceNode in adj_list_collapsed_nodes)) {
+                                    adj_list_collapsed_nodes[sourceNode] = {
+                                        'edges': []
+                                    };
+                                }
+                                adj_list_collapsed_nodes[sourceNode]['edges'].push({
+                                    'target': targetNode,
+                                    'dims': dims
+                                });
                             }
                         }
                     }
 
                     dotSource += '}';
-                    console.log(dotSource);
+                    console.log(adj_list_collapsed_nodes);
                     return dotSource;
                 }
 
@@ -559,10 +571,13 @@
                         if (!path) return;
 
                         // Find the source node data
-                        const sourceNodeData = adj_list[edge.source];
-                        if (!sourceNodeData) return;
+                        if (!adj_list[edge.source] && !adj_list_collapsed_nodes[edge.source]) return;
 
                         // Find the edge data with matching target
+                        let sourceNodeData = adj_list_collapsed_nodes[edge.source];
+                        if (!sourceNodeData) {
+                            sourceNodeData = adj_list[edge.source];
+                        }
                         const edgeData = sourceNodeData.edges.find(e => e.target === edge.target);
                         if (!edgeData || !edgeData.dims) return;
 
