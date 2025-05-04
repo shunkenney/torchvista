@@ -677,10 +677,10 @@
                 return `translate(${nodeData.position.x}, ${nodeData.position.y})`;
             });
         
-            // Filter nodes for click event - don't include input or output nodes
+        // Filter nodes for click event - don't include input or output nodes
         inner.selectAll(".node")
             .filter(function([nodeName]) {
-                return !inputNodes.has(nodeName) && !nodeName.startsWith("output");
+                return !inputNodes.has(nodeName) && !nodeName.startsWith("output") && !collapsedContainers.has(nodeName)
             })
             .on("click", showPopup);
 
@@ -919,7 +919,7 @@
                         // Remove the highlight class after animation completes
                         setTimeout(() => {
                             targetElement.classed("highlight-node", false);
-                        }, 1000); // Match the animation duration
+                        }, 2000); // Match the animation duration
                     }
                 } else if (Object.keys(graphvizData.clusters).includes(lastModifiedContainer)) {
                     // Highlight the cluster (expanded container)
@@ -934,7 +934,7 @@
                         // Remove the highlight class after animation completes
                         setTimeout(() => {
                             targetElement.classed("highlight-cluster", false);
-                        }, 1000); // Match the animation duration
+                        }, 2000); // Match the animation duration
                     }
                 }
                 
@@ -1187,19 +1187,19 @@
 
     /* Apply only the glow effect to the boundary box */
     .highlight-cluster rect {
-      animation: containerHighlight 1.0s ease-in-out forwards;
+      animation: containerHighlight 2.0s ease-in-out forwards;
     }
 
     /* Apply both glow and stroke effects to the main container rect only */
     .highlight-cluster > rect:first-of-type {
-      animation: containerHighlight 1.0s ease-in-out forwards, 
-                 containerStrokeHighlight 1.0s ease-in-out forwards;
+      animation: containerHighlight 2.0s ease-in-out forwards, 
+                 containerStrokeHighlight 2.0s ease-in-out forwards;
     }
 
     /* Apply both effects to node rects */
     .highlight-node rect {
-      animation: containerHighlight 1.0s ease-in-out forwards, 
-                 containerStrokeHighlight 1.0s ease-in-out forwards;
+      animation: containerHighlight 2.0s ease-in-out forwards, 
+                 containerStrokeHighlight 2.0s ease-in-out forwards;
     }
 
 </style>
