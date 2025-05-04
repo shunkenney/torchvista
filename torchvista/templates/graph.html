@@ -49,6 +49,11 @@
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
+
+    const EXPAND_TARGET_COVERAGE = 0.8;
+    const COLLAPSE_TARGET_COVERAGE = 0.2;
+    let lastModifiedContainer = null; // Track the last modified container
+    let lastOperation = null; // Track whether it was 'expand' or 'collapse'
     
     function waitForLibs(callback) {
         if (typeof d3 !== 'undefined' && typeof dagre !== 'undefined' && typeof Viz !== 'undefined') {
@@ -481,6 +486,9 @@
             collapsedContainers.add(clusterName);
             console.log("Collapsed container:", clusterName);
             
+            // Track this container and operation for centering after reload
+            lastModifiedContainer = clusterName;
+            lastOperation = "collapse";
             reloadGraph();
         });
 
@@ -751,6 +759,10 @@
                 // Always expanding when clicked (since these are collapsed containers)
                 collapsedContainers.delete(nodeName);
                 console.log("Expanded container:", nodeName);
+
+                // Track this container and operation for centering after reload
+                lastModifiedContainer = nodeName;
+                lastOperation = "expand";
                 
                 // Use the existing reloadGraph function
                 reloadGraph();
@@ -852,7 +864,85 @@
         const width = svgNode.clientWidth || 800; // Fallback if clientWidth is 0
         const height = svgNode.clientHeight || 600; // Fallback if clientHeight is 0
         
-        if (errorNode) {
+        if (lastModifiedContainer && (Object.keys(graphvizData.nodes).includes(lastModifiedContainer) || 
+            Object.keys(graphvizData.clusters).includes(lastModifiedContainer))) {
+            
+            // Center on the container that was just expanded or collapsed
+            let targetCoverage = lastOperation === "expand" ? EXPAND_TARGET_COVERAGE : COLLAPSE_TARGET_COVERAGE;
+            let targetNode;
+            let targetPos;
+            let containerWidth, containerHeight;
+            
+            if (Object.keys(graphvizData.nodes).includes(lastModifiedContainer)) {
+                // It's a node (collapsed container)
+                targetNode = graphvizData.nodes[lastModifiedContainer];
+                targetPos = { x: targetNode.position.x, y: targetNode.position.y };
+                containerWidth = targetNode.width;
+                containerHeight = targetNode.height;
+            } else if (Object.keys(graphvizData.clusters).includes(lastModifiedContainer)) {
+                // It's a cluster (expanded container)
+                const clusterData = graphvizData.clusters[lastModifiedContainer];
+                const [x1, y1, x2, y2] = clusterData.bb.split(",").map(Number);
+                targetPos = { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+                containerWidth = x2 - x1;
+                containerHeight = y2 - y1;
+            }
+            
+            if (targetPos && containerWidth && containerHeight) {
+                // Calculate scale to make container occupy the target percentage of viewport
+                const widthScale = (width * targetCoverage) / containerWidth;
+                const heightScale = (height * targetCoverage) / containerHeight;
+                // Use the smaller scale to ensure container fits in viewport
+                const targetScale = Math.min(widthScale, heightScale);
+                
+                const translate = [
+                    width / 2 - targetPos.x * targetScale,
+                    height / 2 - targetPos.y * targetScale
+                ];
+                
+                svg.call(zoom.transform, d3.zoomIdentity
+                    .translate(translate[0], translate[1])
+                    .scale(targetScale));
+                    
+                console.log(`Centered on ${lastModifiedContainer} with ${lastOperation} zoom level: ${targetScale}`);
+                console.log(`Container dimensions: ${containerWidth}x${containerHeight}, viewport: ${width}x${height}`);
+                
+                // Apply highlight effect to the target container
+                if (Object.keys(graphvizData.nodes).includes(lastModifiedContainer)) {
+                    // Highlight the node (collapsed container)
+                    const targetElement = inner.selectAll(".node")
+                        .filter(([nodeName]) => nodeName === lastModifiedContainer);
+                        
+                    if (!targetElement.empty()) {
+                        targetElement.classed("highlight-node", true);
+                        
+                        // Remove the highlight class after animation completes
+                        setTimeout(() => {
+                            targetElement.classed("highlight-node", false);
+                        }, 1000); // Match the animation duration
+                    }
+                } else if (Object.keys(graphvizData.clusters).includes(lastModifiedContainer)) {
+                    // Highlight the cluster (expanded container)
+                    const targetElement = inner.selectAll(".boundary-box")
+                        .filter(function([clusterName]) {
+                            return clusterName === lastModifiedContainer;
+                        });
+                        
+                    if (!targetElement.empty()) {
+                        targetElement.classed("highlight-cluster", true);
+                        
+                        // Remove the highlight class after animation completes
+                        setTimeout(() => {
+                            targetElement.classed("highlight-cluster", false);
+                        }, 1000); // Match the animation duration
+                    }
+                }
+                
+                // Reset tracking variables after applying the transformation
+                lastModifiedContainer = null;
+                lastOperation = null;
+            }
+        } else if (errorNode) {
             // Focus on the error node if there is one
             const nodeData = graphvizData.nodes[errorNode];
             if (nodeData) {
@@ -1067,5 +1157,50 @@
     .edge-label {
       pointer-events: all;
     }
+
+    @keyframes containerHighlight {
+      0% { 
+        filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+      }
+      59% { 
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+      }
+      100% { 
+        filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+      }
+    }
+
+    @keyframes containerStrokeHighlight {
+      0% { 
+        stroke: #333;
+        stroke-width: 1px;
+      }
+      59% { 
+        stroke: #FFD700;
+        stroke-width: 1px;
+      }
+      100% { 
+        stroke: #333;
+        stroke-width: 1px;
+      }
+    }
+
+    /* Apply only the glow effect to the boundary box */
+    .highlight-cluster rect {
+      animation: containerHighlight 1.0s ease-in-out forwards;
+    }
+
+    /* Apply both glow and stroke effects to the main container rect only */
+    .highlight-cluster > rect:first-of-type {
+      animation: containerHighlight 1.0s ease-in-out forwards, 
+                 containerStrokeHighlight 1.0s ease-in-out forwards;
+    }
+
+    /* Apply both effects to node rects */
+    .highlight-node rect {
+      animation: containerHighlight 1.0s ease-in-out forwards, 
+                 containerStrokeHighlight 1.0s ease-in-out forwards;
+    }
+
 </style>
 </div>
