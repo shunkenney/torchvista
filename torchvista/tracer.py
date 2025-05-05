@@ -128,7 +128,6 @@ def trace_model(model, input_tensor):
     graph_node_name_to_without_suffix = {}
     node_to_ancestors = defaultdict(list)
     last_tensor_input_id = 0
-    last_primitive_input_id = 0
 
     nodes_to_delete = []
 
@@ -210,52 +209,24 @@ def trace_model(model, input_tensor):
         # have to put nodes in the graph.
         if not inputs:
             return
+
         
-        nonlocal current_op, last_successful_op, last_primitive_input_id, last_tensor_input_id
+        
+        nonlocal current_op, last_successful_op, last_tensor_input_id
         op_name, is_module = get_unique_op_name(op_type, module)
         
-        input_dims = tuple(inputs[0].shape) if isinstance(inputs[0], torch.Tensor) else \
-                     [tuple(t.shape) for t in inputs[0]] if isinstance(inputs[0], (list, tuple)) and all(isinstance(t, torch.Tensor) for t in inputs[0]) \
-                     else inputs[0]
-
         graph_node_name_to_without_suffix[op_name] = op_type
         adj_list[op_name] = {
             'edges': [],
-            'input_dims': format_dims(input_dims),
-            'output_dims': None,
             'failed': True,
             'is_module': is_module,
         }
-
-        for inp in inputs:
-            if isinstance(inp, torch.Tensor) and hasattr(inp, '_tensor_source_name'):
-                adj_list[inp._tensor_source_name]['edges'].append(op_name)
-            elif isinstance(inp, (list, tuple)):
-                for t in inp:
-                    if isinstance(t, torch.Tensor) and hasattr(t, '_tensor_source_name'):
-                        adj_list[t._tensor_source_name]['edges'].append(op_name)
-            elif isinstance(inp, torch.Tensor):
-                graph_node_name_to_without_suffix[f'tensor_{last_tensor_input_id}'] = 'tensor'
-                adj_list[f'tensor_{last_tensor_input_id}'] = {
-                    'edges': [op_name],
-                    'input_dims': format_dims(inp.shape),
-                    'output_dims': format_dims(inp.shape),
-                    'failed': False,
-                    'is_module': False,
-                }
-                last_tensor_input_id += 1
-            else:
-                graph_node_name_to_without_suffix[f'{type(inp).__name__}_{last_primitive_input_id}'] = f'{type(inp).__name__}'
-                adj_list[f'{type(inp).__name__}_{last_primitive_input_id}'] = {
-                    'edges': [op_name],
-                    'input_dims': '',
-                    'output_dims': '',
-                    'failed': False,
-                    'is_module': False,
-                }
-                last_primitive_input_id += 1
-                
-                
+        input_tensors = extract_tensors_from_obj(inputs)
+        
+        for inp in input_tensors:
+            if hasattr(inp, '_tensor_source_name'):
+                dims = format_dims(tuple(inp.shape))
+                adj_list[inp._tensor_source_name]['edges'].append({'target': op_name, 'dims': dims})                
 
         formatted_args, formatted_kwargs = capture_args(*args, **kwargs)
         func_info_map[op_name] = {
@@ -270,6 +241,8 @@ def trace_model(model, input_tensor):
             parent_module_to_nodes[parent].append(op_name)
             parent_module_to_depth[parent] = max(depth, 0 if parent not in parent_module_to_depth else parent_module_to_depth[parent])
             depth += 1
+
+        node_to_ancestors[op_name] = module_stack[::-1]
 
         return op_name
 
@@ -326,7 +299,6 @@ def trace_model(model, input_tensor):
     def trace_op(op_name, output):            
         # Because some discovered operations don't get added to the adj_list in pre_trace_op
         if op_name not in adj_list:
-            # print('----END TRACE_OP----', op_name)
             return output
         nonlocal last_successful_op, current_op
         last_successful_op = op_name
@@ -337,24 +309,14 @@ def trace_model(model, input_tensor):
             # No tensors found in the output
             nodes_to_delete.append(op_name)
             return output
-
-        # If we found any tensors in the output, keep the node
-        # Try to format the output dimensions in a meaningful way
-        if isinstance(output, torch.Tensor):
-            output_dims = format_dims(tuple(output.shape))
-        elif all(isinstance(t, torch.Tensor) for t in output_tensors):
-            output_dims = [format_dims(tuple(t.shape)) for t in output_tensors]
-        else:
-            output_dims = "complex output with tensors"
         
-        adj_list[op_name]['output_dims'] = output_dims
         adj_list[op_name]['failed'] = False
         
         # Tag each tensor with the source operation
         for tensor in output_tensors:
             tensor._tensor_source_name = op_name
 
-        node_to_ancestors[op_name] = module_stack[::-1]
+        # node_to_ancestors[op_name] = module_stack[::-1]
 
         return output
 
@@ -508,25 +470,24 @@ def trace_model(model, input_tensor):
     def cleanup_graph(adj_list, nodes_to_delete):
         for node in nodes_to_delete:
             del adj_list[node]
-            for _, l in adj_list.items():
-                if node in l['edges']:
-                    l['edges'].remove(node)
-
-        reachable = set()
+            for src_node, node_data in adj_list.items():
+                node_data['edges'] = [edge for edge in node_data['edges'] 
+                                     if edge['target'] != node]
     
+        reachable = set()
+        
         def dfs(node):
             if node in reachable:
                 return
             reachable.add(node)
-            for neighbor in adj_list.get(node, {}).get('edges', []):
-                dfs(neighbor)
-    
+            for edge in adj_list.get(node, {}).get('edges', []):
+                dfs(edge['target'])
+        
         dfs('input')
-    
+        
         for node in list(adj_list.keys()):
             if node not in reachable:
                 del adj_list[node]
-
     def build_immediate_ancestor_map(ancestor_dict, adj_list):
         immediate_ancestor_map = {}
         for node, ancestors in ancestor_dict.items():
@@ -545,8 +506,6 @@ def trace_model(model, input_tensor):
         graph_node_name_to_without_suffix['input'] = 'input'
         adj_list['input'] = {
             'edges': [],
-            'input_dims': tuple(input_tensor.shape),
-            'output_dims': format_dims(tuple(input_tensor.shape)),
             'failed': False,
             'is_module': False,
         }
@@ -561,18 +520,16 @@ def trace_model(model, input_tensor):
             if output_tensors:
                 output_node_name = 'output'
                 graph_node_name_to_without_suffix['output'] = 'output'
-                
-                adj_list[output_node_name] = {
-                    'edges': [],
-                    'input_dims': "",
-                    'output_dims': "",
-                    'failed': False,
-                    'is_module': False,
-                }
-                node_to_base_name_map[output_node_name] = output_node_name
-
-                for output_tensor in output_tensors:
-                    adj_list[output_tensor._tensor_source_name]['edges'].append(output_node_name)
+                for i, output_tensor in enumerate(output_tensors):
+                    output_node_name = f'output_{i}'
+                    adj_list[output_node_name] = {
+                        'edges': [],
+                        'failed': False,
+                        'is_module': False,
+                    }
+                    dims = format_dims(tuple(output_tensor.shape))
+                    adj_list[output_tensor._tensor_source_name]['edges'].append({'target': output_node_name, 'dims': dims})
+                    node_to_base_name_map[output_node_name] = output_node_name
                 for output_tensor in output_tensors:
                     cleanup_tensor_attributes(output)
 
@@ -583,7 +540,11 @@ def trace_model(model, input_tensor):
         restore_modules()
         cleanup_tensor_attributes(input_tensor)
 
+    # print(adj_list)
     cleanup_graph(adj_list, nodes_to_delete)
+    # for x in [adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors]:
+    #     print(x)
+    #     print()
     # print(adj_list)
     plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list))
     if exception is not None:
