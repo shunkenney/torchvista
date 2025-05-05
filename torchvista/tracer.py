@@ -584,7 +584,7 @@ def trace_model(model, input_tensor):
         cleanup_tensor_attributes(input_tensor)
 
     cleanup_graph(adj_list, nodes_to_delete)
-    print(adj_list)
+    # print(adj_list)
     plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list))
     if exception is not None:
         raise exception

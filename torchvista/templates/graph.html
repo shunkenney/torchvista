@@ -145,6 +145,24 @@
         return result;
     }
 
+    function identifyContainersWithFailedNodes(adj_list, ancestor_map) {
+        const failedNodes = Object.keys(adj_list).filter(node => adj_list[node].failed);
+      
+        const containersWithFailedNodes = new Set();
+      
+        failedNodes.forEach(failedNode => {
+            let currentNode = failedNode;
+
+            while (ancestor_map[currentNode]) {
+                const container = ancestor_map[currentNode];
+                containersWithFailedNodes.add(container);
+                currentNode = container;
+            }
+        });
+      
+        return containersWithFailedNodes;
+    }
+
 
     function generateDotSource(adj_list, ancestor_map) {
         let dotSource = 'digraph G {\n';
@@ -411,9 +429,18 @@
         .append("g")
         .attr("class", "boundary-box");
 
+        const containersWithFailedNodes = identifyContainersWithFailedNodes(adj_list, ancestor_map);
+
         clusters.each(function([clusterName, clusterData]) {
             const group = d3.select(this);
+
             
+
+            const hasFailedNodes = containersWithFailedNodes.has(clusterName);
+            if (hasFailedNodes) {
+                group.classed("error", true);
+            }
+
             // Parse bounding box coordinates
             const [x1, y1, x2, y2] = clusterData.bb.split(",").map(Number);
             
@@ -471,7 +498,7 @@
             .attr("x", x1 + 10)
             .attr("y", y1 + 10)
             .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "central")
+            .attr("dominant-baseline", "middle")
             .attr("font-size", "10px")
             .attr("font-weight", "bold")
             .attr("cursor", "pointer")
@@ -530,17 +557,17 @@
         })
         .attr("marker-end", "url(#arrowhead_${unique_id})");
         
-            // Add dimension labels on edges
+        // Add dimension labels on edges
         edges.each(function(edge) {
             const edgeGroup = d3.select(this);
             const path = edgeGroup.select("path").node();
             
             if (!path) return;
             
-                // Find the source node data
+            // Find the source node data
             if (!adj_list[edge.source] && !adj_list_collapsed_nodes[edge.source]) return;
             
-                // Find the edge data with matching target
+            // Find the edge data with matching target
             let sourceNodeData = adj_list_collapsed_nodes[edge.source];
             if (!sourceNodeData) {
                 sourceNodeData = adj_list[edge.source];
@@ -548,18 +575,18 @@
             const edgeData = sourceNodeData.edges.find(e => e.target === edge.target);
             if (!edgeData || !edgeData.dims) return;
             
-                // Calculate position for label - near the start of the edge
-                // Get a point that's 20% along the path
+            // Calculate position for label - near the start of the edge
+            // Get a point that's 20% along the path
             const pathLength = path.getTotalLength();
             const pointAtStart = path.getPointAtLength(pathLength * 0.5);
             
-                // Get path direction at that point for text rotation
+            // Get path direction at that point for text rotation
             const pointBefore = path.getPointAtLength(pathLength * 0.4);
             const pointAfter = path.getPointAtLength(pathLength * 0.6);
-                // const angle = Math.atan2(pointAfter.y - pointBefore.y, pointAfter.x - pointBefore.x) * 180 / Math.PI;
+            // const angle = Math.atan2(pointAfter.y - pointBefore.y, pointAfter.x - pointBefore.x) * 180 / Math.PI;
             const angle = 0.0;
             
-                // Create a background for the text
+            // Create a background for the text
             const labelGroup = edgeGroup.append("g")
             .attr("class", "edge-label")
             .attr("transform", `translate(${pointAtStart.x}, ${pointAtStart.y})`);
@@ -571,7 +598,7 @@
             .text(edgeData.dims)
             .attr("transform", `rotate(${angle})`);
             
-                // Add background rectangle
+            // Add background rectangle
             const bbox = text.node().getBBox();
             labelGroup.insert("rect", "text")
             .attr("x", bbox.x - 2)
@@ -667,9 +694,9 @@
             // In the createGraph function, when you're creating nodes, modify the class assignment:
             .attr("class", function([nodeName, nodeData]) {
                 let classes = "node";
-                if (adj_list[nodeName] && adj_list[nodeName].failed) classes += " error";
+                if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) classes += " error";
                 if (inputNodes.has(nodeName)) classes += " input";
-                else if (adj_list[nodeName] && adj_list[nodeName].is_module) classes += " module";
+                else if ((adj_list[nodeName] && adj_list[nodeName].is_module) || (collapsedContainers.has(nodeName))) classes += " module";
                 else classes += " operation";
                 return classes;
             })
@@ -694,8 +721,8 @@
         .attr("class", function([nodeName]) { 
             if (inputNodes.has(nodeName)) return "input";
             if (nodeName.startsWith("output")) return "output";
-            if (adj_list[nodeName] && adj_list[nodeName].failed) return "failed";
-            return adj_list[nodeName] && adj_list[nodeName].is_module ? "module" : "operation";
+            if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) return "failed";
+            return ((adj_list[nodeName] && adj_list[nodeName].is_module) || (collapsedContainers.has(nodeName))) ? "module" : "operation";
         });
         
         // Add labels for nodes
@@ -745,7 +772,7 @@
             .attr("x", -width/2 + 10)
             .attr("y", -height/2 + 10) 
             .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "central")
+            .attr("dominant-baseline", "middle")
             .attr("font-size", "10px")
             .attr("font-weight", "bold")
             .attr("cursor", "pointer")
@@ -1010,8 +1037,19 @@
         stroke: #333;
         fill: #fff;
     }
-    .node text {
-        font: 10px "'Roboto', sans-serif";
+    text.node-label {
+        font: "'Roboto', sans-serif";
+        cursor: default;
+        user-select: none;
+    }
+    text.type-indicator {
+        font: "'Roboto', sans-serif";
+        cursor: default;
+        user-select: none;
+    }
+    text.collapse-icon {
+        font: "'Roboto', sans-serif";
+        font-size: 14px
         cursor: default;
         user-select: none;
     }
@@ -1021,7 +1059,7 @@
     }
     .node rect.input { fill: #FF9AFF; }
     .node rect.output { fill: #FF9AFF; }
-    .node rect.failed { fill: #bd0000; }
+    .node rect.failed { fill: rgb(224 15 15); }
     .node rect.module { fill: #8BDEDB; }
     .node rect.operation { fill: #FEBC5A; }
     .edgeLabelGroup {
@@ -1042,7 +1080,7 @@
     }
 
     .node.error rect {
-        stroke: #bd0000;
+        stroke: black;
         stroke-width: 1px;
         /* stroke-dasharray: 3, 3; */
         rx: 5px;
@@ -1050,7 +1088,12 @@
     }
 
     .node.error text {
-        fill: white;
+/*        fill: white;*/
+    }`
+
+    .boundary-box.error > rect:first-of-type {
+        fill: red;
+        fill-opacity: 0.2;
     }
 
     #graph-container {
@@ -1147,6 +1190,8 @@
     .collapse-icon {
         pointer-events: none;
         user-select: none;
+        font-family: '14px "'Roboto', sans-serif"';
+        fill: rgb(51, 51, 51);
     }
 
     /* Edge hover styles */
@@ -1162,7 +1207,13 @@
       0% { 
         filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
       }
-      59% { 
+      25% { 
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+      }
+      50% { 
+        filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+      }
+      75% { 
         filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
       }
       100% { 
@@ -1172,33 +1223,29 @@
 
     @keyframes containerStrokeHighlight {
       0% { 
-        stroke: #333;
         stroke-width: 1px;
       }
-      59% { 
-        stroke: #FFD700;
+      25% { 
+        stroke-width: 3px;
+      }
+      50% { 
         stroke-width: 1px;
+      }
+      75% { 
+        stroke-width: 3px;
       }
       100% { 
-        stroke: #333;
         stroke-width: 1px;
       }
     }
 
-    /* Apply only the glow effect to the boundary box */
-    .highlight-cluster rect {
-      animation: containerHighlight 2.0s ease-in-out forwards;
-    }
-
-    /* Apply both glow and stroke effects to the main container rect only */
     .highlight-cluster > rect:first-of-type {
-      animation: containerHighlight 2.0s ease-in-out forwards, 
+      animation: 
                  containerStrokeHighlight 2.0s ease-in-out forwards;
     }
 
-    /* Apply both effects to node rects */
     .highlight-node rect {
-      animation: containerHighlight 2.0s ease-in-out forwards, 
+      animation: 
                  containerStrokeHighlight 2.0s ease-in-out forwards;
     }
 
