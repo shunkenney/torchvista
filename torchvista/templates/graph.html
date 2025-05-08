@@ -737,7 +737,7 @@
         
         // Add type indicators
         nodes.filter(function([nodeName]) {
-            return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")));
+            return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")));
         }).append("text")
         .attr("class", "type-indicator")
         .attr("text-anchor", "end")
