@@ -508,7 +508,7 @@
             .attr("font-size", "10px")
             .attr("font-weight", "bold")
             .attr("cursor", "pointer")
-            .text("-");
+            .text("—");
         });
 
         // Add click event handler for collapse buttons
@@ -709,7 +709,7 @@
         // Filter nodes for click event - don't include input or output nodes
         inner.selectAll(".node")
             .filter(function([nodeName]) {
-                return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input"))) && !collapsedContainers.has(nodeName)
+                return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant"))) && !collapsedContainers.has(nodeName)
             })
             .on("click", showPopup);
 
@@ -761,8 +761,8 @@
             // Add collapse/expand button (with "+" since it's collapsed)
             nodeGroup.append("circle")
             .attr("class", "collapse-button")
-            .attr("cx", -width/2 + 10)
-            .attr("cy", -height/2 + 10)
+            .attr("cx", -width/2 + 8)
+            .attr("cy", -height/2 + 8)
             .attr("r", 6)
             .attr("fill", "#fff")
             .attr("stroke", "#333")
@@ -772,8 +772,8 @@
             // Add "+" symbol
             nodeGroup.append("text")
             .attr("class", "collapse-icon")
-            .attr("x", -width/2 + 10)
-            .attr("y", -height/2 + 10) 
+            .attr("x", -width/2 + 8)
+            .attr("y", -height/2 + 8) 
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
             .attr("font-size", "10px")
