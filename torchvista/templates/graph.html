@@ -69,7 +69,7 @@
             edges: [],
             clusters: {}
         };
-    
+
         // Process nodes - they have _gvid property and may have a "pos" attribute
         for (const obj of graphData.objects) {
             // Skip cluster objects (which are subgraphs)
@@ -242,7 +242,11 @@
             // Add regular nodes
             for (const child of children) {
                 if (!containerNodes.has(child)) {
-                    dotSource += `${indent}  "${child}";\n`;
+                    if (adj_list[child] && adj_list[child].node_type === "Constant") {
+                        dotSource += `${indent}  "${child}" [width=0.7, height=0.3];\n`;
+                    } else {
+                        dotSource += `${indent}  "${child}";\n`;
+                    }
                 }
             }
 
@@ -258,7 +262,11 @@
         // Add standalone nodes (not in containers)
         for (const node of Object.keys(adj_list)) {
             if (!ancestor_map[node]) {
-                dotSource += `  "${node}";\n`;
+                if (adj_list[node] && adj_list[node].node_type === "Constant") {
+                    dotSource += `  "${node}" [width=0.7, height=0.3];\n`;
+                } else {
+                    dotSource += `  "${node}";\n`;
+                }
             }
         }
 
@@ -301,7 +309,6 @@
         }
 
         dotSource += '}';
-        console.log(adj_list_collapsed_nodes);
         return dotSource;
     }
 
@@ -322,26 +329,25 @@
 
     function reloadGraph() {
         d3.select("#graph_${unique_id}").html("");
+        // debugger;
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
-        console.log(dotSource);
         
         const viz = new Viz();
         viz.renderJSONObject(dotSource)
         .then(graphData => {
-                // Extract the graph data with positions from Graphviz
+            // Extract the graph data with positions from Graphviz
             const extractedGraphData = extractGraphData(graphData);
 
-            console.log(graphData);
             
-                // Now create the graph with the Graphviz layout data
+            // Now create the graph with the Graphviz layout data
             createGraph(extractedGraphData);
 
             renderGraphvizImage(dotSource);
         })
         .catch(error => {
             console.error("Error with Graphviz layout:", error);
-                // Fall back to your existing layout method if there's an error
+            // Fall back to your existing layout method if there's an error
             console.log("Falling back to dagre layout");
             createGraph(null);
         });
@@ -511,7 +517,6 @@
             event.stopPropagation(); // Prevent event from bubbling to SVG
             // Collapse the container
             collapsedContainers.add(clusterName);
-            console.log("Collapsed container:", clusterName);
             
             // Track this container and operation for centering after reload
             lastModifiedContainer = clusterName;
@@ -679,13 +684,6 @@
         });
 
 
-        // Identify input nodes
-        const inputNodes = new Set(Object.keys(adj_list).filter(node => 
-            !Object.values(adj_list).some(data => 
-                data.edges.some(edge => edge.target === node)
-                )
-            ));
-        
         // Create nodes using positions from Graphviz
         const nodes = inner.selectAll(".node")
             .data(Object.entries(graphvizData.nodes))
@@ -695,9 +693,11 @@
             .attr("class", function([nodeName, nodeData]) {
                 let classes = "node";
                 if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) classes += " error";
-                if (inputNodes.has(nodeName)) classes += " input";
-                else if ((adj_list[nodeName] && adj_list[nodeName].is_module) || (collapsedContainers.has(nodeName))) classes += " module";
-                else classes += " operation";
+                if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) classes += " input";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName))) classes += " module";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) classes += " output";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Operation")) classes += " operation";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")) classes += " constant";
                 return classes;
             })
             .attr("transform", function([nodeName, nodeData]) {
@@ -707,7 +707,7 @@
         // Filter nodes for click event - don't include input or output nodes
         inner.selectAll(".node")
             .filter(function([nodeName]) {
-                return !inputNodes.has(nodeName) && !nodeName.startsWith("output") && !collapsedContainers.has(nodeName)
+                return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input"))) && !collapsedContainers.has(nodeName)
             })
             .on("click", showPopup);
 
@@ -719,10 +719,11 @@
         .attr("x", function([nodeName, nodeData]) { return -nodeData.width / 2; })
         .attr("y", function([nodeName, nodeData]) { return -nodeData.height / 2; })
         .attr("class", function([nodeName]) { 
-            if (inputNodes.has(nodeName)) return "input";
-            if (nodeName.startsWith("output")) return "output";
+            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Input") return "input";
+            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Output") return "output";
+            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Constant") return "constant";
             if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) return "failed";
-            return ((adj_list[nodeName] && adj_list[nodeName].is_module) || (collapsedContainers.has(nodeName))) ? "module" : "operation";
+            return ((adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName))) ? "module" : "operation";
         });
         
         // Add labels for nodes
@@ -734,7 +735,7 @@
         
         // Add type indicators
         nodes.filter(function([nodeName]) {
-            return !inputNodes.has(nodeName) && !nodeName.startsWith("output");
+            return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")));
         }).append("text")
         .attr("class", "type-indicator")
         .attr("text-anchor", "end")
@@ -743,7 +744,7 @@
             return `translate(${nodeData.width / 2 - 3}, ${-nodeData.height / 2 + 3})`;
         })
         .text(function([nodeName]) {
-            return (adj_list[nodeName] && adj_list[nodeName].is_module) || (collapsedContainers.has(nodeName)) ? "Module" : "Tensor Op";
+            return (adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName)) ? "Module" : "Tensor Op";
         });
 
         // Add collapse/expand buttons to collapsed container nodes
@@ -785,7 +786,6 @@
                 
                 // Always expanding when clicked (since these are collapsed containers)
                 collapsedContainers.delete(nodeName);
-                console.log("Expanded container:", nodeName);
 
                 // Track this container and operation for centering after reload
                 lastModifiedContainer = nodeName;
@@ -838,7 +838,7 @@
             tensorOpTemplate.style("display", "none");
             noInfoMessage.style("display", "none");
             
-            if (nodeData.is_module && (module_info[nodeName] || (module_name_to_base_name[nodeName] && module_info[module_name_to_base_name[nodeName]]))) {
+            if (((adj_list[nodeName] && adj_list[nodeName].node_type === "Module")) && (module_info[nodeName] || (module_name_to_base_name[nodeName] && module_info[module_name_to_base_name[nodeName]]))) {
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
@@ -846,7 +846,7 @@
                 d3.select("#module-attributes_${unique_id}").text(JSON.stringify(info.attributes, null, 2));
                 d3.select("#module-parameters_${unique_id}").text(JSON.stringify(info.parameters, null, 2));
                 d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
-            } else if (!nodeData.is_module && tensor_op_info[nodeName]) {
+            } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && tensor_op_info[nodeName]) {
                 const info = tensor_op_info[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
                 
@@ -930,9 +930,6 @@
                 svg.call(zoom.transform, d3.zoomIdentity
                     .translate(translate[0], translate[1])
                     .scale(targetScale));
-                    
-                console.log(`Centered on ${lastModifiedContainer} with ${lastOperation} zoom level: ${targetScale}`);
-                console.log(`Container dimensions: ${containerWidth}x${containerHeight}, viewport: ${width}x${height}`);
                 
                 // Apply highlight effect to the target container
                 if (Object.keys(graphvizData.nodes).includes(lastModifiedContainer)) {
@@ -1038,17 +1035,17 @@
         fill: #fff;
     }
     text.node-label {
-        font: "'Roboto', sans-serif";
+        font-family: "'Roboto', sans-serif";
         cursor: default;
         user-select: none;
     }
     text.type-indicator {
-        font: "'Roboto', sans-serif";
+        font-family: "'Roboto', sans-serif";
         cursor: default;
         user-select: none;
     }
     text.collapse-icon {
-        font: "'Roboto', sans-serif";
+        font-family: "'Roboto', sans-serif";
         font-size: 14px
         cursor: default;
         user-select: none;
@@ -1058,6 +1055,9 @@
         fill: none;
     }
     .node rect.input { fill: #FF9AFF; }
+    .node rect.constant { fill: rgb(235 235 235); }
+    .node.constant .node-label { font-size: 11px; }
+
     .node rect.output { fill: #FF9AFF; }
     .node rect.failed { fill: rgb(224 15 15); }
     .node rect.module { fill: #8BDEDB; }
@@ -1181,7 +1181,7 @@
         pointer-events: none;
         user-select: none;
         font-size: 4px;
-        font-family: '10px "'Roboto', sans-serif"';
+        font-family: "'Roboto', sans-serif";
     }
     
     .collapse-button:hover {
@@ -1190,7 +1190,7 @@
     .collapse-icon {
         pointer-events: none;
         user-select: none;
-        font-family: '14px "'Roboto', sans-serif"';
+        font-family: "'Roboto', sans-serif";
         fill: rgb(51, 51, 51);
     }
 

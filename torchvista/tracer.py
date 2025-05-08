@@ -31,6 +31,16 @@ from collections import defaultdict
 import numpy as np
 import numbers
 
+from enum import Enum
+
+class NodeType(Enum):
+    MODULE = "Module"
+    OPERATION = "Operation"
+    INPUT = "Input"
+    OUTPUT = "Output"
+    CONSTANT = "Constant"
+
+
 def get_all_nn_modules():
     import inspect
     import pkgutil
@@ -156,18 +166,18 @@ def trace_model(model, input_tensor):
                 module_to_node_name[module] = base_name
                 module_info[base_name] = get_module_info(module)
                 node_to_base_name_map[base_name] = base_name
-                return base_name, True
+                return base_name, NodeType.MODULE.value
             else:
                 base_name = module_to_node_name[module]
                 module_reuse_count[base_name] = module_reuse_count.get(base_name, 0) + 1
                 reused_name = f"{base_name}_{module_reuse_count[base_name]}"
                 node_to_base_name_map[reused_name] = base_name
-                return reused_name, True
+                return reused_name, NodeType.MODULE.value
         else:
             op_type_counters[op_type] += 1
             op_name = f"{op_type}_{op_type_counters[op_type]}"
             node_to_base_name_map[op_name] = op_name
-            return op_name, False
+            return op_name, NodeType.OPERATION.value
 
     def get_module_info(module):
         info = {
@@ -219,13 +229,13 @@ def trace_model(model, input_tensor):
             return
         
         nonlocal current_op, last_successful_op, last_tensor_input_id, last_np_array_input_id, last_numeric_input_id
-        op_name, is_module = get_unique_op_name(op_type, module)
+        op_name, node_type = get_unique_op_name(op_type, module)
         
         graph_node_name_to_without_suffix[op_name] = op_type
         adj_list[op_name] = {
             'edges': [],
             'failed': True,
-            'is_module': is_module,
+            'node_type': node_type,
         }
         input_tensors = extract_tensors_from_obj(inputs)
         
@@ -238,7 +248,7 @@ def trace_model(model, input_tensor):
                 adj_list[f'tensor_{last_tensor_input_id}'] = {
                     'edges': [],
                     'failed': False,
-                    'is_module': False,
+                    'node_type': 'Constant',
                 }
                 adj_list[f'tensor_{last_tensor_input_id}']['edges'].append({'target': op_name, 'dims': dims})
                 node_to_ancestors[f'tensor_{last_tensor_input_id}'] = module_stack[::-1]
@@ -251,7 +261,7 @@ def trace_model(model, input_tensor):
                 adj_list[f'np_array_{last_np_array_input_id}'] = {
                     'edges': [],
                     'failed': False,
-                    'is_module': False,
+                    'node_type': NodeType.CONSTANT.value,
                 }
                 adj_list[f'np_array_{last_np_array_input_id}']['edges'].append({'target': op_name, 'dims': dims})
                 constant_node_names.append(f'np_array_{last_np_array_input_id}')
@@ -262,7 +272,7 @@ def trace_model(model, input_tensor):
                 adj_list[f'scalar_{last_numeric_input_id}'] = {
                     'edges': [],
                     'failed': False,
-                    'is_module': False,
+                    'node_type': NodeType.CONSTANT.value,
                 }
                 adj_list[f'scalar_{last_numeric_input_id}']['edges'].append({'target': op_name, 'dims': dims})
                 constant_node_names.append(f'scalar_{last_numeric_input_id}')
@@ -594,7 +604,7 @@ def trace_model(model, input_tensor):
         adj_list['input'] = {
             'edges': [],
             'failed': False,
-            'is_module': False,
+            'node_type': NodeType.INPUT.value,
         }
         node_to_base_name_map['input'] = 'input'
         node_to_ancestors['input'] = []
@@ -621,7 +631,7 @@ def trace_model(model, input_tensor):
                         adj_list[output_node_name] = {
                             'edges': [],
                             'failed': False,
-                            'is_module': False,
+                            'node_type': NodeType.OUTPUT.value,
                         }
         
                         node_to_base_name_map[output_node_name] = output_node_name
