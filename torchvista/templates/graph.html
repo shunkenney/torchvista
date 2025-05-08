@@ -608,6 +608,8 @@
             labelGroup.insert("rect", "text")
             .attr("x", bbox.x - 2)
             .attr("y", bbox.y - 2)
+            .attr("rx", 4)
+            .attr("ry", 4)
             .attr("width", bbox.width + 4)
             .attr("height", bbox.height + 4)
             .attr("fill", "rgb(243, 243, 235) ")
@@ -633,7 +635,7 @@
                 originalParent.appendChild(edgeGroup.node());
                 
                 // Make edge thicker
-                path.attr("stroke-width", parseFloat(originalStrokeWidth) * 1.2);
+                path.attr("stroke-width", parseFloat(originalStrokeWidth) * 1.4);
                 
                 // Make label text larger
                 labelText.style("font-size", "6px");
@@ -1226,13 +1228,13 @@
         stroke-width: 1px;
       }
       25% { 
-        stroke-width: 3px;
+        stroke-width: 5px;
       }
       50% { 
         stroke-width: 1px;
       }
       75% { 
-        stroke-width: 3px;
+        stroke-width: 5px;
       }
       100% { 
         stroke-width: 1px;
