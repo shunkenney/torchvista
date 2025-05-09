@@ -28,11 +28,8 @@
         </div>
         <div id="popup-content_${unique_id}"></div>
         
-        <script src="https://d3js.org/d3.v7.min.js"></script>
-        <script src="https://unpkg.com/@dagrejs/dagre@1.0.2/dist/dagre.js"></script>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+        <script src="https://unpkg.com/@viz-js/viz@3.12.0/lib/viz-standalone.js"></script>
         
         <script>
 
@@ -49,6 +46,7 @@
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
+    let vizInstance = null;
 
     const EXPAND_TARGET_COVERAGE = 0.8;
     const COLLAPSE_TARGET_COVERAGE = 0.2;
@@ -56,10 +54,13 @@
     let lastOperation = null; // Track whether it was 'expand' or 'collapse'
     
     function waitForLibs(callback) {
-        if (typeof d3 !== 'undefined' && typeof dagre !== 'undefined' && typeof Viz !== 'undefined') {
-            callback();
+        if (typeof d3 !== 'undefined' && typeof Viz !== 'undefined') {
+            Viz.instance().then(viz => {
+                vizInstance = viz;
+                callback();
+            });
         } else {
-            setTimeout(function() { waitForLibs(callback) }, 100);
+            setTimeout(function() { waitForLibs(callback) }, 400);
         }
     }
 
@@ -244,6 +245,8 @@
                 if (!containerNodes.has(child)) {
                     if (adj_list[child] && adj_list[child].node_type === "Constant") {
                         dotSource += `${indent}  "${child}" [width=0.7, height=0.3];\n`;
+                    } else if (adj_list[child] && (adj_list[child].node_type === "Input" || adj_list[child].node_type === "Output")) {
+                        dotSource += `${indent}  "${child}" [width=1.1, height=0.5];\n`;
                     } else {
                         dotSource += `${indent}  "${child}";\n`;
                     }
@@ -264,6 +267,8 @@
             if (!ancestor_map[node]) {
                 if (adj_list[node] && adj_list[node].node_type === "Constant") {
                     dotSource += `  "${node}" [width=0.7, height=0.3];\n`;
+                } else if (adj_list[node] && (adj_list[node].node_type === "Input" || adj_list[node].node_type === "Output")) {
+                    dotSource += `  "${node}" [width=1.1, height=0.5];\n`;
                 } else {
                     dotSource += `  "${node}";\n`;
                 }
@@ -329,28 +334,17 @@
 
     function reloadGraph() {
         d3.select("#graph_${unique_id}").html("");
-        // debugger;
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
+        graphData = vizInstance.renderJSON(dotSource)
+        // Extract the graph data with positions from Graphviz
+        const extractedGraphData = extractGraphData(graphData);
+
         
-        const viz = new Viz();
-        viz.renderJSONObject(dotSource)
-        .then(graphData => {
-            // Extract the graph data with positions from Graphviz
-            const extractedGraphData = extractGraphData(graphData);
+        // Now create the graph with the Graphviz layout data
+        createGraph(extractedGraphData);
 
-            
-            // Now create the graph with the Graphviz layout data
-            createGraph(extractedGraphData);
-
-            renderGraphvizImage(dotSource);
-        })
-        .catch(error => {
-            console.error("Error with Graphviz layout:", error);
-            // Fall back to your existing layout method if there's an error
-            console.log("Falling back to dagre layout");
-            createGraph(null);
-        });
+        // renderGraphvizImage(dotSource);
     }
                     
     waitForLibs(function() {                                
@@ -378,24 +372,16 @@
             .style("text-align", "center");
         
         // Use Viz.js to render the DOT source directly to SVG
-        const viz = new Viz();
-        viz.renderSVGElement(dotSource)
-        .then(svgElement => {
-            // Append the SVG element to the container
-            graphvizContainer.node().appendChild(svgElement);
+        svgElement = vizInstance.renderSVGElement(dotSource)
+        // Append the SVG element to the container
+        graphvizContainer.node().appendChild(svgElement);
           
-            // Style the SVG
-            d3.select(svgElement)
-                .attr("width", "100%")
-                .attr("height", "600px")
-                .style("background-color", "#f9f9f9");
-            })
-            .catch(error => {
-                console.error("Error rendering Graphviz:", error);
-                graphvizContainer.append("p")
-                .text("Error rendering Graphviz visualization: " + error.message)
-                .style("color", "red");
-            });
+        // Style the SVG
+        d3.select(svgElement)
+            .attr("width", "100%")
+            .attr("height", "600px")
+            .style("background-color", "#f9f9f9");
+        
     }
 
     function createGraph(graphvizData) {
@@ -472,20 +458,12 @@
             .attr("dominant-baseline", "hanging")
             .attr("dy", "-6")
             .attr("font-size", 7)
-            .attr("fill", "#333");
-            
-            // Get text bounding box and create background
-            const textBox = text.node().getBBox();
-            const padding = 1;
-            
-            textGroup.insert("rect", "text")
-            .attr("x", -padding)
-            .attr("y", textBox.y - padding)
-            .attr("width", textBox.width + 2 * padding)
-            .attr("height", textBox.height + 2 * padding)
-            .attr("fill", "#f3f3eb");
-
-            
+            .attr("fill", "#333")
+            .attr("stroke", "#f3f3eb")
+            .attr("stroke-width", "5px")
+            .attr("paint-order", "stroke")
+            .attr("stroke-linejoin", "round");
+                        
             
             // Add collapse/expand button
             group.append("circle")
@@ -599,10 +577,14 @@
             const text = labelGroup.append("text")
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .style("font-size", "4px")
+            .style("font-size", "5px")
             .text(edgeData.dims)
-            .attr("transform", `rotate(${angle})`);
-            
+            .attr("transform", `rotate(${angle})`)
+            .attr("stroke", "#f3f3eb")
+            .attr("stroke-width", "5px")
+            .attr("paint-order", "stroke")
+            .attr("stroke-linejoin", "round");
+
             // Add background rectangle
             const bbox = text.node().getBBox();
             labelGroup.insert("rect", "text")
@@ -626,7 +608,7 @@
             const labelText = labelGroup.select("text");
             const labelBg = labelGroup.select("rect");
             const originalStrokeWidth = path.attr("stroke-width") || 1;
-            const originalFontSize = labelText.style("font-size") || "4px";
+            const originalFontSize = labelText.style("font-size") || "5px";
             const originalParent = edgeGroup.node().parentNode;
             const originalPosition = Array.from(originalParent.childNodes).indexOf(edgeGroup.node());
             
@@ -638,7 +620,7 @@
                 path.attr("stroke-width", parseFloat(originalStrokeWidth) * 1.4);
                 
                 // Make label text larger
-                labelText.style("font-size", "6px");
+                labelText.style("font-size", "7px");
                     
                 // Adjust the background rectangle for the label
                 const bbox = labelText.node().getBBox();
@@ -1228,13 +1210,13 @@
         stroke-width: 1px;
       }
       25% { 
-        stroke-width: 5px;
+        stroke-width: 3px;
       }
       50% { 
         stroke-width: 1px;
       }
       75% { 
-        stroke-width: 5px;
+        stroke-width: 3px;
       }
       100% { 
         stroke-width: 1px;
