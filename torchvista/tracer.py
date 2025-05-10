@@ -17,6 +17,7 @@ from IPython.display import display, HTML
 import numpy as np
 import numbers
 from enum import Enum
+from importlib import resources
 
 
 class NodeType(Enum):
@@ -84,14 +85,10 @@ MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
 def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map):
     unique_id = str(uuid.uuid4())
-    template_path = Path('templates/graph.html')
-    with template_path.open('r') as file:
-        template_str = file.read()
-    d3_path = Path('assets/d3.min.js')
-    viz_path = Path('assets/viz-standalone.js')
-    with d3_path.open('r') as d3_file, viz_path.open('r') as viz_file:
-        d3_source = d3_file.read()
-        viz_source = viz_file.read()
+    template_str = resources.read_text('torchvista.templates', 'graph.html')
+    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
+    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
+    viz_source = resources.read_text('torchvista.assets', 'viz-standalone.js')
 
     template = Template(template_str)
         

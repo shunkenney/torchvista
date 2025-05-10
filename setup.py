@@ -9,6 +9,6 @@ setup(
         'ipython>=7.0.0'
     ],
     package_data={
-        'mylib': ['templates/*.html'],
+        'torchvista': ['templates/*.html', 'assets/*'],
     },
 )
