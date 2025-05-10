@@ -7,35 +7,33 @@
         </div>
         <div id="popup-content_${unique_id}" class="popup-content">
             <div id="common-info_${unique_id}">
-                <!-- <p><strong>Input dims:</strong> <span id="input-dims_${unique_id}"></span></p>
-                    <p><strong>Output dims:</strong> <span id="output-dims_${unique_id}"></span></p> -->
-                </div>
-                <div id="module-template_${unique_id}" style="display:none;">
-                    <p><strong>Type:</strong> <span id="module-type_${unique_id}"></span></p>
-                    <p><strong>Attributes:</strong></p>
-                    <pre id="module-attributes_${unique_id}"></pre>
-                    <p><strong>Parameters:</strong></p>
-                    <pre id="module-parameters_${unique_id}"></pre>
-                    <p><strong>Extra Repr:</strong></p>
-                    <pre id="module-extra-repr_${unique_id}"></pre>
-                </div>
-                <div id="tensor-op-template_${unique_id}" style="display:none;">
-                    <p><strong>Parameters:</strong></p>
-                    <pre id="tensor-parameters_${unique_id}"></pre>
-                </div>
-                <p id="no-info_${unique_id}" style="display:none;">No further information available for this node.</p>
             </div>
+            <div id="module-template_${unique_id}" style="display:none;">
+                <p><strong>Type:</strong> <span id="module-type_${unique_id}"></span></p>
+                <p><strong>Attributes:</strong></p>
+                <pre id="module-attributes_${unique_id}"></pre>
+                <p><strong>Parameters:</strong></p>
+                <pre id="module-parameters_${unique_id}"></pre>
+                <p><strong>Extra Repr:</strong></p>
+                <pre id="module-extra-repr_${unique_id}"></pre>
+            </div>
+            <div id="tensor-op-template_${unique_id}" style="display:none;">
+                <p><strong>Parameters:</strong></p>
+                <pre id="tensor-parameters_${unique_id}"></pre>
+            </div>
+            <p id="no-info_${unique_id}" style="display:none;">No further information available for this node.</p>
         </div>
-        <div id="popup-content_${unique_id}"></div>
-        
-        <script>
-            ${d3_source}
-        </script>
-        <script>
-            ${viz_source}
-        </script>
-        
-        <script>
+    </div>
+    <div id="popup-content_${unique_id}"></div>
+    
+    <script>
+        ${d3_source}
+    </script>
+    <script>
+        ${viz_source}
+    </script>
+    
+    <script>
 
 
 (function() {
@@ -1011,231 +1009,237 @@
 })();
 
 
-</script>
+    </script>
 
-<style>
-    #graph {
-        width: 100%;
-        height: 100%;
-    }
-    .node rect {
-        stroke: #333;
-        fill: #fff;
-    }
-    text.node-label {
-        font-family: "'Roboto', sans-serif";
-        cursor: default;
-        user-select: none;
-    }
-    text.type-indicator {
-        font-family: "'Roboto', sans-serif";
-        cursor: default;
-        user-select: none;
-    }
-    text.collapse-icon {
-        font-family: "'Roboto', sans-serif";
-        font-size: 14px
-        cursor: default;
-        user-select: none;
-    }
-    .edge {
-        stroke: #333333;
-        fill: none;
-    }
-    .node rect.input { fill: #FF9AFF; }
-    .node rect.constant { fill: rgb(235 235 235); }
-    .node.constant .node-label { font-size: 11px; }
+    <style>
+        #graph {
+            width: 100%;
+            height: 100%;
+        }
+        .node rect {
+            stroke: #333;
+            fill: #fff;
+        }
+        text.node-label {
+            font-family: "'Roboto', sans-serif";
+            cursor: default;
+            user-select: none;
+        }
+        text.type-indicator {
+            font-family: "'Roboto', sans-serif";
+            cursor: default;
+            user-select: none;
+        }
+        text.collapse-icon {
+            font-family: "'Roboto', sans-serif";
+            font-size: 14px
+            cursor: default;
+            user-select: none;
+        }
+        .edge {
+            stroke: #333333;
+            fill: none;
+        }
+        .node rect.input { fill: #FF9AFF; }
+        .node rect.constant { fill: rgb(235 235 235); }
 
-    .node rect.output { fill: #FF9AFF; }
-    .node rect.failed { fill: rgb(224 15 15); }
-    .node rect.module { fill: #8BDEDB; }
-    .node rect.operation { fill: #FEBC5A; }
-    .edgeLabelGroup {
-        pointer-events: none;
-    }
-    #arrowhead path {
-        fill: #333333;;
-    }
-    .node rect,
-    .node ellipse {
-        transition: fill 0.3s ease;
-    }
+        .node rect.output { fill: #FF9AFF; }
+        .node rect.failed { fill: rgb(224 15 15); }
+        .node rect.module { fill: #8BDEDB; }
+        .node rect.operation { fill: #FEBC5A; }
+        .edgeLabelGroup {
+            pointer-events: none;
+        }
+        #arrowhead path {
+            fill: #333333;;
+        }
+        .node rect,
+        .node ellipse {
+            transition: fill 0.3s ease;
+        }
 
-    .node .type-indicator {
-        font-size: 5px;
-        fill: rgba(0, 0, 0, 1.0);  /* Dark grey, semi-transparent */
-        pointer-events: none;
-    }
+        .node .type-indicator {
+            font-size: 5px;
+            fill: rgba(0, 0, 0, 1.0);  /* Dark grey, semi-transparent */
+            pointer-events: none;
+        }
 
-    .node.error rect {
-        stroke: black;
-        stroke-width: 1px;
-        /* stroke-dasharray: 3, 3; */
-        rx: 5px;
-        ry: 5px;
-    }
+        .node.error rect {
+            stroke: black;
+            stroke-width: 1px;
+            /* stroke-dasharray: 3, 3; */
+            rx: 5px;
+            ry: 5px;
+        }
 
-    .node.error text {
-/*        fill: white;*/
-    }`
+        .boundary-box.error > rect:first-of-type {
+            fill: red;
+            fill-opacity: 0.2;
+        }
 
-    .boundary-box.error > rect:first-of-type {
-        fill: red;
-        fill-opacity: 0.2;
-    }
+        #graph-container {
+            position: relative;
+        }
+        .popup {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            width: 300px;
+            max-height: 400px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            display: flex;
+            flex-direction: column;
+        }
 
-    #graph-container {
-        position: relative;
-    }
-    .popup {
-        position: absolute;
-        background: white;
-        border: 1px solid #ccc;
-        width: 300px;
-        max-height: 400px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        display: none;
-        display: flex;
-        flex-direction: column;
-    }
+        .popup-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 5px 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1;
+        }
 
-    .popup-header {
-        position: sticky;
-        top: 0;
-        background: white;
-        padding: 5px 10px;
-        border-bottom: 1px solid #ccc;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 1;
-    }
+        .popup h3 {
+            margin: 0;
+            font-size: 16px;
+        }
 
-    .popup h3 {
-        margin: 0;
-        font-size: 16px;
-    }
+        .popup-content {
+            padding: 10px;
+            padding-bottom: 10px;
+            overflow-y: auto;
+            overflow-x: auto;
+            flex-grow: 1;
+        }
 
-    .popup-content {
-        padding: 10px;
-        padding-bottom: 10px;
-        overflow-y: auto;
-        overflow-x: auto;
-        flex-grow: 1;
-    }
+        .popup pre {
+            white-space: pre;
+            overflow-x: auto;
+            font-family: monospace;
+        }
 
-    .popup pre {
-        white-space: pre;
-        overflow-x: auto;
-        font-family: monospace;
-    }
+        .popup-close {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 1;
+        }
 
-    .popup-close {
-        cursor: pointer;
-        font-size: 24px;
-        font-weight: bold;
-        line-height: 1;
-    }
+        #popup-title {
+            font-size: 24px;
+        }
 
-    #popup-title {
-        font-size: 24px;
-    }
+        #graph-container {
+            position: relative;
+        }
 
-    #graph-container {
-        position: relative;
-    }
+        pre {
+            margin-bottom: 0;
+        }
 
-    pre {
-        margin-bottom: 0;
-    }
+        .boundary-box rect {
+            pointer-events: none;
+        }
+        .boundary-box text {
+            pointer-events: none;
+            user-select: none;
+        }
 
-    .boundary-box rect {
-        pointer-events: none;
-    }
-    .boundary-box text {
-        pointer-events: none;
-        user-select: none;
-    }
+        .boundary-box rect {
+            pointer-events: none;
+        }
+        .boundary-box text {
+            pointer-events: none;
+            user-select: none;
+            font-weight: bold;
+        }
+        .edge-label text {
+            pointer-events: none;
+            user-select: none;
+            font-size: 4px;
+            font-family: "'Roboto', sans-serif";
+        }
+        
+        .collapse-button:hover {
+            fill: #eee;
+        }
+        .collapse-icon {
+            pointer-events: none;
+            user-select: none;
+            font-family: "'Roboto', sans-serif";
+            fill: rgb(51, 51, 51);
+        }
 
-    .boundary-box rect {
-        pointer-events: none;
-    }
-    .boundary-box text {
-        pointer-events: none;
-        user-select: none;
-        font-weight: bold;
-    }
-    .edge-label text {
-        pointer-events: none;
-        user-select: none;
-        font-size: 4px;
-        font-family: "'Roboto', sans-serif";
-    }
-    
-    .collapse-button:hover {
-        fill: #eee;
-    }
-    .collapse-icon {
-        pointer-events: none;
-        user-select: none;
-        font-family: "'Roboto', sans-serif";
-        fill: rgb(51, 51, 51);
-    }
+        /* Edge hover styles */
+        .edge-group path {
+          pointer-events: stroke;
+        }
 
-    /* Edge hover styles */
-    .edge-group path {
-      pointer-events: stroke;
-    }
+        .edge-label {
+          pointer-events: all;
+        }
 
-    .edge-label {
-      pointer-events: all;
-    }
+        @keyframes containerHighlight {
+          0% { 
+            filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+          }
+          25% { 
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+          }
+          50% { 
+            filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+          }
+          75% { 
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+          }
+          100% { 
+            filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+          }
+        }
 
-    @keyframes containerHighlight {
-      0% { 
-        filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-      }
-      25% { 
-        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
-      }
-      50% { 
-        filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-      }
-      75% { 
-        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
-      }
-      100% { 
-        filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-      }
-    }
+        @keyframes containerStrokeHighlight {
+          0% { 
+            stroke-width: 1px;
+          }
+          25% { 
+            stroke-width: 3px;
+          }
+          50% { 
+            stroke-width: 1px;
+          }
+          75% { 
+            stroke-width: 3px;
+          }
+          100% { 
+            stroke-width: 1px;
+          }
+        }
 
-    @keyframes containerStrokeHighlight {
-      0% { 
-        stroke-width: 1px;
-      }
-      25% { 
-        stroke-width: 3px;
-      }
-      50% { 
-        stroke-width: 1px;
-      }
-      75% { 
-        stroke-width: 3px;
-      }
-      100% { 
-        stroke-width: 1px;
-      }
-    }
+        .highlight-cluster > rect:first-of-type {
+          animation: 
+             containerStrokeHighlight 2.0s ease-in-out forwards;
+        }
 
-    .highlight-cluster > rect:first-of-type {
-      animation: 
-                 containerStrokeHighlight 2.0s ease-in-out forwards;
-    }
+        .highlight-node rect {
+          animation: 
+             containerStrokeHighlight 2.0s ease-in-out forwards;
+        }
 
-    .highlight-node rect {
-      animation: 
-                 containerStrokeHighlight 2.0s ease-in-out forwards;
-    }
+        text.node-label {
+            font-family: "Roboto", sans-serif;
+            font-size: 0.8rem;  /* Base size using rem units for accessibility */
+            cursor: default;
+            user-select: none;
+        }
 
-</style>
+        .node.constant .node-label {
+            font-size: 0.7rem;
+        }
+
+    </style>
 </div>
