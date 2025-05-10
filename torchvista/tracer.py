@@ -125,7 +125,7 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, 
     display(HTML(output))
 
 
-def trace_model(model, input_tensor):
+def trace_model(model, inputs):
     adj_list = {}
     op_type_counters = defaultdict(int)
     last_successful_op = None
@@ -534,7 +534,11 @@ def trace_model(model, input_tensor):
             for src_node, node_data in adj_list.items():
                 node_data['edges'] = [edge for edge in node_data['edges'] if edge['target'] != node]
     
-        # Step 1: Forward DFS from 'input'
+        # Step a: Identify all input nodes based on node_type
+        input_nodes = [node for node, data in adj_list.items() 
+                      if data.get('node_type') == NodeType.INPUT.value]
+        
+        # Step 1: Forward DFS from all input nodes
         forward_reachable = set()
     
         def dfs_forward(node):
@@ -544,8 +548,10 @@ def trace_model(model, input_tensor):
             for edge in adj_list.get(node, {}).get('edges', []):
                 dfs_forward(edge['target'])
     
-        dfs_forward('input')
-    
+        # Run DFS from each input node
+        for input_node in input_nodes:
+            dfs_forward(input_node)
+
         # Step 2: Build reverse adjacency list
         reverse_adj_list = {}
         for node, data in adj_list.items():
@@ -606,20 +612,23 @@ def trace_model(model, input_tensor):
         wrap_functions()
         traverse_model(model)
 
-        input_tensor._tensor_source_name = 'input'
-        graph_node_name_to_without_suffix['input'] = 'input'
-        adj_list['input'] = {
-            'edges': [],
-            'failed': False,
-            'node_type': NodeType.INPUT.value,
-        }
-        node_to_base_name_map['input'] = 'input'
-        node_to_ancestors['input'] = []
-        node_to_ancestors['output'] = []
+        inputs_wrapped = (inputs)
+        input_tensors = extract_tensors_from_obj(inputs_wrapped)
+        for i, tensor in enumerate(input_tensors):
+            input_name = f'input_{i}'
+            tensor._tensor_source_name = input_name
+            graph_node_name_to_without_suffix[input_name] = input_name
+            adj_list[input_name] = {
+                'edges': [],
+                'failed': False,
+                'node_type': NodeType.INPUT.value,
+            }
+            node_to_base_name_map[input_name] = input_name
+            node_to_ancestors[input_name] = []
 
         exception = None
         with torch.no_grad():
-            output = model(input_tensor)
+            output = model(*inputs) if isinstance(inputs, tuple) else model(inputs)
             output_tensors = extract_tensors_from_obj(output)
             if output_tensors:
                 output_node_name = 'output'
@@ -661,7 +670,8 @@ def trace_model(model, input_tensor):
     finally:
         restore_functions()
         restore_modules()
-        cleanup_tensor_attributes(input_tensor)
+        for tensor in input_tensors:
+            cleanup_tensor_attributes(tensor)
 
     cleanup_graph(adj_list, nodes_to_delete)
     plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list))
