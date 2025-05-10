@@ -98,9 +98,14 @@ MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
 def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map):
     unique_id = str(uuid.uuid4())
-    template_path = Path('graph.html')
+    template_path = Path('templates/graph.html')
     with template_path.open('r') as file:
         template_str = file.read()
+    d3_path = Path('assets/d3.min.js')
+    viz_path = Path('assets/viz-standalone.js')
+    with d3_path.open('r') as d3_file, viz_path.open('r') as viz_file:
+        d3_source = d3_file.read()
+        viz_source = viz_file.read()
 
     template = Template(template_str)
         
@@ -114,6 +119,8 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, 
         'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
         'ancestor_map': json.dumps(ancestor_map),
         'unique_id': unique_id,
+        'd3_source': d3_source,
+        'viz_source': viz_source,
     })
     display(HTML(output))
 
