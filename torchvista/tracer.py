@@ -2,36 +2,22 @@ import torch
 import torch.nn as nn
 from collections import OrderedDict
 import torch.nn.functional as F
-import inspect
-# from IPython.core.ultratb import AutoFormattedTB
 from torch.overrides import get_ignored_functions
-import json
-# from IPython.display import display, HTML
-import json
 from pathlib import Path
 from string import Template
 import uuid
 from collections import defaultdict
 import types
 from overrides import CONTAINER_MODULES, FUNCTIONS
-import torch
-import torch.nn as nn
-from collections import OrderedDict
-import torch.nn.functional as F
 import inspect
 from IPython.core.ultratb import AutoFormattedTB
 
 import json
 from IPython.display import display, HTML
-import json
-from pathlib import Path
-from string import Template
-import uuid
-from collections import defaultdict
 import numpy as np
 import numbers
-
 from enum import Enum
+
 
 class NodeType(Enum):
     MODULE = "Module"
