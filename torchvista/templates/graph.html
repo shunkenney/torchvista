@@ -41,7 +41,7 @@
 (function() {
     const adj_list = ${adj_list_json};
     const module_info = ${module_info_json};
-    const tensor_op_info = ${tensor_op_info_json};
+    const func_info_map = ${func_info_map_json};
     const module_name_to_base_name = ${module_name_to_base_name_json};
     const parent_module_to_nodes = ${parent_module_to_nodes_json};
     const parent_module_to_depth = ${parent_module_to_depth_json};
@@ -834,8 +834,8 @@
                 d3.select("#module-attributes_${unique_id}").text(JSON.stringify(info.attributes, null, 2));
                 d3.select("#module-parameters_${unique_id}").text(JSON.stringify(info.parameters, null, 2));
                 d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
-            } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && tensor_op_info[nodeName]) {
-                const info = tensor_op_info[nodeName];
+            } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
+                const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
                 
                 d3.select("#tensor-parameters_${unique_id}").text(JSON.stringify(info, null, 2));

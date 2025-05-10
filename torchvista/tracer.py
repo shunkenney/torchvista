@@ -8,7 +8,7 @@ from string import Template
 import uuid
 from collections import defaultdict
 import types
-from overrides import CONTAINER_MODULES, FUNCTIONS
+from .overrides import CONTAINER_MODULES, FUNCTIONS
 import inspect
 from IPython.core.ultratb import AutoFormattedTB
 
@@ -83,58 +83,28 @@ def get_all_nn_modules():
 
 MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
-def plot_graph(adj_list, module_name_to_base_name, module_info, tensor_op_info, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map):
-    unique_id = str(uuid.uuid4())
-    template_str = resources.read_text('torchvista.templates', 'graph.html')
-    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
-    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
-    viz_source = resources.read_text('torchvista.assets', 'viz-standalone.js')
 
-    template = Template(template_str)
-        
-    output = template.safe_substitute({
-        'adj_list_json': json.dumps(adj_list),
-        'module_info_json': json.dumps(module_info),
-        'tensor_op_info_json': json.dumps(tensor_op_info),
-        'module_name_to_base_name_json': json.dumps(module_name_to_base_name),
-        'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
-        'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
-        'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
-        'ancestor_map': json.dumps(ancestor_map),
-        'unique_id': unique_id,
-        'd3_source': d3_source,
-        'viz_source': viz_source,
-    })
-    display(HTML(output))
-
-
-def trace_model(model, inputs):
-    adj_list = {}
-    op_type_counters = defaultdict(int)
+def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors):
     last_successful_op = None
-    module_to_node_name = {}
     current_op = None
-    original_ops = {}
-    module_reuse_count = {}
-    module_info = {}
-    func_info_map = {}
-    node_to_base_name_map = {}
-    module_hierarchy = {}
-    traced_modules = set()
     current_executing_module = None
     current_executing_function = None
-    module_stack = []
-    parent_module_to_nodes = defaultdict(list)
-    parent_module_to_depth = {}
-    original_module_forwards = {}
-    graph_node_name_to_without_suffix = {}
-    node_to_ancestors = defaultdict(list)
     last_tensor_input_id = 0
     last_np_array_input_id = 0
     last_numeric_input_id = 0
+
+    op_type_counters = defaultdict(int)
+    module_to_node_name = {}
+    original_ops = {}
+    module_reuse_count = {}
+    module_hierarchy = {}
+    traced_modules = set()
+    module_stack = []
+    original_module_forwards = {}
     nodes_to_delete = []
     constant_node_names = []
     output_node_set = set()
+
 
     def format_dims(dims):
         def helper():
@@ -581,16 +551,6 @@ def trace_model(model, inputs):
             node_data['edges'] = [edge for edge in node_data['edges'] if edge['target'] in adj_list]
 
                 
-    def build_immediate_ancestor_map(ancestor_dict, adj_list):
-        immediate_ancestor_map = {}
-        for node, ancestors in ancestor_dict.items():
-            if ancestors and node in adj_list:
-                immediate_ancestor_map[node] = ancestors[0]
-                for i in range(len(ancestors) - 1):
-                    if ancestors[i] not in immediate_ancestor_map:
-                        immediate_ancestor_map[ancestors[i]] = ancestors[i + 1]
-        return immediate_ancestor_map
-        
     try:
         wrap_functions()
         traverse_model(model)
@@ -657,6 +617,118 @@ def trace_model(model, inputs):
             cleanup_tensor_attributes(tensor)
 
     cleanup_graph(adj_list, nodes_to_delete)
+
+def build_immediate_ancestor_map(ancestor_dict, adj_list):
+    immediate_ancestor_map = {}
+    for node, ancestors in ancestor_dict.items():
+        if ancestors and node in adj_list:
+            immediate_ancestor_map[node] = ancestors[0]
+            for i in range(len(ancestors) - 1):
+                if ancestors[i] not in immediate_ancestor_map:
+                    immediate_ancestor_map[ancestors[i]] = ancestors[i + 1]
+    return immediate_ancestor_map
+    
+
+def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map):
+    unique_id = str(uuid.uuid4())
+    template_str = resources.read_text('torchvista.templates', 'graph.html')
+    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
+    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
+    viz_source = resources.read_text('torchvista.assets', 'viz-standalone.js')
+
+    template = Template(template_str)
+        
+    output = template.safe_substitute({
+        'adj_list_json': json.dumps(adj_list),
+        'module_info_json': json.dumps(module_info),
+        'func_info_map_json': json.dumps(func_info_map),
+        'module_name_to_base_name_json': json.dumps(module_name_to_base_name),
+        'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
+        'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
+        'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
+        'ancestor_map': json.dumps(ancestor_map),
+        'unique_id': unique_id,
+        'd3_source': d3_source,
+        'viz_source': viz_source,
+    })
+    display(HTML(output))
+
+
+def _get_demo_html_str(model, inputs):
+    adj_list = {}
+    op_type_counters = defaultdict(int)
+    module_to_node_name = {}
+    original_ops = {}
+    module_reuse_count = {}
+    module_info = {}
+    func_info_map = {}
+    node_to_base_name_map = {}
+    module_hierarchy = {}
+    traced_modules = set()
+    module_stack = []
+    parent_module_to_nodes = defaultdict(list)
+    parent_module_to_depth = {}
+    original_module_forwards = {}
+    graph_node_name_to_without_suffix = {}
+    node_to_ancestors = defaultdict(list)
+    nodes_to_delete = []
+    constant_node_names = []
+    output_node_set = set()
+
+    try:
+        process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors)
+    except Exception as e:
+        exception = e
+
+
+    unique_id = str(uuid.uuid4())
+    template_str = resources.read_text('torchvista.templates', 'graph.html')
+    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
+    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
+    viz_source = resources.read_text('torchvista.assets', 'viz-standalone.js')
+
+    template = Template(template_str)
+        
+    output = template.safe_substitute({
+        'adj_list_json': json.dumps(adj_list),
+        'module_info_json': json.dumps(module_info),
+        'func_info_map_json': json.dumps(func_info_map),
+        'module_name_to_base_name_json': json.dumps(node_to_base_name_map),
+        'parent_module_to_nodes_json': json.dumps(parent_module_to_nodes),
+        'parent_module_to_depth_json': json.dumps(parent_module_to_depth),
+        'graph_node_name_to_without_suffix': json.dumps(graph_node_name_to_without_suffix),
+        'ancestor_map': json.dumps(build_immediate_ancestor_map(node_to_ancestors, adj_list)),
+        'unique_id': unique_id,
+        'd3_source': d3_source,
+        'viz_source': viz_source,
+    })
+    return output
+
+
+def trace_model(model, inputs):
+    adj_list = {}
+    module_reuse_count = {}
+    module_info = {}
+    func_info_map = {}
+    node_to_base_name_map = {}
+    module_hierarchy = {}
+    traced_modules = set()
+    module_stack = []
+    parent_module_to_nodes = defaultdict(list)
+    parent_module_to_depth = {}
+    original_module_forwards = {}
+    graph_node_name_to_without_suffix = {}
+    node_to_ancestors = defaultdict(list)
+    nodes_to_delete = []
+    constant_node_names = []
+    output_node_set = set()
+
+    exception = None
+
+    try:
+        process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors)
+    except Exception as e:
+        exception = e
     plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list))
     if exception is not None:
         raise exception

@@ -1,3 +1,6 @@
+import torch
+import torch.nn as nn
+
 # TODO: Find this list more systematically
 # Right now they have been taken from
 # - torch.Tensor
