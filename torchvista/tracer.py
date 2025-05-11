@@ -7,10 +7,7 @@ from pathlib import Path
 from string import Template
 import uuid
 from collections import defaultdict
-import types
 from .overrides import CONTAINER_MODULES, FUNCTIONS
-import inspect
-from IPython.core.ultratb import AutoFormattedTB
 
 import json
 from IPython.display import display, HTML
@@ -308,7 +305,7 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
         
         return tensors
 
-    def trace_op(op_name, output):            
+    def trace_op(op_name, output):
         # Because some discovered operations don't get added to the adj_list in pre_trace_op
         if op_name not in adj_list:
             return output
@@ -656,30 +653,20 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, p
 
 def _get_demo_html_str(model, inputs, code_contents):
     adj_list = {}
-    op_type_counters = defaultdict(int)
-    module_to_node_name = {}
-    original_ops = {}
-    module_reuse_count = {}
     module_info = {}
     func_info_map = {}
     node_to_base_name_map = {}
-    module_hierarchy = {}
-    traced_modules = set()
-    module_stack = []
     parent_module_to_nodes = defaultdict(list)
     parent_module_to_depth = {}
-    original_module_forwards = {}
     graph_node_name_to_without_suffix = {}
     node_to_ancestors = defaultdict(list)
-    nodes_to_delete = []
-    constant_node_names = []
-    output_node_set = set()
+
+    exception = None
 
     try:
         process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors)
     except Exception as e:
         exception = e
-
 
     unique_id = str(uuid.uuid4())
     template_str = resources.read_text('torchvista.templates', 'demo-graph.html')
@@ -703,26 +690,18 @@ def _get_demo_html_str(model, inputs, code_contents):
         'viz_source': viz_source,
         'code_contents': code_contents
     })
-    return output
+    return output, exception
 
 
 def trace_model(model, inputs):
     adj_list = {}
-    module_reuse_count = {}
     module_info = {}
     func_info_map = {}
     node_to_base_name_map = {}
-    module_hierarchy = {}
-    traced_modules = set()
-    module_stack = []
     parent_module_to_nodes = defaultdict(list)
     parent_module_to_depth = {}
-    original_module_forwards = {}
     graph_node_name_to_without_suffix = {}
     node_to_ancestors = defaultdict(list)
-    nodes_to_delete = []
-    constant_node_names = []
-    output_node_set = set()
 
     exception = None
 
@@ -730,6 +709,9 @@ def trace_model(model, inputs):
         process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors)
     except Exception as e:
         exception = e
+
     plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list))
+
+
     if exception is not None:
         raise exception

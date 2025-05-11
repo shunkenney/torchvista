@@ -1,5 +1,4 @@
 from .models import models
-import torch
 from torchvista import tracer
 from pathlib import Path
 
@@ -13,7 +12,8 @@ def test_all_models():
         example_input = items["example_input"]
         code_contents = items["code_contents"]
         print(f"Testing {name}...")
-        graph_html = tracer._get_demo_html_str(model, example_input, code_contents)
+        graph_html, exception = tracer._get_demo_html_str(model, example_input, code_contents)
+        print('exception:', exception)
         output_path = DOCS_DIR / f"{name}.html"
         output_path.write_text(graph_html)
         print(f"Saved output to {output_path}")

@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class DataHolder:
     def __init__(self, x, y):
         self.x = x
         self.y = [(y)]
 
-class IdentityModule(nn.Module):
+class MyModule(nn.Module):
     def __init__(self):
         super().__init__()
         self.linear = nn.Linear(5, 12)
@@ -19,7 +20,7 @@ class IdentityModule(nn.Module):
         return DataHolder(c, d)
         
 
-model = IdentityModule()
+model = MyModule()
 example_input = {
     'tensor_1': torch.randn(2, 5),
     'inner': {
@@ -28,12 +29,17 @@ example_input = {
 }
 
 code_contents = """
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvista import trace_model
+
 class DataHolder:
     def __init__(self, x, y):
         self.x = x
         self.y = [(y)]
 
-class IdentityModule(nn.Module):
+class MyModule(nn.Module):
     def __init__(self):
         super().__init__()
         self.linear = nn.Linear(5, 12)
@@ -46,7 +52,7 @@ class IdentityModule(nn.Module):
         return DataHolder(c, d)
         
 
-model = IdentityModule()
+model = MyModule()
 example_input = {
     'tensor_1': torch.randn(2, 5),
     'inner': {
