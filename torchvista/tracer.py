@@ -654,7 +654,7 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, p
     display(HTML(output))
 
 
-def _get_demo_html_str(model, inputs):
+def _get_demo_html_str(model, inputs, code_contents):
     adj_list = {}
     op_type_counters = defaultdict(int)
     module_to_node_name = {}
@@ -682,7 +682,7 @@ def _get_demo_html_str(model, inputs):
 
 
     unique_id = str(uuid.uuid4())
-    template_str = resources.read_text('torchvista.templates', 'graph.html')
+    template_str = resources.read_text('torchvista.templates', 'demo-graph.html')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
     viz_source = resources.read_text('torchvista.assets', 'viz-standalone.js')
@@ -701,6 +701,7 @@ def _get_demo_html_str(model, inputs):
         'unique_id': unique_id,
         'd3_source': d3_source,
         'viz_source': viz_source,
+        'code_contents': code_contents
     })
     return output
 

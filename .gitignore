@@ -1,4 +1,4 @@
 .DS_Store
 *.egg-info/
 dist/
-torchvista/__pycache__/
+__pycache__/
