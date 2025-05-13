@@ -11,6 +11,7 @@ def test_all_models():
         model = items["model"]
         example_input = items["example_input"]
         code_contents = items["code_contents"]
+        # error_contents = items["error_contents"]
         print(f"Testing {name}...")
         graph_html, exception = tracer._get_demo_html_str(model, example_input, code_contents)
         print('exception:', exception)

@@ -11,4 +11,5 @@ for filename in os.listdir(os.path.dirname(__file__)):
             "model": getattr(module, "model"),
             "example_input": getattr(module, "example_input"),
             "code_contents": getattr(module, "code_contents"),
+            "error_contents": getattr(module, "error_contents", ""),
         }

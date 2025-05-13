@@ -614,6 +614,8 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
             cleanup_tensor_attributes(tensor)
 
     cleanup_graph(adj_list, nodes_to_delete)
+    if exception is not None:
+        raise exception
 
 def build_immediate_ancestor_map(ancestor_dict, adj_list):
     immediate_ancestor_map = {}
@@ -688,7 +690,8 @@ def _get_demo_html_str(model, inputs, code_contents):
         'unique_id': unique_id,
         'd3_source': d3_source,
         'viz_source': viz_source,
-        'code_contents': code_contents
+        'code_contents': code_contents,
+        'error_contents': str(exception) if exception else ""
     })
     return output, exception
 
