@@ -1,18 +1,18 @@
 # torchvista
 
-An interactive tool to visualize the forward pass of a PyTorch model directly in the notebook—with a single line of code.
+An interactive tool to visualize the forward pass of a PyTorch model directly in the notebook—with a single line of code. Works with web-based notebooks like Jupyter and Google Colab.
 
 ## ✨ Features
 
-### Interactive graph with drag and zoom support
+#### Interactive graph with drag and zoom support
 
 ![](docs/assets/interactive-graph.gif)
 
-### Collapsible nodes for hierarchical modules 
+#### Collapsible nodes for hierarchical modules 
 
 ![](docs/assets/collapsible-graph.gif)
 
-### Error-tolerant partial visualization when errors arise (e.g., shape mismatches) for ease of debugging
+#### Error-tolerant partial visualization when errors arise (e.g., shape mismatches) for ease of debugging
 
 ![](docs/assets/error-graph.png)
 
