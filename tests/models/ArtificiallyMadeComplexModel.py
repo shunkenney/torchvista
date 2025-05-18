@@ -144,7 +144,7 @@ class ComplexModel(nn.Module):
             nn.Parameter(torch.randn(1))
         ])
     
-    def forward(self, x, y, z):
+    def forward(self, x, y):
         # Input shape: [batch_size, 3, height, width]
         x = self.features(x)
         x = self.adaptive_pool(x)
@@ -166,9 +166,8 @@ class ComplexModel(nn.Module):
 model = ComplexModel()
 x = torch.randn(2, 3, 32, 32)
 y = torch.randn(2, 3, 32, 32)
-z = torch.randn(2, 3, 32, 32)
 
-example_input = (x, y, z)
+example_input = (x, y)
 
 
 code_contents = """
@@ -319,7 +318,7 @@ class ComplexModel(nn.Module):
             nn.Parameter(torch.randn(1))
         ])
     
-    def forward(self, x, y, z):
+    def forward(self, x, y):
         # Input shape: [batch_size, 3, height, width]
         x = self.features(x)
         x = self.adaptive_pool(x)
@@ -341,9 +340,8 @@ class ComplexModel(nn.Module):
 model = ComplexModel()
 x = torch.randn(2, 3, 32, 32)
 y = torch.randn(2, 3, 32, 32)
-z = torch.randn(2, 3, 32, 32)
 
-example_input = (x, y, z)
+example_input = (x, y)
 
 trace_model(model, example_input)
 
