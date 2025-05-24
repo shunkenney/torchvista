@@ -10,7 +10,7 @@
             }
 
             .container {
-            display: flex;
+                display: flex;
                 flex-direction: column;
                 height: 100vh;
             }
@@ -313,6 +313,31 @@
             .node.constant .node-label {
                 font-size: 0.7rem;
             }
+
+            .top-bar {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                min-height: 25px;
+            }
+
+            .repo-title {
+                font-size: 24px;
+                font-weight: bold;
+                margin: 0;
+                font-family: 'Arial', sans-serif;
+            }
+
+            /* GitHub button iframe styling */
+            .github-star-button {
+                border-radius: 6px;
+                overflow: hidden;
+            }
+
 
         </style>
     </head>
@@ -1341,6 +1366,12 @@
         </script>
 
         <div class="container">
+            <div class="top-bar">
+                <h1 class="repo-title">TorchVista</h1>
+                <!-- GitHub's official star button -->
+                <iframe src="https://ghbtns.com/github-btn.html?user=sachinhosmani&repo=torchvista&type=star&count=true&size=large" 
+                        frameborder="0" scrolling="0" width="170" height="30" title="GitHub Star Button"></iframe>
+            </div>
             <div class="left-column">
 
 <div class="code-box" id="codeBox">

@@ -10,7 +10,7 @@
             }
 
             .container {
-            display: flex;
+                display: flex;
                 flex-direction: column;
                 height: 100vh;
             }
@@ -313,6 +313,31 @@
             .node.constant .node-label {
                 font-size: 0.7rem;
             }
+
+            .top-bar {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                min-height: 25px;
+            }
+
+            .repo-title {
+                font-size: 24px;
+                font-weight: bold;
+                margin: 0;
+                font-family: 'Arial', sans-serif;
+            }
+
+            /* GitHub button iframe styling */
+            .github-star-button {
+                border-radius: 6px;
+                overflow: hidden;
+            }
+
 
         </style>
     </head>
@@ -632,7 +657,7 @@
     }
 
     function reloadGraph() {
-        d3.select("#graph_f5d3b62e-be15-4d85-aa20-474025f87609").html("");
+        d3.select("#graph_53e6a855-fa85-4402-909c-abbb3418b6d0").html("");
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
         graphData = vizInstance.renderJSON(dotSource)
@@ -693,7 +718,7 @@
     // Add this function to render the raw Graphviz visualization
     function renderGraphvizImage(dotSource) {
         // Create a container for the Graphviz image
-        const graphvizContainer = d3.select("#graph-container_f5d3b62e-be15-4d85-aa20-474025f87609")
+        const graphvizContainer = d3.select("#graph-container_53e6a855-fa85-4402-909c-abbb3418b6d0")
             .append("div")
             .attr("id", "graphviz-image-container")
             .style("margin-top", "20px")
@@ -718,7 +743,7 @@
     }
 
     function createGraph(graphvizData) {
-        const svg = d3.select("#graph_f5d3b62e-be15-4d85-aa20-474025f87609")
+        const svg = d3.select("#graph_53e6a855-fa85-4402-909c-abbb3418b6d0")
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -736,7 +761,7 @@
 
         // Define arrowhead marker
         svg.append("defs").append("marker")
-        .attr("id", "arrowhead_f5d3b62e-be15-4d85-aa20-474025f87609")
+        .attr("id", "arrowhead_53e6a855-fa85-4402-909c-abbb3418b6d0")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 8)
         .attr("refY", 0)
@@ -871,7 +896,7 @@
             }
             return "";
         })
-        .attr("marker-end", "url(#arrowhead_f5d3b62e-be15-4d85-aa20-474025f87609)");
+        .attr("marker-end", "url(#arrowhead_53e6a855-fa85-4402-909c-abbb3418b6d0)");
         
         // Add dimension labels on edges
         edges.each(function(edge) {
@@ -1138,18 +1163,18 @@
         function showPopup(event, [nodeName]) {
             event.stopPropagation();
             
-            const popup = d3.select("#popup_f5d3b62e-be15-4d85-aa20-474025f87609");
+            const popup = d3.select("#popup_53e6a855-fa85-4402-909c-abbb3418b6d0");
             const clickedElement = d3.select(this).select("rect").node();
-            const moduleTemplate = d3.select("#module-template_f5d3b62e-be15-4d85-aa20-474025f87609");
-            const tensorOpTemplate = d3.select("#tensor-op-template_f5d3b62e-be15-4d85-aa20-474025f87609");
-            const noInfoMessage = d3.select("#no-info_f5d3b62e-be15-4d85-aa20-474025f87609");
+            const moduleTemplate = d3.select("#module-template_53e6a855-fa85-4402-909c-abbb3418b6d0");
+            const tensorOpTemplate = d3.select("#tensor-op-template_53e6a855-fa85-4402-909c-abbb3418b6d0");
+            const noInfoMessage = d3.select("#no-info_53e6a855-fa85-4402-909c-abbb3418b6d0");
             
             const nodeData = adj_list[nodeName];
             
-            d3.select("#popup-title_f5d3b62e-be15-4d85-aa20-474025f87609").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
+            d3.select("#popup-title_53e6a855-fa85-4402-909c-abbb3418b6d0").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
             
-            // d3.select("#input-dims_f5d3b62e-be15-4d85-aa20-474025f87609").text(nodeData.input_dims);
-            // d3.select("#output-dims_f5d3b62e-be15-4d85-aa20-474025f87609").text(nodeData.output_dims);
+            // d3.select("#input-dims_53e6a855-fa85-4402-909c-abbb3418b6d0").text(nodeData.input_dims);
+            // d3.select("#output-dims_53e6a855-fa85-4402-909c-abbb3418b6d0").text(nodeData.output_dims);
             
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
@@ -1159,21 +1184,21 @@
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#module-type_f5d3b62e-be15-4d85-aa20-474025f87609").text(info.type || 'N/A');
-                d3.select("#module-attributes_f5d3b62e-be15-4d85-aa20-474025f87609").text(JSON.stringify(info.attributes, null, 2));
-                d3.select("#module-parameters_f5d3b62e-be15-4d85-aa20-474025f87609").text(JSON.stringify(info.parameters, null, 2));
-                d3.select("#module-extra-repr_f5d3b62e-be15-4d85-aa20-474025f87609").text(info.extra_repr || 'N/A');
+                d3.select("#module-type_53e6a855-fa85-4402-909c-abbb3418b6d0").text(info.type || 'N/A');
+                d3.select("#module-attributes_53e6a855-fa85-4402-909c-abbb3418b6d0").text(JSON.stringify(info.attributes, null, 2));
+                d3.select("#module-parameters_53e6a855-fa85-4402-909c-abbb3418b6d0").text(JSON.stringify(info.parameters, null, 2));
+                d3.select("#module-extra-repr_53e6a855-fa85-4402-909c-abbb3418b6d0").text(info.extra_repr || 'N/A');
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#tensor-parameters_f5d3b62e-be15-4d85-aa20-474025f87609").text(JSON.stringify(info, null, 2));
+                d3.select("#tensor-parameters_53e6a855-fa85-4402-909c-abbb3418b6d0").text(JSON.stringify(info, null, 2));
             } else {
                 noInfoMessage.style("display", "block").classed("content-shown", true);
             }
             
             const boundingBox = clickedElement.getBoundingClientRect();
-            const containerRect = d3.select("#graph-container_f5d3b62e-be15-4d85-aa20-474025f87609").node().getBoundingClientRect();
+            const containerRect = d3.select("#graph-container_53e6a855-fa85-4402-909c-abbb3418b6d0").node().getBoundingClientRect();
             
             const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
             const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
@@ -1181,11 +1206,11 @@
             popup.style("left", `${x}px`)
             .style("top", `${y}px`)
             .style("display", "flex");
-            d3.select("#popup-content_f5d3b62e-be15-4d85-aa20-474025f87609").node().scrollTop = 0;
+            d3.select("#popup-content_53e6a855-fa85-4402-909c-abbb3418b6d0").node().scrollTop = 0;
         }
         
         function closePopup() {
-            d3.select("#popup_f5d3b62e-be15-4d85-aa20-474025f87609").style("display", "none");
+            d3.select("#popup_53e6a855-fa85-4402-909c-abbb3418b6d0").style("display", "none");
         }
         
         d3.select(".popup-close").on("click", closePopup);
@@ -1341,6 +1366,12 @@
         </script>
 
         <div class="container">
+            <div class="top-bar">
+                <h1 class="repo-title">TorchVista</h1>
+                <!-- GitHub's official star button -->
+                <iframe src="https://ghbtns.com/github-btn.html?user=sachinhosmani&repo=torchvista&type=star&count=true&size=large" 
+                        frameborder="0" scrolling="0" width="170" height="30" title="GitHub Star Button"></iframe>
+            </div>
             <div class="left-column">
 
 <div class="code-box" id="codeBox">
@@ -1398,33 +1429,33 @@ trace_model(model, example_input)
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container_f5d3b62e-be15-4d85-aa20-474025f87609" style="height: 97%; overflow: auto; position: relative;">
-                    <div id="graph_f5d3b62e-be15-4d85-aa20-474025f87609" style="height: 100%"></div>
-                    <div id="popup_f5d3b62e-be15-4d85-aa20-474025f87609" class="popup" style="display: none;">
+                <div id="graph-container_53e6a855-fa85-4402-909c-abbb3418b6d0" style="height: 97%; overflow: auto; position: relative;">
+                    <div id="graph_53e6a855-fa85-4402-909c-abbb3418b6d0" style="height: 100%"></div>
+                    <div id="popup_53e6a855-fa85-4402-909c-abbb3418b6d0" class="popup" style="display: none;">
                         <div class="popup-header">
-                            <h3 id="popup-title_f5d3b62e-be15-4d85-aa20-474025f87609"></h3>
+                            <h3 id="popup-title_53e6a855-fa85-4402-909c-abbb3418b6d0"></h3>
                             <span class="popup-close">✕</span>
                         </div>
-                        <div id="popup-content_f5d3b62e-be15-4d85-aa20-474025f87609" class="popup-content">
-                            <div id="common-info_f5d3b62e-be15-4d85-aa20-474025f87609">
+                        <div id="popup-content_53e6a855-fa85-4402-909c-abbb3418b6d0" class="popup-content">
+                            <div id="common-info_53e6a855-fa85-4402-909c-abbb3418b6d0">
                             </div>
-                            <div id="module-template_f5d3b62e-be15-4d85-aa20-474025f87609" style="display:none;">
-                                <p><strong>Type:</strong> <span id="module-type_f5d3b62e-be15-4d85-aa20-474025f87609"></span></p>
+                            <div id="module-template_53e6a855-fa85-4402-909c-abbb3418b6d0" style="display:none;">
+                                <p><strong>Type:</strong> <span id="module-type_53e6a855-fa85-4402-909c-abbb3418b6d0"></span></p>
                                 <p><strong>Attributes:</strong></p>
-                                <pre id="module-attributes_f5d3b62e-be15-4d85-aa20-474025f87609"></pre>
+                                <pre id="module-attributes_53e6a855-fa85-4402-909c-abbb3418b6d0"></pre>
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="module-parameters_f5d3b62e-be15-4d85-aa20-474025f87609"></pre>
+                                <pre id="module-parameters_53e6a855-fa85-4402-909c-abbb3418b6d0"></pre>
                                 <p><strong>Extra Repr:</strong></p>
-                                <pre id="module-extra-repr_f5d3b62e-be15-4d85-aa20-474025f87609"></pre>
+                                <pre id="module-extra-repr_53e6a855-fa85-4402-909c-abbb3418b6d0"></pre>
                             </div>
-                            <div id="tensor-op-template_f5d3b62e-be15-4d85-aa20-474025f87609" style="display:none;">
+                            <div id="tensor-op-template_53e6a855-fa85-4402-909c-abbb3418b6d0" style="display:none;">
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="tensor-parameters_f5d3b62e-be15-4d85-aa20-474025f87609"></pre>
+                                <pre id="tensor-parameters_53e6a855-fa85-4402-909c-abbb3418b6d0"></pre>
                             </div>
-                            <p id="no-info_f5d3b62e-be15-4d85-aa20-474025f87609" style="display:none;">No further information available for this node.</p>
+                            <p id="no-info_53e6a855-fa85-4402-909c-abbb3418b6d0" style="display:none;">No further information available for this node.</p>
                         </div>
                     </div>
-                    <div id="popup-content_f5d3b62e-be15-4d85-aa20-474025f87609"></div>
+                    <div id="popup-content_53e6a855-fa85-4402-909c-abbb3418b6d0"></div>
                 </div>
             </div>
         </div>

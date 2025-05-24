@@ -1,67 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Demos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TorchVista Demos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .repo-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .title {
+            font-size: 32px;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .heading {
+            font-size: 32px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .demos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .demo-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .demo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .demo-item a {
+            color: #495057;
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+        }
+
+        .demo-item a:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .demos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <ul>
-        <li>
-            <a href="LinearModel.html">Simple linear model</a>
-        </li>
-        <li>
-            <a href="ArtificiallyMadeComplexModel.html">Artificially made complex model</a>
-        </li>
-        <li>
-            <a href="UnusedNodes.html">Model nodes that don't connect to the output</a>
-        </li>
-        <li>
-            <a href="RepeatedOutputTensors.html">Same output tensor repeated and returned</a>
-        </li>
-        <li>
-            <a href="ComplexInputOutput.html">Complex input and output</a>
-        </li>
-        <li>
-            <a href="CNNWithBranching.html">CNN with Branching</a>
-        </li>
-        <li>
-            <a href="MiniUnetPP.html">Unet PP</a>
-        </li>
-        <li>
-            <a href="MLPSkipConnections.html">MLP with Skip Connections</a>
-        </li>
-        <li>
-            <a href="SimpleResnet.html">Simple Resnet</a>
-        </li>
-        <li>
-            <a href="SelfAttentionClassifier.html">Self Attention Classifier</a>
-        </li>
-        <li>
-            <a href="TransformerPositional.html">Positional Transformer</a>
-        </li>
-        <li>
-            <a href="DeepCNN.html">Deep CNN</a>
-        </li>
-        <li>
-            <a href="UNetBottleneckAttention.html">Tensor size mismatch error</a>
-        </li>
-        <li>
-            <a href="MultiPathWithError.html">Index out of bounds error</a>
-        </li>
-        <li>
-            <a href="MobileVitCollapsed.html">MobileVit (Fully collapsed)</a>
-        </li>
-        <li>
-            <a href="MobileVitMaxDepth1.html">MobileVit (Max Depth = 1)</a>
-        </li>
-        <li>
-            <a href="MobileVitMaxDepth2.html">MobileVit (Max Depth = 2)</a>
-        </li>
-        <li>
-            <a href="MobileVitMaxDepth3.html">MobileVit (Max Depth = 3)</a>
-        </li>
-        <li>
-            <a href="XLNetBaseCased.html">XLNetBaseCased (Large model)</a>
-        </li>
-    </ul>
+    <div class="top-bar">
+        <h1 class="repo-title">TorchVista</h1>
+        <iframe src="https://ghbtns.com/github-btn.html?user=sachinhosmani&repo=torchvista&type=star&count=true&size=large" 
+                frameborder="0" scrolling="0" width="170" height="30" title="GitHub Star Button"></iframe>
+    </div>
+
+    <div class="container">
+        <h1 class="heading">Demos</h1>
+        
+        <div class="demos-grid">
+            <div class="demo-item">
+                <a href="LinearModel.html">Simple linear model</a>
+            </div>
+            <div class="demo-item">
+                <a href="ArtificiallyMadeComplexModel.html">Artificially made complex model</a>
+            </div>
+            <div class="demo-item">
+                <a href="UnusedNodes.html">Model nodes that don't connect to the output</a>
+            </div>
+            <div class="demo-item">
+                <a href="RepeatedOutputTensors.html">Same output tensor repeated and returned</a>
+            </div>
+            <div class="demo-item">
+                <a href="ComplexInputOutput.html">Complex input and output</a>
+            </div>
+            <div class="demo-item">
+                <a href="CNNWithBranching.html">CNN with Branching</a>
+            </div>
+            <div class="demo-item">
+                <a href="MiniUnetPP.html">Unet PP</a>
+            </div>
+            <div class="demo-item">
+                <a href="MLPSkipConnections.html">MLP with Skip Connections</a>
+            </div>
+            <div class="demo-item">
+                <a href="SimpleResnet.html">Simple Resnet</a>
+            </div>
+            <div class="demo-item">
+                <a href="SelfAttentionClassifier.html">Self Attention Classifier</a>
+            </div>
+            <div class="demo-item">
+                <a href="TransformerPositional.html">Positional Transformer</a>
+            </div>
+            <div class="demo-item">
+                <a href="DeepCNN.html">Deep CNN</a>
+            </div>
+            <div class="demo-item">
+                <a href="UNetBottleneckAttention.html">Tensor size mismatch error</a>
+            </div>
+            <div class="demo-item">
+                <a href="MultiPathWithError.html">Index out of bounds error</a>
+            </div>
+            <div class="demo-item">
+                <a href="MobileVitCollapsed.html">MobileVit (Fully collapsed)</a>
+            </div>
+            <div class="demo-item">
+                <a href="MobileVitMaxDepth1.html">MobileVit (Max Depth = 1)</a>
+            </div>
+            <div class="demo-item">
+                <a href="MobileVitMaxDepth2.html">MobileVit (Max Depth = 2)</a>
+            </div>
+            <div class="demo-item">
+                <a href="MobileVitMaxDepth3.html">MobileVit (Max Depth = 3)</a>
+            </div>
+            <div class="demo-item">
+                <a href="XLNetBaseCased.html">XLNetBaseCased (Large model)</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
