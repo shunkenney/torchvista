@@ -5,6 +5,8 @@ import timm
 model = timm.create_model('mobilevit_s', pretrained=True)
 example_input = torch.randn(1, 3, 256, 256)
 
+max_module_expansion_depth = 1
+
 code_contents = """
 import torch
 from torchvision.models import squeezenet1_1
@@ -15,5 +17,5 @@ import timm
 model = timm.create_model('mobilevit_s', pretrained=True)
 example_input = torch.randn(1, 3, 256, 256)
 
-trace_model(model, example_input)
+trace_model(model, example_input, max_module_expansion_depth=1)
 """

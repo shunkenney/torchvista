@@ -339,6 +339,7 @@
     const parent_module_to_depth = ${parent_module_to_depth_json};
     const graph_node_name_to_without_suffix = ${graph_node_name_to_without_suffix};
     const ancestor_map = ${ancestor_map};
+    const max_module_expansion_depth = ${max_module_expansion_depth};
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
@@ -510,13 +511,15 @@
             return descendants;
         }
 
+        let visibleCollapsedContainers = [];
         // Process containers
         function processContainer(containerName, level = 0) {
             const indent = ' '.repeat(level * 2);
 
             // Check if this container is collapsed
             if (collapsedContainers.has(containerName)) {
-              // For collapsed containers, create a normal node instead of a subgraph
+                // For collapsed containers, create a normal node instead of a subgraph
+                visibleCollapsedContainers.push(containerName);
                 dotSource += `${indent}"${containerName}";\n`;
                 return;
             }
@@ -579,8 +582,8 @@
                 let dims = edge.dims;
                 let skipEdge = false;
 
-                // Check if source node is inside a collapsed container
-                for (const collapsedContainer of collapsedContainers) {
+                // Check if source node is inside a visible collapsed container
+                for (const collapsedContainer of visibleCollapsedContainers) {
                     const descendants = getAllDescendants(collapsedContainer);
 
                     if (descendants.includes(node)) {
@@ -642,9 +645,43 @@
 
         // renderGraphvizImage(dotSource);
     }
-                    
-    waitForLibs(function() {                                
+                
+    function initializeCollapsedContainersFromGraph() {
+        const containerDepths = new Map();
+        
+        function getContainerDepth(container) {
+            if (containerDepths.has(container)) {
+                return containerDepths.get(container);
+            }
+            
+            let depth = 0;
+            for (const [child, parent] of Object.entries(ancestor_map)) {
+                if (child === container && parent) {
+                    depth = getContainerDepth(parent) + 1;
+                    break;
+                }
+            }
+            
+            containerDepths.set(container, depth);
+            return depth;
+        }
+        
+        for (const container of containerNodes) {
+            const depth = getContainerDepth(container);
+            if (depth >= max_module_expansion_depth) {
+                collapsedContainers.add(container);
+            }
+        }
+    }
+
+    waitForLibs(function() {
         reloadGraph();
+        
+        initializeCollapsedContainersFromGraph();
+        
+        if (collapsedContainers.size > 0) {
+            reloadGraph();
+        }
     });
 
     function findErrorNode(nodes) {

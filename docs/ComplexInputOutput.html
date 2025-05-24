@@ -339,6 +339,7 @@
     const parent_module_to_depth = {};
     const graph_node_name_to_without_suffix = {"input_0": "input_0", "input_1": "input_1", "__mul___1": "__mul__", "__getitem___1": "__getitem__", "__truediv___1": "__truediv__", "relu_1": "relu", "__sub___1": "__sub__", "Linear_1": "Linear", "output": "output"};
     const ancestor_map = {};
+    const max_module_expansion_depth = 3;
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
@@ -510,13 +511,15 @@
             return descendants;
         }
 
+        let visibleCollapsedContainers = [];
         // Process containers
         function processContainer(containerName, level = 0) {
             const indent = ' '.repeat(level * 2);
 
             // Check if this container is collapsed
             if (collapsedContainers.has(containerName)) {
-              // For collapsed containers, create a normal node instead of a subgraph
+                // For collapsed containers, create a normal node instead of a subgraph
+                visibleCollapsedContainers.push(containerName);
                 dotSource += `${indent}"${containerName}";\n`;
                 return;
             }
@@ -579,8 +582,8 @@
                 let dims = edge.dims;
                 let skipEdge = false;
 
-                // Check if source node is inside a collapsed container
-                for (const collapsedContainer of collapsedContainers) {
+                // Check if source node is inside a visible collapsed container
+                for (const collapsedContainer of visibleCollapsedContainers) {
                     const descendants = getAllDescendants(collapsedContainer);
 
                     if (descendants.includes(node)) {
@@ -629,7 +632,7 @@
     }
 
     function reloadGraph() {
-        d3.select("#graph_595fc265-28d5-4e11-900e-304dbd52de28").html("");
+        d3.select("#graph_265f1315-e970-4378-981c-c6f0630fc1d6").html("");
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
         graphData = vizInstance.renderJSON(dotSource)
@@ -642,9 +645,43 @@
 
         // renderGraphvizImage(dotSource);
     }
-                    
-    waitForLibs(function() {                                
+                
+    function initializeCollapsedContainersFromGraph() {
+        const containerDepths = new Map();
+        
+        function getContainerDepth(container) {
+            if (containerDepths.has(container)) {
+                return containerDepths.get(container);
+            }
+            
+            let depth = 0;
+            for (const [child, parent] of Object.entries(ancestor_map)) {
+                if (child === container && parent) {
+                    depth = getContainerDepth(parent) + 1;
+                    break;
+                }
+            }
+            
+            containerDepths.set(container, depth);
+            return depth;
+        }
+        
+        for (const container of containerNodes) {
+            const depth = getContainerDepth(container);
+            if (depth >= max_module_expansion_depth) {
+                collapsedContainers.add(container);
+            }
+        }
+    }
+
+    waitForLibs(function() {
         reloadGraph();
+        
+        initializeCollapsedContainersFromGraph();
+        
+        if (collapsedContainers.size > 0) {
+            reloadGraph();
+        }
     });
 
     function findErrorNode(nodes) {
@@ -656,7 +693,7 @@
     // Add this function to render the raw Graphviz visualization
     function renderGraphvizImage(dotSource) {
         // Create a container for the Graphviz image
-        const graphvizContainer = d3.select("#graph-container_595fc265-28d5-4e11-900e-304dbd52de28")
+        const graphvizContainer = d3.select("#graph-container_265f1315-e970-4378-981c-c6f0630fc1d6")
             .append("div")
             .attr("id", "graphviz-image-container")
             .style("margin-top", "20px")
@@ -681,7 +718,7 @@
     }
 
     function createGraph(graphvizData) {
-        const svg = d3.select("#graph_595fc265-28d5-4e11-900e-304dbd52de28")
+        const svg = d3.select("#graph_265f1315-e970-4378-981c-c6f0630fc1d6")
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -699,7 +736,7 @@
 
         // Define arrowhead marker
         svg.append("defs").append("marker")
-        .attr("id", "arrowhead_595fc265-28d5-4e11-900e-304dbd52de28")
+        .attr("id", "arrowhead_265f1315-e970-4378-981c-c6f0630fc1d6")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 8)
         .attr("refY", 0)
@@ -834,7 +871,7 @@
             }
             return "";
         })
-        .attr("marker-end", "url(#arrowhead_595fc265-28d5-4e11-900e-304dbd52de28)");
+        .attr("marker-end", "url(#arrowhead_265f1315-e970-4378-981c-c6f0630fc1d6)");
         
         // Add dimension labels on edges
         edges.each(function(edge) {
@@ -1101,18 +1138,18 @@
         function showPopup(event, [nodeName]) {
             event.stopPropagation();
             
-            const popup = d3.select("#popup_595fc265-28d5-4e11-900e-304dbd52de28");
+            const popup = d3.select("#popup_265f1315-e970-4378-981c-c6f0630fc1d6");
             const clickedElement = d3.select(this).select("rect").node();
-            const moduleTemplate = d3.select("#module-template_595fc265-28d5-4e11-900e-304dbd52de28");
-            const tensorOpTemplate = d3.select("#tensor-op-template_595fc265-28d5-4e11-900e-304dbd52de28");
-            const noInfoMessage = d3.select("#no-info_595fc265-28d5-4e11-900e-304dbd52de28");
+            const moduleTemplate = d3.select("#module-template_265f1315-e970-4378-981c-c6f0630fc1d6");
+            const tensorOpTemplate = d3.select("#tensor-op-template_265f1315-e970-4378-981c-c6f0630fc1d6");
+            const noInfoMessage = d3.select("#no-info_265f1315-e970-4378-981c-c6f0630fc1d6");
             
             const nodeData = adj_list[nodeName];
             
-            d3.select("#popup-title_595fc265-28d5-4e11-900e-304dbd52de28").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
+            d3.select("#popup-title_265f1315-e970-4378-981c-c6f0630fc1d6").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
             
-            // d3.select("#input-dims_595fc265-28d5-4e11-900e-304dbd52de28").text(nodeData.input_dims);
-            // d3.select("#output-dims_595fc265-28d5-4e11-900e-304dbd52de28").text(nodeData.output_dims);
+            // d3.select("#input-dims_265f1315-e970-4378-981c-c6f0630fc1d6").text(nodeData.input_dims);
+            // d3.select("#output-dims_265f1315-e970-4378-981c-c6f0630fc1d6").text(nodeData.output_dims);
             
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
@@ -1122,21 +1159,21 @@
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#module-type_595fc265-28d5-4e11-900e-304dbd52de28").text(info.type || 'N/A');
-                d3.select("#module-attributes_595fc265-28d5-4e11-900e-304dbd52de28").text(JSON.stringify(info.attributes, null, 2));
-                d3.select("#module-parameters_595fc265-28d5-4e11-900e-304dbd52de28").text(JSON.stringify(info.parameters, null, 2));
-                d3.select("#module-extra-repr_595fc265-28d5-4e11-900e-304dbd52de28").text(info.extra_repr || 'N/A');
+                d3.select("#module-type_265f1315-e970-4378-981c-c6f0630fc1d6").text(info.type || 'N/A');
+                d3.select("#module-attributes_265f1315-e970-4378-981c-c6f0630fc1d6").text(JSON.stringify(info.attributes, null, 2));
+                d3.select("#module-parameters_265f1315-e970-4378-981c-c6f0630fc1d6").text(JSON.stringify(info.parameters, null, 2));
+                d3.select("#module-extra-repr_265f1315-e970-4378-981c-c6f0630fc1d6").text(info.extra_repr || 'N/A');
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#tensor-parameters_595fc265-28d5-4e11-900e-304dbd52de28").text(JSON.stringify(info, null, 2));
+                d3.select("#tensor-parameters_265f1315-e970-4378-981c-c6f0630fc1d6").text(JSON.stringify(info, null, 2));
             } else {
                 noInfoMessage.style("display", "block").classed("content-shown", true);
             }
             
             const boundingBox = clickedElement.getBoundingClientRect();
-            const containerRect = d3.select("#graph-container_595fc265-28d5-4e11-900e-304dbd52de28").node().getBoundingClientRect();
+            const containerRect = d3.select("#graph-container_265f1315-e970-4378-981c-c6f0630fc1d6").node().getBoundingClientRect();
             
             const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
             const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
@@ -1144,11 +1181,11 @@
             popup.style("left", `${x}px`)
             .style("top", `${y}px`)
             .style("display", "flex");
-            d3.select("#popup-content_595fc265-28d5-4e11-900e-304dbd52de28").node().scrollTop = 0;
+            d3.select("#popup-content_265f1315-e970-4378-981c-c6f0630fc1d6").node().scrollTop = 0;
         }
         
         function closePopup() {
-            d3.select("#popup_595fc265-28d5-4e11-900e-304dbd52de28").style("display", "none");
+            d3.select("#popup_265f1315-e970-4378-981c-c6f0630fc1d6").style("display", "none");
         }
         
         d3.select(".popup-close").on("click", closePopup);
@@ -1353,33 +1390,33 @@ trace_model(model, example_input)
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container_595fc265-28d5-4e11-900e-304dbd52de28" style="height: 97%; overflow: auto; position: relative;">
-                    <div id="graph_595fc265-28d5-4e11-900e-304dbd52de28" style="height: 100%"></div>
-                    <div id="popup_595fc265-28d5-4e11-900e-304dbd52de28" class="popup" style="display: none;">
+                <div id="graph-container_265f1315-e970-4378-981c-c6f0630fc1d6" style="height: 97%; overflow: auto; position: relative;">
+                    <div id="graph_265f1315-e970-4378-981c-c6f0630fc1d6" style="height: 100%"></div>
+                    <div id="popup_265f1315-e970-4378-981c-c6f0630fc1d6" class="popup" style="display: none;">
                         <div class="popup-header">
-                            <h3 id="popup-title_595fc265-28d5-4e11-900e-304dbd52de28"></h3>
+                            <h3 id="popup-title_265f1315-e970-4378-981c-c6f0630fc1d6"></h3>
                             <span class="popup-close">✕</span>
                         </div>
-                        <div id="popup-content_595fc265-28d5-4e11-900e-304dbd52de28" class="popup-content">
-                            <div id="common-info_595fc265-28d5-4e11-900e-304dbd52de28">
+                        <div id="popup-content_265f1315-e970-4378-981c-c6f0630fc1d6" class="popup-content">
+                            <div id="common-info_265f1315-e970-4378-981c-c6f0630fc1d6">
                             </div>
-                            <div id="module-template_595fc265-28d5-4e11-900e-304dbd52de28" style="display:none;">
-                                <p><strong>Type:</strong> <span id="module-type_595fc265-28d5-4e11-900e-304dbd52de28"></span></p>
+                            <div id="module-template_265f1315-e970-4378-981c-c6f0630fc1d6" style="display:none;">
+                                <p><strong>Type:</strong> <span id="module-type_265f1315-e970-4378-981c-c6f0630fc1d6"></span></p>
                                 <p><strong>Attributes:</strong></p>
-                                <pre id="module-attributes_595fc265-28d5-4e11-900e-304dbd52de28"></pre>
+                                <pre id="module-attributes_265f1315-e970-4378-981c-c6f0630fc1d6"></pre>
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="module-parameters_595fc265-28d5-4e11-900e-304dbd52de28"></pre>
+                                <pre id="module-parameters_265f1315-e970-4378-981c-c6f0630fc1d6"></pre>
                                 <p><strong>Extra Repr:</strong></p>
-                                <pre id="module-extra-repr_595fc265-28d5-4e11-900e-304dbd52de28"></pre>
+                                <pre id="module-extra-repr_265f1315-e970-4378-981c-c6f0630fc1d6"></pre>
                             </div>
-                            <div id="tensor-op-template_595fc265-28d5-4e11-900e-304dbd52de28" style="display:none;">
+                            <div id="tensor-op-template_265f1315-e970-4378-981c-c6f0630fc1d6" style="display:none;">
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="tensor-parameters_595fc265-28d5-4e11-900e-304dbd52de28"></pre>
+                                <pre id="tensor-parameters_265f1315-e970-4378-981c-c6f0630fc1d6"></pre>
                             </div>
-                            <p id="no-info_595fc265-28d5-4e11-900e-304dbd52de28" style="display:none;">No further information available for this node.</p>
+                            <p id="no-info_265f1315-e970-4378-981c-c6f0630fc1d6" style="display:none;">No further information available for this node.</p>
                         </div>
                     </div>
-                    <div id="popup-content_595fc265-28d5-4e11-900e-304dbd52de28"></div>
+                    <div id="popup-content_265f1315-e970-4378-981c-c6f0630fc1d6"></div>
                 </div>
             </div>
         </div>

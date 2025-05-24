@@ -628,7 +628,7 @@ def build_immediate_ancestor_map(ancestor_dict, adj_list):
     return immediate_ancestor_map
     
 
-def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map):
+def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map, max_module_expansion_depth):
     unique_id = str(uuid.uuid4())
     template_str = resources.read_text('torchvista.templates', 'graph.html')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
@@ -649,11 +649,13 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, p
         'unique_id': unique_id,
         'd3_source': d3_source,
         'viz_source': viz_source,
+        'max_module_expansion_depth': max_module_expansion_depth,
     })
     display(HTML(output))
 
 
-def _get_demo_html_str(model, inputs, code_contents):
+def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=3):
+    max_module_expansion_depth = max(max_module_expansion_depth, 0)
     adj_list = {}
     module_info = {}
     func_info_map = {}
@@ -691,12 +693,13 @@ def _get_demo_html_str(model, inputs, code_contents):
         'd3_source': d3_source,
         'viz_source': viz_source,
         'code_contents': code_contents,
-        'error_contents': str(exception) if exception else ""
+        'error_contents': str(exception) if exception else "",
+        'max_module_expansion_depth': max_module_expansion_depth,
     })
     return output, exception
 
 
-def trace_model(model, inputs):
+def trace_model(model, inputs, max_module_expansion_depth=3):
     adj_list = {}
     module_info = {}
     func_info_map = {}
@@ -705,6 +708,7 @@ def trace_model(model, inputs):
     parent_module_to_depth = {}
     graph_node_name_to_without_suffix = {}
     node_to_ancestors = defaultdict(list)
+    max_module_expansion_depth = max(max_module_expansion_depth, 0)
 
     exception = None
 
@@ -713,7 +717,7 @@ def trace_model(model, inputs):
     except Exception as e:
         exception = e
 
-    plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list))
+    plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), max_module_expansion_depth)
 
 
     if exception is not None:

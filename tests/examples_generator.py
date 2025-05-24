@@ -11,9 +11,13 @@ def test_all_models():
         model = items["model"]
         example_input = items["example_input"]
         code_contents = items["code_contents"]
+        kwargs = {}
+        if items["max_module_expansion_depth"] >= 0:
+            kwargs["max_module_expansion_depth"] = items["max_module_expansion_depth"]
         # error_contents = items["error_contents"]
         print(f"Testing {name}...")
-        graph_html, exception = tracer._get_demo_html_str(model, example_input, code_contents)
+        
+        graph_html, exception = tracer._get_demo_html_str(model, example_input, code_contents, **kwargs)
         print('exception:', exception)
         output_path = DOCS_DIR / f"{name}.html"
         output_path.write_text(graph_html)
