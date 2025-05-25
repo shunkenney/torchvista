@@ -161,7 +161,7 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
 
         return info
 
-    def format_arg(arg, max_length=50):
+    def format_arg(arg, max_length=200):
         if isinstance(arg, torch.Tensor):
             return f"tensor({','.join(str(d) for d in arg.shape)})"
         elif isinstance(arg, (list, tuple)) and all(isinstance(item, torch.Tensor) for item in arg):

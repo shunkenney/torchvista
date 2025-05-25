@@ -492,14 +492,7 @@
         dotSource += '  rankdir=BT;\n'; // Top to bottom layout
         dotSource += '  node [shape=box];\n';
 
-        // Clear and rebuild the containerNodes set
-        containerNodes.clear();
         adj_list_collapsed_nodes = {};
-        for (const value of Object.values(ancestor_map)) {
-            if (value !== null && value !== undefined) {
-                containerNodes.add(value);
-            }
-        }
 
         // Build container hierarchy
         const containerHierarchy = {};
@@ -656,8 +649,20 @@
         return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
     }
 
+    function initContainerNodes() {
+        // Clear and rebuild the containerNodes set
+        containerNodes.clear();
+        for (const value of Object.values(ancestor_map)) {
+            if (value !== null && value !== undefined) {
+                containerNodes.add(value);
+            }
+        }
+    }
     function reloadGraph() {
-        d3.select("#graph_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").html("");
+        d3.select("#graph_619413f4-9e50-4cdc-b6a4-11a166590dd6").html("");
+
+        initializeCollapsedContainersFromGraph();
+
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
         graphData = vizInstance.renderJSON(dotSource)
@@ -699,14 +704,9 @@
         }
     }
 
-    waitForLibs(function() {
+    waitForLibs(function() {        
+        initContainerNodes();
         reloadGraph();
-        
-        initializeCollapsedContainersFromGraph();
-        
-        if (collapsedContainers.size > 0) {
-            reloadGraph();
-        }
     });
 
     function findErrorNode(nodes) {
@@ -718,7 +718,7 @@
     // Add this function to render the raw Graphviz visualization
     function renderGraphvizImage(dotSource) {
         // Create a container for the Graphviz image
-        const graphvizContainer = d3.select("#graph-container_5bfec1fd-acea-4eea-9220-1bdf6393a5f9")
+        const graphvizContainer = d3.select("#graph-container_619413f4-9e50-4cdc-b6a4-11a166590dd6")
             .append("div")
             .attr("id", "graphviz-image-container")
             .style("margin-top", "20px")
@@ -743,7 +743,7 @@
     }
 
     function createGraph(graphvizData) {
-        const svg = d3.select("#graph_5bfec1fd-acea-4eea-9220-1bdf6393a5f9")
+        const svg = d3.select("#graph_619413f4-9e50-4cdc-b6a4-11a166590dd6")
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -761,7 +761,7 @@
 
         // Define arrowhead marker
         svg.append("defs").append("marker")
-        .attr("id", "arrowhead_5bfec1fd-acea-4eea-9220-1bdf6393a5f9")
+        .attr("id", "arrowhead_619413f4-9e50-4cdc-b6a4-11a166590dd6")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 8)
         .attr("refY", 0)
@@ -896,7 +896,7 @@
             }
             return "";
         })
-        .attr("marker-end", "url(#arrowhead_5bfec1fd-acea-4eea-9220-1bdf6393a5f9)");
+        .attr("marker-end", "url(#arrowhead_619413f4-9e50-4cdc-b6a4-11a166590dd6)");
         
         // Add dimension labels on edges
         edges.each(function(edge) {
@@ -1163,18 +1163,18 @@
         function showPopup(event, [nodeName]) {
             event.stopPropagation();
             
-            const popup = d3.select("#popup_5bfec1fd-acea-4eea-9220-1bdf6393a5f9");
+            const popup = d3.select("#popup_619413f4-9e50-4cdc-b6a4-11a166590dd6");
             const clickedElement = d3.select(this).select("rect").node();
-            const moduleTemplate = d3.select("#module-template_5bfec1fd-acea-4eea-9220-1bdf6393a5f9");
-            const tensorOpTemplate = d3.select("#tensor-op-template_5bfec1fd-acea-4eea-9220-1bdf6393a5f9");
-            const noInfoMessage = d3.select("#no-info_5bfec1fd-acea-4eea-9220-1bdf6393a5f9");
+            const moduleTemplate = d3.select("#module-template_619413f4-9e50-4cdc-b6a4-11a166590dd6");
+            const tensorOpTemplate = d3.select("#tensor-op-template_619413f4-9e50-4cdc-b6a4-11a166590dd6");
+            const noInfoMessage = d3.select("#no-info_619413f4-9e50-4cdc-b6a4-11a166590dd6");
             
             const nodeData = adj_list[nodeName];
             
-            d3.select("#popup-title_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
+            d3.select("#popup-title_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
             
-            // d3.select("#input-dims_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(nodeData.input_dims);
-            // d3.select("#output-dims_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(nodeData.output_dims);
+            // d3.select("#input-dims_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(nodeData.input_dims);
+            // d3.select("#output-dims_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(nodeData.output_dims);
             
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
@@ -1184,21 +1184,21 @@
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#module-type_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(info.type || 'N/A');
-                d3.select("#module-attributes_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(JSON.stringify(info.attributes, null, 2));
-                d3.select("#module-parameters_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(JSON.stringify(info.parameters, null, 2));
-                d3.select("#module-extra-repr_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(info.extra_repr || 'N/A');
+                d3.select("#module-type_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(info.type || 'N/A');
+                d3.select("#module-attributes_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(JSON.stringify(info.attributes, null, 2));
+                d3.select("#module-parameters_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(JSON.stringify(info.parameters, null, 2));
+                d3.select("#module-extra-repr_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(info.extra_repr || 'N/A');
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#tensor-parameters_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").text(JSON.stringify(info, null, 2));
+                d3.select("#tensor-parameters_619413f4-9e50-4cdc-b6a4-11a166590dd6").text(JSON.stringify(info, null, 2));
             } else {
                 noInfoMessage.style("display", "block").classed("content-shown", true);
             }
             
             const boundingBox = clickedElement.getBoundingClientRect();
-            const containerRect = d3.select("#graph-container_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").node().getBoundingClientRect();
+            const containerRect = d3.select("#graph-container_619413f4-9e50-4cdc-b6a4-11a166590dd6").node().getBoundingClientRect();
             
             const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
             const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
@@ -1206,11 +1206,11 @@
             popup.style("left", `${x}px`)
             .style("top", `${y}px`)
             .style("display", "flex");
-            d3.select("#popup-content_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").node().scrollTop = 0;
+            d3.select("#popup-content_619413f4-9e50-4cdc-b6a4-11a166590dd6").node().scrollTop = 0;
         }
         
         function closePopup() {
-            d3.select("#popup_5bfec1fd-acea-4eea-9220-1bdf6393a5f9").style("display", "none");
+            d3.select("#popup_619413f4-9e50-4cdc-b6a4-11a166590dd6").style("display", "none");
         }
         
         d3.select(".popup-close").on("click", closePopup);
@@ -1414,33 +1414,33 @@ trace_model(model, example_input)
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container_5bfec1fd-acea-4eea-9220-1bdf6393a5f9" style="height: 97%; overflow: auto; position: relative;">
-                    <div id="graph_5bfec1fd-acea-4eea-9220-1bdf6393a5f9" style="height: 100%"></div>
-                    <div id="popup_5bfec1fd-acea-4eea-9220-1bdf6393a5f9" class="popup" style="display: none;">
+                <div id="graph-container_619413f4-9e50-4cdc-b6a4-11a166590dd6" style="height: 97%; overflow: auto; position: relative;">
+                    <div id="graph_619413f4-9e50-4cdc-b6a4-11a166590dd6" style="height: 100%"></div>
+                    <div id="popup_619413f4-9e50-4cdc-b6a4-11a166590dd6" class="popup" style="display: none;">
                         <div class="popup-header">
-                            <h3 id="popup-title_5bfec1fd-acea-4eea-9220-1bdf6393a5f9"></h3>
+                            <h3 id="popup-title_619413f4-9e50-4cdc-b6a4-11a166590dd6"></h3>
                             <span class="popup-close">✕</span>
                         </div>
-                        <div id="popup-content_5bfec1fd-acea-4eea-9220-1bdf6393a5f9" class="popup-content">
-                            <div id="common-info_5bfec1fd-acea-4eea-9220-1bdf6393a5f9">
+                        <div id="popup-content_619413f4-9e50-4cdc-b6a4-11a166590dd6" class="popup-content">
+                            <div id="common-info_619413f4-9e50-4cdc-b6a4-11a166590dd6">
                             </div>
-                            <div id="module-template_5bfec1fd-acea-4eea-9220-1bdf6393a5f9" style="display:none;">
-                                <p><strong>Type:</strong> <span id="module-type_5bfec1fd-acea-4eea-9220-1bdf6393a5f9"></span></p>
+                            <div id="module-template_619413f4-9e50-4cdc-b6a4-11a166590dd6" style="display:none;">
+                                <p><strong>Type:</strong> <span id="module-type_619413f4-9e50-4cdc-b6a4-11a166590dd6"></span></p>
                                 <p><strong>Attributes:</strong></p>
-                                <pre id="module-attributes_5bfec1fd-acea-4eea-9220-1bdf6393a5f9"></pre>
+                                <pre id="module-attributes_619413f4-9e50-4cdc-b6a4-11a166590dd6"></pre>
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="module-parameters_5bfec1fd-acea-4eea-9220-1bdf6393a5f9"></pre>
+                                <pre id="module-parameters_619413f4-9e50-4cdc-b6a4-11a166590dd6"></pre>
                                 <p><strong>Extra Repr:</strong></p>
-                                <pre id="module-extra-repr_5bfec1fd-acea-4eea-9220-1bdf6393a5f9"></pre>
+                                <pre id="module-extra-repr_619413f4-9e50-4cdc-b6a4-11a166590dd6"></pre>
                             </div>
-                            <div id="tensor-op-template_5bfec1fd-acea-4eea-9220-1bdf6393a5f9" style="display:none;">
+                            <div id="tensor-op-template_619413f4-9e50-4cdc-b6a4-11a166590dd6" style="display:none;">
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="tensor-parameters_5bfec1fd-acea-4eea-9220-1bdf6393a5f9"></pre>
+                                <pre id="tensor-parameters_619413f4-9e50-4cdc-b6a4-11a166590dd6"></pre>
                             </div>
-                            <p id="no-info_5bfec1fd-acea-4eea-9220-1bdf6393a5f9" style="display:none;">No further information available for this node.</p>
+                            <p id="no-info_619413f4-9e50-4cdc-b6a4-11a166590dd6" style="display:none;">No further information available for this node.</p>
                         </div>
                     </div>
-                    <div id="popup-content_5bfec1fd-acea-4eea-9220-1bdf6393a5f9"></div>
+                    <div id="popup-content_619413f4-9e50-4cdc-b6a4-11a166590dd6"></div>
                 </div>
             </div>
         </div>

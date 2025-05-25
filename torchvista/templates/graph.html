@@ -173,14 +173,7 @@
         dotSource += '  rankdir=BT;\n'; // Top to bottom layout
         dotSource += '  node [shape=box];\n';
 
-        // Clear and rebuild the containerNodes set
-        containerNodes.clear();
         adj_list_collapsed_nodes = {};
-        for (const value of Object.values(ancestor_map)) {
-            if (value !== null && value !== undefined) {
-                containerNodes.add(value);
-            }
-        }
 
         // Build container hierarchy
         const containerHierarchy = {};
@@ -337,8 +330,20 @@
         return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
     }
 
+    function initContainerNodes() {
+        // Clear and rebuild the containerNodes set
+        containerNodes.clear();
+        for (const value of Object.values(ancestor_map)) {
+            if (value !== null && value !== undefined) {
+                containerNodes.add(value);
+            }
+        }
+    }
     function reloadGraph() {
         d3.select("#graph_${unique_id}").html("");
+
+        initializeCollapsedContainersFromGraph();
+
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
         graphData = vizInstance.renderJSON(dotSource)
@@ -380,14 +385,9 @@
         }
     }
 
-    waitForLibs(function() {
+    waitForLibs(function() {        
+        initContainerNodes();
         reloadGraph();
-        
-        initializeCollapsedContainersFromGraph();
-        
-        if (collapsedContainers.size > 0) {
-            reloadGraph();
-        }
     });
 
     function findErrorNode(nodes) {
