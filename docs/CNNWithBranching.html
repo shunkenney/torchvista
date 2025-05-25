@@ -368,6 +368,7 @@
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
+    let containerHierarchy = {};
     let vizInstance = null;
 
     const EXPAND_TARGET_COVERAGE = 0.8;
@@ -468,7 +469,7 @@
         return result;
     }
 
-    function identifyContainersWithFailedNodes(adj_list, ancestor_map) {
+    function identifyContainersWithFailedNodes() {
         const failedNodes = Object.keys(adj_list).filter(node => adj_list[node].failed);
       
         const containersWithFailedNodes = new Set();
@@ -486,16 +487,10 @@
         return containersWithFailedNodes;
     }
 
-
-    function generateDotSource(adj_list, ancestor_map) {
-        let dotSource = 'digraph G {\n';
-        dotSource += '  rankdir=BT;\n'; // Top to bottom layout
-        dotSource += '  node [shape=box];\n';
-
+    function processCollapsedGraph() {
         adj_list_collapsed_nodes = {};
-
         // Build container hierarchy
-        const containerHierarchy = {};
+        containerHierarchy = {};
         for (const [node, parent] of Object.entries(ancestor_map)) {
             if (parent && !containerHierarchy[parent]) {
                 containerHierarchy[parent] = [];
@@ -505,43 +500,134 @@
             }
         }
 
-        // Find top containers
-        const topContainers = new Set();
-        for (const container of containerNodes) {
-            // A top container is one that doesn't have an ancestor itself
-            if (!ancestor_map[container]) {
-                topContainers.add(container);
-            }
-        }
-
         // Helper function to get all descendants of a container
         function getAllDescendants(container) {
             let descendants = [];
             const children = containerHierarchy[container] || [];
-
             for (const child of children) {
                 descendants.push(child);
                 if (containerNodes.has(child)) {
                     descendants = descendants.concat(getAllDescendants(child));
                 }
             }
-
             return descendants;
         }
+        
+        // First, add all collapsed containers as nodes
+        for (const container of collapsedContainers) {
+            adj_list_collapsed_nodes[container] = {
+                node_type: "Module",
+                edges: []
+            };
+        }
+        
+        for (const [node, data] of Object.entries(adj_list)) {
+            let nodeIsInsideCollapsed = false;
+            
+            // Check if this node is inside a collapsed container
+            for (const container of collapsedContainers) {
+                const descendants = getAllDescendants(container);
+                if (descendants.includes(node)) {
+                    nodeIsInsideCollapsed = true;
+                    break;
+                }
+            }
+            
+            // If node is not inside a collapsed container, add it to the processed list
+            if (!nodeIsInsideCollapsed) {
+                adj_list_collapsed_nodes[node] = {
+                    node_type: data.node_type,
+                    edges: []
+                };
+            }
+        }
 
-        let visibleCollapsedContainers = [];
-        // Process containers
+        function findVisibleCollapsedContainers() {
+            const allDescendants = new Set();
+            const visibleContainers = new Set();
+
+            for (const container of collapsedContainers) {
+                const descendants = getAllDescendants(container, containerHierarchy);
+                for (const desc of descendants) {
+                    allDescendants.add(desc);
+                }
+            }
+
+            for (const container of collapsedContainers) {
+                if (!allDescendants.has(container)) {
+                    visibleContainers.add(container);
+                }
+            }
+
+            return visibleContainers;
+        }
+
+        
+
+        let visibleCollapsedContainers = findVisibleCollapsedContainers();
+        
+        // Process edges
+        for (const [node, data] of Object.entries(adj_list)) {
+            for (const edge of data.edges) {
+                let sourceNode = node;
+                let targetNode = edge.target;
+                let skipEdge = false;
+                
+                for (const collapsedContainer of visibleCollapsedContainers) {
+                    const descendants = getAllDescendants(collapsedContainer);
+                    
+                    if (descendants.includes(node)) {
+                        sourceNode = collapsedContainer;
+                    }
+                    
+                    if (descendants.includes(edge.target)) {
+                        targetNode = collapsedContainer;
+                    }
+                    
+                    // Skip internal edges within collapsed containers
+                    if (descendants.includes(node) && descendants.includes(edge.target)) {
+                        skipEdge = true;
+                    }
+                }
+                
+                if (!skipEdge && sourceNode !== targetNode && adj_list_collapsed_nodes[sourceNode]) {
+                    // Check if edge already exists to avoid duplicates
+                    const existingEdge = adj_list_collapsed_nodes[sourceNode].edges.find(e => e.target === targetNode);
+                    if (!existingEdge) {
+                        adj_list_collapsed_nodes[sourceNode].edges.push({
+                            target: targetNode,
+                            dims: edge.dims
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    function generateDotFromProcessedData() {
+        let dotSource = 'digraph G {\n';
+        dotSource += '  rankdir=BT;\n';
+        dotSource += '  node [shape=box];\n';
+
+        // Find top containers
+        const topContainers = new Set();
+        for (const container of containerNodes) {
+            if (!ancestor_map[container] & !collapsedContainers.has(container)) {
+                topContainers.add(container);
+            }
+        }
+
+        // Process containers recursively
         function processContainer(containerName, level = 0) {
             const indent = ' '.repeat(level * 2);
-
-            // Check if this container is collapsed
+            
+            // Check if this container is collapsed (appears as a regular node)
             if (collapsedContainers.has(containerName)) {
                 // For collapsed containers, create a normal node instead of a subgraph
-                visibleCollapsedContainers.push(containerName);
                 dotSource += `${indent}"${containerName}";\n`;
                 return;
             }
-
+            
             // Start subgraph for non-collapsed containers
             dotSource += `${indent}subgraph cluster_${containerName} {\n`;
             dotSource += `${indent}  label="${containerName}";\n`;
@@ -557,12 +643,13 @@
                 }
             }
 
-            // Add regular nodes
+            // Add regular nodes that are direct children
             for (const child of children) {
-                if (!containerNodes.has(child)) {
-                    if (adj_list[child] && adj_list[child].node_type === "Constant") {
+                if (!containerNodes.has(child) && adj_list_collapsed_nodes[child]) {
+                    const nodeData = adj_list_collapsed_nodes[child];
+                    if (nodeData.node_type === "Constant") {
                         dotSource += `${indent}  "${child}" [width=0.7, height=0.3];\n`;
-                    } else if (adj_list[child] && (adj_list[child].node_type === "Input" || adj_list[child].node_type === "Output")) {
+                    } else if (nodeData.node_type === "Input" || nodeData.node_type === "Output") {
                         dotSource += `${indent}  "${child}" [width=1.1, height=0.5];\n`;
                     } else {
                         dotSource += `${indent}  "${child}";\n`;
@@ -570,7 +657,6 @@
                 }
             }
 
-            // Close subgraph
             dotSource += `${indent}}\n`;
         }
 
@@ -579,12 +665,12 @@
             processContainer(container);
         }
 
-        // Add standalone nodes (not in containers)
-        for (const node of Object.keys(adj_list)) {
+        // Add standalone nodes (not in any container)
+        for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             if (!ancestor_map[node]) {
-                if (adj_list[node] && adj_list[node].node_type === "Constant") {
+                if (data.node_type === "Constant") {
                     dotSource += `  "${node}" [width=0.7, height=0.3];\n`;
-                } else if (adj_list[node] && (adj_list[node].node_type === "Input" || adj_list[node].node_type === "Output")) {
+                } else if (data.node_type === "Input" || data.node_type === "Output") {
                     dotSource += `  "${node}" [width=1.1, height=0.5];\n`;
                 } else {
                     dotSource += `  "${node}";\n`;
@@ -592,41 +678,10 @@
             }
         }
 
-        // Process edges, handling collapsed containers
-        for (const [node, data] of Object.entries(adj_list)) {
+        // Add all edges
+        for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             for (const edge of data.edges) {
-                let sourceNode = node;
-                let targetNode = edge.target;
-                let dims = edge.dims;
-                let skipEdge = false;
-
-                // Check if source node is inside a visible collapsed container
-                for (const collapsedContainer of visibleCollapsedContainers) {
-                    const descendants = getAllDescendants(collapsedContainer);
-
-                    if (descendants.includes(node)) {
-                        // Source node is inside a collapsed container, redirect edge from container
-                        sourceNode = collapsedContainer;
-                    }
-
-                    if (descendants.includes(edge.target)) {
-                        // Target node is inside a collapsed container, redirect edge to container
-                        targetNode = collapsedContainer;
-                    }
-
-                    // Skip edges between nodes inside the same collapsed container
-                    if (descendants.includes(node) && descendants.includes(edge.target)) {
-                        skipEdge = true;
-                    }
-                }
-
-                if (!skipEdge && sourceNode !== targetNode) {
-                    dotSource += `  "${sourceNode}" -> "${targetNode}";\n`;
-                      if (!(sourceNode in adj_list_collapsed_nodes)) {
-                          adj_list_collapsed_nodes[sourceNode] = {'edges': []};
-                      }
-                      adj_list_collapsed_nodes[sourceNode]['edges'].push({'target': targetNode, 'dims': dims});
-                }
+                dotSource += `  "${node}" -> "${edge.target}";\n`;
             }
         }
 
@@ -634,7 +689,13 @@
         return dotSource;
     }
 
-        
+    // Updated generateDotSource function
+    function generateDotSource() {
+        processCollapsedGraph();
+        const dotSource = generateDotFromProcessedData();
+        return dotSource;
+    }
+
     function calculateBoundingBox(nodeGroup, nodePositions) {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         nodeGroup.forEach(nodeName => {
@@ -659,7 +720,7 @@
         }
     }
     function reloadGraph() {
-        d3.select("#graph_f76cb744-09af-40a1-833a-21181e8a871b").html("");
+        d3.select("#graph_632491ba-545c-4212-a6e8-cbcd92f4b16d").html("");
 
         initializeCollapsedContainersFromGraph();
 
@@ -718,7 +779,7 @@
     // Add this function to render the raw Graphviz visualization
     function renderGraphvizImage(dotSource) {
         // Create a container for the Graphviz image
-        const graphvizContainer = d3.select("#graph-container_f76cb744-09af-40a1-833a-21181e8a871b")
+        const graphvizContainer = d3.select("#graph-container_632491ba-545c-4212-a6e8-cbcd92f4b16d")
             .append("div")
             .attr("id", "graphviz-image-container")
             .style("margin-top", "20px")
@@ -743,7 +804,7 @@
     }
 
     function createGraph(graphvizData) {
-        const svg = d3.select("#graph_f76cb744-09af-40a1-833a-21181e8a871b")
+        const svg = d3.select("#graph_632491ba-545c-4212-a6e8-cbcd92f4b16d")
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -761,7 +822,7 @@
 
         // Define arrowhead marker
         svg.append("defs").append("marker")
-        .attr("id", "arrowhead_f76cb744-09af-40a1-833a-21181e8a871b")
+        .attr("id", "arrowhead_632491ba-545c-4212-a6e8-cbcd92f4b16d")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 8)
         .attr("refY", 0)
@@ -896,7 +957,7 @@
             }
             return "";
         })
-        .attr("marker-end", "url(#arrowhead_f76cb744-09af-40a1-833a-21181e8a871b)");
+        .attr("marker-end", "url(#arrowhead_632491ba-545c-4212-a6e8-cbcd92f4b16d)");
         
         // Add dimension labels on edges
         edges.each(function(edge) {
@@ -1163,18 +1224,18 @@
         function showPopup(event, [nodeName]) {
             event.stopPropagation();
             
-            const popup = d3.select("#popup_f76cb744-09af-40a1-833a-21181e8a871b");
+            const popup = d3.select("#popup_632491ba-545c-4212-a6e8-cbcd92f4b16d");
             const clickedElement = d3.select(this).select("rect").node();
-            const moduleTemplate = d3.select("#module-template_f76cb744-09af-40a1-833a-21181e8a871b");
-            const tensorOpTemplate = d3.select("#tensor-op-template_f76cb744-09af-40a1-833a-21181e8a871b");
-            const noInfoMessage = d3.select("#no-info_f76cb744-09af-40a1-833a-21181e8a871b");
+            const moduleTemplate = d3.select("#module-template_632491ba-545c-4212-a6e8-cbcd92f4b16d");
+            const tensorOpTemplate = d3.select("#tensor-op-template_632491ba-545c-4212-a6e8-cbcd92f4b16d");
+            const noInfoMessage = d3.select("#no-info_632491ba-545c-4212-a6e8-cbcd92f4b16d");
             
             const nodeData = adj_list[nodeName];
             
-            d3.select("#popup-title_f76cb744-09af-40a1-833a-21181e8a871b").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
+            d3.select("#popup-title_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
             
-            // d3.select("#input-dims_f76cb744-09af-40a1-833a-21181e8a871b").text(nodeData.input_dims);
-            // d3.select("#output-dims_f76cb744-09af-40a1-833a-21181e8a871b").text(nodeData.output_dims);
+            // d3.select("#input-dims_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(nodeData.input_dims);
+            // d3.select("#output-dims_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(nodeData.output_dims);
             
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
@@ -1184,21 +1245,21 @@
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#module-type_f76cb744-09af-40a1-833a-21181e8a871b").text(info.type || 'N/A');
-                d3.select("#module-attributes_f76cb744-09af-40a1-833a-21181e8a871b").text(JSON.stringify(info.attributes, null, 2));
-                d3.select("#module-parameters_f76cb744-09af-40a1-833a-21181e8a871b").text(JSON.stringify(info.parameters, null, 2));
-                d3.select("#module-extra-repr_f76cb744-09af-40a1-833a-21181e8a871b").text(info.extra_repr || 'N/A');
+                d3.select("#module-type_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(info.type || 'N/A');
+                d3.select("#module-attributes_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(JSON.stringify(info.attributes, null, 2));
+                d3.select("#module-parameters_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(JSON.stringify(info.parameters, null, 2));
+                d3.select("#module-extra-repr_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(info.extra_repr || 'N/A');
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#tensor-parameters_f76cb744-09af-40a1-833a-21181e8a871b").text(JSON.stringify(info, null, 2));
+                d3.select("#tensor-parameters_632491ba-545c-4212-a6e8-cbcd92f4b16d").text(JSON.stringify(info, null, 2));
             } else {
                 noInfoMessage.style("display", "block").classed("content-shown", true);
             }
             
             const boundingBox = clickedElement.getBoundingClientRect();
-            const containerRect = d3.select("#graph-container_f76cb744-09af-40a1-833a-21181e8a871b").node().getBoundingClientRect();
+            const containerRect = d3.select("#graph-container_632491ba-545c-4212-a6e8-cbcd92f4b16d").node().getBoundingClientRect();
             
             const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
             const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
@@ -1206,11 +1267,11 @@
             popup.style("left", `${x}px`)
             .style("top", `${y}px`)
             .style("display", "flex");
-            d3.select("#popup-content_f76cb744-09af-40a1-833a-21181e8a871b").node().scrollTop = 0;
+            d3.select("#popup-content_632491ba-545c-4212-a6e8-cbcd92f4b16d").node().scrollTop = 0;
         }
         
         function closePopup() {
-            d3.select("#popup_f76cb744-09af-40a1-833a-21181e8a871b").style("display", "none");
+            d3.select("#popup_632491ba-545c-4212-a6e8-cbcd92f4b16d").style("display", "none");
         }
         
         d3.select(".popup-close").on("click", closePopup);
@@ -1363,7 +1424,7 @@
             
     }
 })();
-        </script>
+       </script>
 
         <div class="container">
             <div class="top-bar">
@@ -1413,33 +1474,33 @@ trace_model(model, example_input)
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container_f76cb744-09af-40a1-833a-21181e8a871b" style="height: 97%; overflow: auto; position: relative;">
-                    <div id="graph_f76cb744-09af-40a1-833a-21181e8a871b" style="height: 100%"></div>
-                    <div id="popup_f76cb744-09af-40a1-833a-21181e8a871b" class="popup" style="display: none;">
+                <div id="graph-container_632491ba-545c-4212-a6e8-cbcd92f4b16d" style="height: 97%; overflow: auto; position: relative;">
+                    <div id="graph_632491ba-545c-4212-a6e8-cbcd92f4b16d" style="height: 100%"></div>
+                    <div id="popup_632491ba-545c-4212-a6e8-cbcd92f4b16d" class="popup" style="display: none;">
                         <div class="popup-header">
-                            <h3 id="popup-title_f76cb744-09af-40a1-833a-21181e8a871b"></h3>
+                            <h3 id="popup-title_632491ba-545c-4212-a6e8-cbcd92f4b16d"></h3>
                             <span class="popup-close">✕</span>
                         </div>
-                        <div id="popup-content_f76cb744-09af-40a1-833a-21181e8a871b" class="popup-content">
-                            <div id="common-info_f76cb744-09af-40a1-833a-21181e8a871b">
+                        <div id="popup-content_632491ba-545c-4212-a6e8-cbcd92f4b16d" class="popup-content">
+                            <div id="common-info_632491ba-545c-4212-a6e8-cbcd92f4b16d">
                             </div>
-                            <div id="module-template_f76cb744-09af-40a1-833a-21181e8a871b" style="display:none;">
-                                <p><strong>Type:</strong> <span id="module-type_f76cb744-09af-40a1-833a-21181e8a871b"></span></p>
+                            <div id="module-template_632491ba-545c-4212-a6e8-cbcd92f4b16d" style="display:none;">
+                                <p><strong>Type:</strong> <span id="module-type_632491ba-545c-4212-a6e8-cbcd92f4b16d"></span></p>
                                 <p><strong>Attributes:</strong></p>
-                                <pre id="module-attributes_f76cb744-09af-40a1-833a-21181e8a871b"></pre>
+                                <pre id="module-attributes_632491ba-545c-4212-a6e8-cbcd92f4b16d"></pre>
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="module-parameters_f76cb744-09af-40a1-833a-21181e8a871b"></pre>
+                                <pre id="module-parameters_632491ba-545c-4212-a6e8-cbcd92f4b16d"></pre>
                                 <p><strong>Extra Repr:</strong></p>
-                                <pre id="module-extra-repr_f76cb744-09af-40a1-833a-21181e8a871b"></pre>
+                                <pre id="module-extra-repr_632491ba-545c-4212-a6e8-cbcd92f4b16d"></pre>
                             </div>
-                            <div id="tensor-op-template_f76cb744-09af-40a1-833a-21181e8a871b" style="display:none;">
+                            <div id="tensor-op-template_632491ba-545c-4212-a6e8-cbcd92f4b16d" style="display:none;">
                                 <p><strong>Parameters:</strong></p>
-                                <pre id="tensor-parameters_f76cb744-09af-40a1-833a-21181e8a871b"></pre>
+                                <pre id="tensor-parameters_632491ba-545c-4212-a6e8-cbcd92f4b16d"></pre>
                             </div>
-                            <p id="no-info_f76cb744-09af-40a1-833a-21181e8a871b" style="display:none;">No further information available for this node.</p>
+                            <p id="no-info_632491ba-545c-4212-a6e8-cbcd92f4b16d" style="display:none;">No further information available for this node.</p>
                         </div>
                     </div>
-                    <div id="popup-content_f76cb744-09af-40a1-833a-21181e8a871b"></div>
+                    <div id="popup-content_632491ba-545c-4212-a6e8-cbcd92f4b16d"></div>
                 </div>
             </div>
         </div>

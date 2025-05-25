@@ -49,6 +49,7 @@
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
+    let containerHierarchy = {};
     let vizInstance = null;
 
     const EXPAND_TARGET_COVERAGE = 0.8;
@@ -149,7 +150,7 @@
         return result;
     }
 
-    function identifyContainersWithFailedNodes(adj_list, ancestor_map) {
+    function identifyContainersWithFailedNodes() {
         const failedNodes = Object.keys(adj_list).filter(node => adj_list[node].failed);
       
         const containersWithFailedNodes = new Set();
@@ -167,16 +168,10 @@
         return containersWithFailedNodes;
     }
 
-
-    function generateDotSource(adj_list, ancestor_map) {
-        let dotSource = 'digraph G {\n';
-        dotSource += '  rankdir=BT;\n'; // Top to bottom layout
-        dotSource += '  node [shape=box];\n';
-
+    function processCollapsedGraph() {
         adj_list_collapsed_nodes = {};
-
         // Build container hierarchy
-        const containerHierarchy = {};
+        containerHierarchy = {};
         for (const [node, parent] of Object.entries(ancestor_map)) {
             if (parent && !containerHierarchy[parent]) {
                 containerHierarchy[parent] = [];
@@ -186,43 +181,134 @@
             }
         }
 
-        // Find top containers
-        const topContainers = new Set();
-        for (const container of containerNodes) {
-            // A top container is one that doesn't have an ancestor itself
-            if (!ancestor_map[container]) {
-                topContainers.add(container);
-            }
-        }
-
         // Helper function to get all descendants of a container
         function getAllDescendants(container) {
             let descendants = [];
             const children = containerHierarchy[container] || [];
-
             for (const child of children) {
                 descendants.push(child);
                 if (containerNodes.has(child)) {
                     descendants = descendants.concat(getAllDescendants(child));
                 }
             }
-
             return descendants;
         }
+        
+        // First, add all collapsed containers as nodes
+        for (const container of collapsedContainers) {
+            adj_list_collapsed_nodes[container] = {
+                node_type: "Module",
+                edges: []
+            };
+        }
+        
+        for (const [node, data] of Object.entries(adj_list)) {
+            let nodeIsInsideCollapsed = false;
+            
+            // Check if this node is inside a collapsed container
+            for (const container of collapsedContainers) {
+                const descendants = getAllDescendants(container);
+                if (descendants.includes(node)) {
+                    nodeIsInsideCollapsed = true;
+                    break;
+                }
+            }
+            
+            // If node is not inside a collapsed container, add it to the processed list
+            if (!nodeIsInsideCollapsed) {
+                adj_list_collapsed_nodes[node] = {
+                    node_type: data.node_type,
+                    edges: []
+                };
+            }
+        }
 
-        let visibleCollapsedContainers = [];
-        // Process containers
+        function findVisibleCollapsedContainers() {
+            const allDescendants = new Set();
+            const visibleContainers = new Set();
+
+            for (const container of collapsedContainers) {
+                const descendants = getAllDescendants(container, containerHierarchy);
+                for (const desc of descendants) {
+                    allDescendants.add(desc);
+                }
+            }
+
+            for (const container of collapsedContainers) {
+                if (!allDescendants.has(container)) {
+                    visibleContainers.add(container);
+                }
+            }
+
+            return visibleContainers;
+        }
+
+        
+
+        let visibleCollapsedContainers = findVisibleCollapsedContainers();
+        
+        // Process edges
+        for (const [node, data] of Object.entries(adj_list)) {
+            for (const edge of data.edges) {
+                let sourceNode = node;
+                let targetNode = edge.target;
+                let skipEdge = false;
+                
+                for (const collapsedContainer of visibleCollapsedContainers) {
+                    const descendants = getAllDescendants(collapsedContainer);
+                    
+                    if (descendants.includes(node)) {
+                        sourceNode = collapsedContainer;
+                    }
+                    
+                    if (descendants.includes(edge.target)) {
+                        targetNode = collapsedContainer;
+                    }
+                    
+                    // Skip internal edges within collapsed containers
+                    if (descendants.includes(node) && descendants.includes(edge.target)) {
+                        skipEdge = true;
+                    }
+                }
+                
+                if (!skipEdge && sourceNode !== targetNode && adj_list_collapsed_nodes[sourceNode]) {
+                    // Check if edge already exists to avoid duplicates
+                    const existingEdge = adj_list_collapsed_nodes[sourceNode].edges.find(e => e.target === targetNode);
+                    if (!existingEdge) {
+                        adj_list_collapsed_nodes[sourceNode].edges.push({
+                            target: targetNode,
+                            dims: edge.dims
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    function generateDotFromProcessedData() {
+        let dotSource = 'digraph G {\n';
+        dotSource += '  rankdir=BT;\n';
+        dotSource += '  node [shape=box];\n';
+
+        // Find top containers
+        const topContainers = new Set();
+        for (const container of containerNodes) {
+            if (!ancestor_map[container] & !collapsedContainers.has(container)) {
+                topContainers.add(container);
+            }
+        }
+
+        // Process containers recursively
         function processContainer(containerName, level = 0) {
             const indent = ' '.repeat(level * 2);
-
-            // Check if this container is collapsed
+            
+            // Check if this container is collapsed (appears as a regular node)
             if (collapsedContainers.has(containerName)) {
                 // For collapsed containers, create a normal node instead of a subgraph
-                visibleCollapsedContainers.push(containerName);
                 dotSource += `${indent}"${containerName}";\n`;
                 return;
             }
-
+            
             // Start subgraph for non-collapsed containers
             dotSource += `${indent}subgraph cluster_${containerName} {\n`;
             dotSource += `${indent}  label="${containerName}";\n`;
@@ -238,12 +324,13 @@
                 }
             }
 
-            // Add regular nodes
+            // Add regular nodes that are direct children
             for (const child of children) {
-                if (!containerNodes.has(child)) {
-                    if (adj_list[child] && adj_list[child].node_type === "Constant") {
+                if (!containerNodes.has(child) && adj_list_collapsed_nodes[child]) {
+                    const nodeData = adj_list_collapsed_nodes[child];
+                    if (nodeData.node_type === "Constant") {
                         dotSource += `${indent}  "${child}" [width=0.7, height=0.3];\n`;
-                    } else if (adj_list[child] && (adj_list[child].node_type === "Input" || adj_list[child].node_type === "Output")) {
+                    } else if (nodeData.node_type === "Input" || nodeData.node_type === "Output") {
                         dotSource += `${indent}  "${child}" [width=1.1, height=0.5];\n`;
                     } else {
                         dotSource += `${indent}  "${child}";\n`;
@@ -251,7 +338,6 @@
                 }
             }
 
-            // Close subgraph
             dotSource += `${indent}}\n`;
         }
 
@@ -260,12 +346,12 @@
             processContainer(container);
         }
 
-        // Add standalone nodes (not in containers)
-        for (const node of Object.keys(adj_list)) {
+        // Add standalone nodes (not in any container)
+        for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             if (!ancestor_map[node]) {
-                if (adj_list[node] && adj_list[node].node_type === "Constant") {
+                if (data.node_type === "Constant") {
                     dotSource += `  "${node}" [width=0.7, height=0.3];\n`;
-                } else if (adj_list[node] && (adj_list[node].node_type === "Input" || adj_list[node].node_type === "Output")) {
+                } else if (data.node_type === "Input" || data.node_type === "Output") {
                     dotSource += `  "${node}" [width=1.1, height=0.5];\n`;
                 } else {
                     dotSource += `  "${node}";\n`;
@@ -273,41 +359,10 @@
             }
         }
 
-        // Process edges, handling collapsed containers
-        for (const [node, data] of Object.entries(adj_list)) {
+        // Add all edges
+        for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             for (const edge of data.edges) {
-                let sourceNode = node;
-                let targetNode = edge.target;
-                let dims = edge.dims;
-                let skipEdge = false;
-
-                // Check if source node is inside a visible collapsed container
-                for (const collapsedContainer of visibleCollapsedContainers) {
-                    const descendants = getAllDescendants(collapsedContainer);
-
-                    if (descendants.includes(node)) {
-                        // Source node is inside a collapsed container, redirect edge from container
-                        sourceNode = collapsedContainer;
-                    }
-
-                    if (descendants.includes(edge.target)) {
-                        // Target node is inside a collapsed container, redirect edge to container
-                        targetNode = collapsedContainer;
-                    }
-
-                    // Skip edges between nodes inside the same collapsed container
-                    if (descendants.includes(node) && descendants.includes(edge.target)) {
-                        skipEdge = true;
-                    }
-                }
-
-                if (!skipEdge && sourceNode !== targetNode) {
-                    dotSource += `  "${sourceNode}" -> "${targetNode}";\n`;
-                      if (!(sourceNode in adj_list_collapsed_nodes)) {
-                          adj_list_collapsed_nodes[sourceNode] = {'edges': []};
-                      }
-                      adj_list_collapsed_nodes[sourceNode]['edges'].push({'target': targetNode, 'dims': dims});
-                }
+                dotSource += `  "${node}" -> "${edge.target}";\n`;
             }
         }
 
@@ -315,7 +370,13 @@
         return dotSource;
     }
 
-        
+    // Updated generateDotSource function
+    function generateDotSource() {
+        processCollapsedGraph();
+        const dotSource = generateDotFromProcessedData();
+        return dotSource;
+    }
+
     function calculateBoundingBox(nodeGroup, nodePositions) {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         nodeGroup.forEach(nodeName => {
