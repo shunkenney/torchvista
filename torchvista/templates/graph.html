@@ -403,8 +403,6 @@
     function reloadGraph() {
         d3.select("#graph_${unique_id}").html("");
 
-        initializeCollapsedContainersFromGraph();
-
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
         graphData = vizInstance.renderJSON(dotSource)
@@ -446,8 +444,9 @@
         }
     }
 
-    waitForLibs(function() {        
+    waitForLibs(function() {
         initContainerNodes();
+        initializeCollapsedContainersFromGraph();
         reloadGraph();
     });
 
