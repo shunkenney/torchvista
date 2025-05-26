@@ -57,7 +57,7 @@ def get_all_nn_modules():
         visited.add(mod)
 
         try:
-            for name, obj in inspect.getmembers(mod):
+            for _, obj in inspect.getmembers(mod):
                 if inspect.isclass(obj) and issubclass(obj, nn.Module):
                     module_classes.add(obj)
         except Exception:

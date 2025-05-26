@@ -272,14 +272,10 @@
                 }
                 
                 if (!skipEdge && sourceNode !== targetNode && adj_list_collapsed_nodes[sourceNode]) {
-                    // Check if edge already exists to avoid duplicates
-                    const existingEdge = adj_list_collapsed_nodes[sourceNode].edges.find(e => e.target === targetNode);
-                    if (!existingEdge) {
-                        adj_list_collapsed_nodes[sourceNode].edges.push({
-                            target: targetNode,
-                            dims: edge.dims
-                        });
-                    }
+                    adj_list_collapsed_nodes[sourceNode].edges.push({
+                        target: targetNode,
+                        dims: edge.dims
+                    });
                 }
             }
         }
