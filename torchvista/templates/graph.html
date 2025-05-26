@@ -12,7 +12,7 @@
                 <p><strong>Type:</strong> <span id="module-type_${unique_id}"></span></p>
                 <p><strong>Attributes:</strong></p>
                 <pre id="module-attributes_${unique_id}"></pre>
-                <p><strong>Parameters:</strong></p>
+                <p><strong>forward() Parameters:</strong></p>
                 <pre id="module-parameters_${unique_id}"></pre>
                 <p><strong>Extra Repr:</strong></p>
                 <pre id="module-extra-repr_${unique_id}"></pre>
@@ -786,7 +786,7 @@
         // Filter nodes for click event - don't include input or output nodes
         inner.selectAll(".node")
             .filter(function([nodeName]) {
-                return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant"))) && !collapsedContainers.has(nodeName)
+                return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")))
             })
             .on("click", showPopup);
 
@@ -917,14 +917,15 @@
             tensorOpTemplate.style("display", "none");
             noInfoMessage.style("display", "none");
             
-            if (((adj_list[nodeName] && adj_list[nodeName].node_type === "Module")) && (module_info[nodeName] || (module_name_to_base_name[nodeName] && module_info[module_name_to_base_name[nodeName]]))) {
+            if (module_info[nodeName] || (module_name_to_base_name[nodeName] && module_info[module_name_to_base_name[nodeName]])) {
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
                 d3.select("#module-type_${unique_id}").text(info.type || 'N/A');
                 d3.select("#module-attributes_${unique_id}").text(JSON.stringify(info.attributes, null, 2));
-                d3.select("#module-parameters_${unique_id}").text(JSON.stringify(info.parameters, null, 2));
                 d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
+                const forward_info = func_info_map[nodeName] ? func_info_map[nodeName] : func_info_map[module_name_to_base_name[nodeName]];
+                d3.select("#module-parameters_${unique_id}").text(JSON.stringify(forward_info, null, 2));
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
