@@ -117,19 +117,12 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
     def get_unique_op_name(op_type, module=None):
         nonlocal op_type_counters, module_to_node_name, module_info, node_to_base_name_map, module_reuse_count
         if module:
-            if module not in module_to_node_name:
-                op_type_counters[op_type] += 1
-                base_name = f"{op_type}_{op_type_counters[op_type]}"
-                module_to_node_name[module] = base_name
-                module_info[base_name] = get_module_info(module)
-                node_to_base_name_map[base_name] = base_name
-                return base_name, NodeType.MODULE.value
-            else:
-                base_name = module_to_node_name[module]
-                module_reuse_count[base_name] = module_reuse_count.get(base_name, 0) + 1
-                reused_name = f"{base_name}_{module_reuse_count[base_name]}"
-                node_to_base_name_map[reused_name] = base_name
-                return reused_name, NodeType.MODULE.value
+            op_type_counters[op_type] += 1
+            base_name = f"{op_type}_{op_type_counters[op_type]}"
+            module_to_node_name[module] = base_name
+            module_info[base_name] = get_module_info(module)
+            node_to_base_name_map[base_name] = base_name
+            return base_name, NodeType.MODULE.value
         else:
             op_type_counters[op_type] += 1
             op_name = f"{op_type}_{op_type_counters[op_type]}"
@@ -178,6 +171,13 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
         formatted_args = [format_arg(arg) for arg in args]
         formatted_kwargs = {k: format_arg(v) for k, v in kwargs.items()}
         return formatted_args, formatted_kwargs
+
+    def record_op_parameters(op_name, *args, **kwargs):
+        formatted_args, formatted_kwargs = capture_args(*args, **kwargs)
+        func_info_map[op_name] = {
+            "positional_args": formatted_args,
+            "keyword_args": formatted_kwargs
+        }
 
     def pre_trace_op(op_type, inputs, module=None, *args, **kwargs):
         # This can happen in some discovered operations which don't take any inputs. For these, we don't
@@ -237,11 +237,7 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
                 last_numeric_input_id += 1
 
 
-        formatted_args, formatted_kwargs = capture_args(*args, **kwargs)
-        func_info_map[op_name] = {
-            "positional_args": formatted_args,
-            "keyword_args": formatted_kwargs
-        }
+        record_op_parameters(op_name, *args, **kwargs)
 
         current_op = op_name
 
@@ -355,7 +351,9 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
         original_module_forwards[module] = orig_forward
 
         def wrapped_forward(*args, **kwargs):
-            module_stack.append(get_unique_op_name(type(module).__name__, module)[0])
+            module_name = get_unique_op_name(type(module).__name__, module)[0]
+            module_stack.append(module_name)
+            record_op_parameters(module_name, *args, **kwargs)
             output = orig_forward(*args, **kwargs)
             module_stack.pop()
             return output
