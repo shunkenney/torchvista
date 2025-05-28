@@ -9,22 +9,28 @@
             <div id="common-info_${unique_id}">
             </div>
             <div id="module-template_${unique_id}" style="display:none;">
-                <p><strong>Type:</strong> <span id="module-type_${unique_id}"></span></p>
-                <p><strong>Attributes:</strong></p>
-                <pre id="module-attributes_${unique_id}"></pre>
-                <p><strong>forward() Parameters:</strong></p>
-                <pre id="module-parameters_${unique_id}"></pre>
-                <p><strong>Extra Repr:</strong></p>
-                <pre id="module-extra-repr_${unique_id}"></pre>
+                <details open>
+                    <summary><strong>Type</strong></summary>
+                    <p id="module-type_${unique_id}"></p>
+                </details>
+                
+                <details id="module-attributes-details_${unique_id}">
+                    <summary><strong>Attributes</strong></summary>
+                    <div id="module-attributes_${unique_id}" class="json-viewer"></div>
+                </details>
+                
+                <details id="module-parameters-details_${unique_id}">
+                    <summary><strong>forward() Parameters</strong></summary>
+                    <div id="module-parameters_${unique_id}" class="json-viewer"></div>
+                </details>
             </div>
             <div id="tensor-op-template_${unique_id}" style="display:none;">
-                <p><strong>Parameters:</strong></p>
-                <pre id="tensor-parameters_${unique_id}"></pre>
+                <summary><strong>Parameters</strong></summary>
+                <div id="tensor-op-parameters_${unique_id}" class="json-viewer"></div>
             </div>
             <p id="no-info_${unique_id}" style="display:none;">No further information available for this node.</p>
         </div>
     </div>
-    <div id="popup-content_${unique_id}"></div>
     
     <script>
         ${d3_source}
@@ -32,7 +38,11 @@
     <script>
         ${viz_source}
     </script>
-    
+
+    <link href="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+
+    <script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.js"></script>
+
     <script>
 
 
@@ -105,14 +115,14 @@
         for (const edge of graphData.edges) {
             const sourceId = edge.tail;
             const targetId = edge.head;
-            
+
             // Find node names by their _gvid
             const sourceName = Object.values(result.nodes).find(n => n.id === sourceId)?.name;
             const targetName = Object.values(result.nodes).find(n => n.id === targetId)?.name;
-            
+
             if (!sourceName || !targetName) continue;
-            
-                // Extract path points from the pos attribute
+
+            // Extract path points from the pos attribute
             let pathPoints = [];
             if (edge.pos) {
                 // IMPORTANT CHANGE: Correctly handle the "e," prefix
@@ -128,14 +138,14 @@
                         const [x, y] = point.split(',').map(Number);
                         return { x, y };
                     });
-                    
+
                     // Add the endpoint as the last point in the path
                     pathPoints.push({ x: endPoint[0], y: endPoint[1] });
                 } else {
                     // Handle normal path without "e," prefix
                     pathPoints = posStr.split(' ').map(point => {
-                    const [x, y] = point.split(',').map(Number);
-                    return { x, y };
+                        const [x, y] = point.split(',').map(Number);
+                        return { x, y };
                     });
                 }
             }
@@ -253,24 +263,24 @@
                 let sourceNode = node;
                 let targetNode = edge.target;
                 let skipEdge = false;
-                
+
                 for (const collapsedContainer of visibleCollapsedContainers) {
                     const descendants = getAllDescendants(collapsedContainer);
-                    
+
                     if (descendants.includes(node)) {
                         sourceNode = collapsedContainer;
                     }
-                    
+
                     if (descendants.includes(edge.target)) {
                         targetNode = collapsedContainer;
                     }
-                    
+
                     // Skip internal edges within collapsed containers
                     if (descendants.includes(node) && descendants.includes(edge.target)) {
                         skipEdge = true;
                     }
                 }
-                
+
                 if (!skipEdge && sourceNode !== targetNode && adj_list_collapsed_nodes[sourceNode]) {
                     adj_list_collapsed_nodes[sourceNode].edges.push({
                         target: targetNode,
@@ -894,9 +904,30 @@
                 rect.style("fill", originalColor);
             });
         });
-        
-        
-        // Implement popup functionality
+
+        function createJsonViewer(container, data) {
+            // Clear previous contents
+            container.innerHTML = '';
+
+            // Create a new div to hold the editor
+            const editorContainer = document.createElement('div');
+            editorContainer.style.height = '300px';
+            editorContainer.style.width = '100%';
+            container.appendChild(editorContainer);
+
+            const options = {
+                mode: 'code',
+                mainMenuBar: false,
+                navigationBar: false,
+                statusBar: false,
+                indentation: 2,
+            };
+            const editor = new JSONEditor(editorContainer, options);
+            editor.set(data);
+            // set a reference for later use during resizing
+            container.jsonEditor = editor;
+        }
+
         function showPopup(event, [nodeName]) {
             event.stopPropagation();
             
@@ -909,10 +940,7 @@
             const nodeData = adj_list[nodeName];
             
             d3.select("#popup-title_${unique_id}").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
-            
-            // d3.select("#input-dims_${unique_id}").text(nodeData.input_dims);
-            // d3.select("#output-dims_${unique_id}").text(nodeData.output_dims);
-            
+
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
             noInfoMessage.style("display", "none");
@@ -922,15 +950,27 @@
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
                 d3.select("#module-type_${unique_id}").text(info.type || 'N/A');
-                d3.select("#module-attributes_${unique_id}").text(JSON.stringify(info.attributes, null, 2));
                 d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
+
                 const forward_info = func_info_map[nodeName] ? func_info_map[nodeName] : func_info_map[module_name_to_base_name[nodeName]];
-                d3.select("#module-parameters_${unique_id}").text(JSON.stringify(forward_info, null, 2));
+                const attributesContainer = d3.select("#module-attributes_${unique_id}").node();
+                attributesContainer.innerHTML = ''; // Clear first
+                createJsonViewer(attributesContainer, info.attributes);
+
+                const parametersContainer = d3.select("#module-parameters_${unique_id}").node();
+                parametersContainer.innerHTML = '';
+                createJsonViewer(parametersContainer, forward_info);
+
+                d3.select("#module-attributes-details_${unique_id}").node().open = false;
+                d3.select("#module-parameters-details_${unique_id}").node().open = false;
+
+
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
-                
-                d3.select("#tensor-parameters_${unique_id}").text(JSON.stringify(info, null, 2));
+                const parametersContainer = d3.select("#tensor-op-parameters_${unique_id}").node();
+                parametersContainer.innerHTML = '';
+                createJsonViewer(parametersContainer, info);
             } else {
                 noInfoMessage.style("display", "block").classed("content-shown", true);
             }
@@ -953,6 +993,17 @@
         
         d3.select(".popup-close").on("click", closePopup);
         svg.on("click", closePopup);
+
+        const popup = document.getElementById(`popup_${unique_id}`);
+        const resizeObserver = new ResizeObserver(() => {
+            const editorContainers = popup.querySelectorAll('.json-viewer');
+            for (let container of editorContainers) {
+                if (container.jsonEditor) {
+                    container.jsonEditor.resize();
+                }
+            }
+        });
+        resizeObserver.observe(popup);
         
         // Calculate view box to ensure the graph is properly scaled and centered
         const findErrorNode = (nodes) => {
@@ -1178,8 +1229,10 @@
             position: absolute;
             background: white;
             border: 1px solid #ccc;
-            width: 300px;
-            max-height: 400px;
+            width: 500px;
+            resize: both;
+            overflow: auto;
+            max-height: 600px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             display: none;
             display: flex;

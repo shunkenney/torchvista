@@ -154,18 +154,33 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
 
         return info
 
-    def format_arg(arg, max_length=200):
-        if isinstance(arg, torch.Tensor):
-            return f"tensor({','.join(str(d) for d in arg.shape)})"
-        elif isinstance(arg, (list, tuple)) and all(isinstance(item, torch.Tensor) for item in arg):
-            return str([format_arg(item) for item in arg])
-        elif isinstance(arg, (int, float, bool)):
-            return arg
-        else:
-            arg_str = str(arg)
-            if len(arg_str) > max_length:
-                return arg_str[:max_length - 3] + "..."
-            return arg_str
+    def format_arg(arg):
+        def _format(value):
+            if isinstance(value, torch.Tensor):
+                return {
+                    "_type": "tensor",
+                    "shape": list(value.shape),
+                    "dtype": str(value.dtype)
+                }
+            elif isinstance(value, np.ndarray):
+                return {
+                    "_type": "ndarray",
+                    "shape": list(value.shape),
+                    "dtype": str(value.dtype)
+                }
+            elif isinstance(value, (list, tuple)):
+                return [_format(v) for v in value]
+            elif isinstance(value, dict):
+                return {str(k): _format(v) for k, v in value.items()}
+            elif isinstance(value, (int, float, bool, str, type(None))):
+                return value
+            else:
+                return {
+                    "_type": type(value).__name__,
+                    "repr": str(value)[:50]  # fallback for unknowns
+                }
+
+        return _format(arg)
 
     def capture_args(*args, **kwargs):
         formatted_args = [format_arg(arg) for arg in args]
@@ -199,7 +214,7 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
         for inp in input_tensors:
             if hasattr(inp, '_tensor_source_name'):
                 dims = format_dims(tuple(inp.shape))
-                adj_list[inp._tensor_source_name]['edges'].append({'target': op_name, 'dims': dims})
+                adj_list[inp._tensor_source_name]['edges'].append({'target': op_name, 'dims': dims, 'edge_data_id': id(inp)})
             elif isinstance(inp, torch.Tensor):
                 dims = format_dims(tuple(inp.shape))
                 adj_list[f'tensor_{last_tensor_input_id}'] = {
@@ -207,7 +222,7 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
                     'failed': False,
                     'node_type': 'Constant',
                 }
-                adj_list[f'tensor_{last_tensor_input_id}']['edges'].append({'target': op_name, 'dims': dims})
+                adj_list[f'tensor_{last_tensor_input_id}']['edges'].append({'target': op_name, 'dims': dims, 'edge_data_id': id(inp)})
                 node_to_ancestors[f'tensor_{last_tensor_input_id}'] = module_stack[::-1]
                 constant_node_names.append(f'tensor_{last_tensor_input_id}')
                 last_tensor_input_id += 1
@@ -220,7 +235,7 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
                     'failed': False,
                     'node_type': NodeType.CONSTANT.value,
                 }
-                adj_list[f'np_array_{last_np_array_input_id}']['edges'].append({'target': op_name, 'dims': dims})
+                adj_list[f'np_array_{last_np_array_input_id}']['edges'].append({'target': op_name, 'dims': dims, 'edge_data_id': id(inp),})
                 constant_node_names.append(f'np_array_{last_np_array_input_id}')
                 node_to_ancestors[f'np_array_{last_np_array_input_id}'] = module_stack[::-1]
                 last_np_array_input_id += 1
@@ -596,7 +611,8 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
                     target_node_name = seen_tensors[tensor_id]
                     adj_list[output_tensor._tensor_source_name]['edges'].append({
                         'target': target_node_name,
-                        'dims': dims
+                        'dims': dims,
+                        'edge_data_id': id(output_tensor),
                     })
         
                 for output_tensor in output_tensors:
