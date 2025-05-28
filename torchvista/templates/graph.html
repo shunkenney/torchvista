@@ -14,12 +14,12 @@
                     <p id="module-type_${unique_id}"></p>
                 </details>
                 
-                <details id="module-attributes-details_${unique_id}">
+                <details open id="module-attributes-details_${unique_id}">
                     <summary><strong>Attributes</strong></summary>
                     <div id="module-attributes_${unique_id}" class="json-viewer"></div>
                 </details>
                 
-                <details id="module-parameters-details_${unique_id}">
+                <details open id="module-parameters-details_${unique_id}">
                     <summary><strong>forward() Parameters</strong></summary>
                     <div id="module-parameters_${unique_id}" class="json-viewer"></div>
                 </details>
@@ -153,7 +153,8 @@
             result.edges.push({
                 source: sourceName,
                 target: targetName,
-                path: pathPoints
+                path: pathPoints,
+                edge_data_id: edge.edge_data_id
             });
         }
 
@@ -259,6 +260,8 @@
         
         // Process edges
         for (const [node, data] of Object.entries(adj_list)) {
+            let seenEdgeDataIds = {};
+
             for (const edge of data.edges) {
                 let sourceNode = node;
                 let targetNode = edge.target;
@@ -281,12 +284,32 @@
                     }
                 }
 
-                if (!skipEdge && sourceNode !== targetNode && adj_list_collapsed_nodes[sourceNode]) {
-                    adj_list_collapsed_nodes[sourceNode].edges.push({
-                        target: targetNode,
-                        dims: edge.dims
-                    });
+                if (skipEdge || sourceNode === targetNode || !adj_list_collapsed_nodes[sourceNode]) {
+                    continue;
                 }
+
+                // Create a consistent key for the source-target pair
+                const pairKey = `${sourceNode}->${targetNode}`;
+                const edgeId = edge.edge_data_id;
+
+                if (edgeId) {
+                    if (!seenEdgeDataIds[pairKey]) {
+                        seenEdgeDataIds[pairKey] = new Set();
+                    }
+
+                    // Skip if this edge_data_id is already added between this pair
+                    if (seenEdgeDataIds[pairKey].has(edgeId)) {
+                        continue;
+                    }
+
+                    seenEdgeDataIds[pairKey].add(edgeId);
+                }
+
+                adj_list_collapsed_nodes[sourceNode].edges.push({
+                    target: targetNode,
+                    dims: edge.dims,
+                    edge_data_id: edge.edge_data_id,
+                });
             }
         }
     }
@@ -368,7 +391,11 @@
         // Add all edges
         for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             for (const edge of data.edges) {
-                dotSource += `  "${node}" -> "${edge.target}";\n`;
+                if (edge.edge_data_id) {
+                    dotSource += `  "${node}" -> "${edge.target}" [edge_data_id="${edge.edge_data_id}"];\n`;
+                } else {
+                    dotSource += `  "${node}" -> "${edge.target}";\n`;
+                }
             }
         }
 
@@ -660,7 +687,10 @@
             if (!sourceNodeData) {
                 sourceNodeData = adj_list[edge.source];
             }
-            const edgeData = sourceNodeData.edges.find(e => e.target === edge.target);
+            const edgeData = sourceNodeData.edges.find(e => 
+                e.target === edge.target && 
+                (e.edge_data_id === undefined || e.edge_data_id.toString() === edge.edge_data_id)
+            );
             if (!edgeData || !edgeData.dims) return;
             
             // Calculate position for label - near the start of the edge
@@ -911,7 +941,7 @@
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            editorContainer.style.height = '300px';
+            editorContainer.style.height = '250px';
             editorContainer.style.width = '100%';
             container.appendChild(editorContainer);
 
@@ -961,8 +991,8 @@
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, forward_info);
 
-                d3.select("#module-attributes-details_${unique_id}").node().open = false;
-                d3.select("#module-parameters-details_${unique_id}").node().open = false;
+                // d3.select("#module-attributes-details_${unique_id}").node().open = false;
+                // d3.select("#module-parameters-details_${unique_id}").node().open = false;
 
 
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
