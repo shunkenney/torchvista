@@ -39,9 +39,9 @@
         ${viz_source}
     </script>
 
-    <link href="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/jsoneditor@10.2.0/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
 
-    <script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsoneditor@10.2.0/dist/jsoneditor.min.js"></script>
 
     <script>
 
@@ -951,6 +951,9 @@
                 navigationBar: false,
                 statusBar: false,
                 indentation: 2,
+                onChange: function() {
+                    editor.set(data);
+                }
             };
             const editor = new JSONEditor(editorContainer, options);
             editor.set(data);
@@ -961,6 +964,31 @@
         function showPopup(event, [nodeName]) {
             event.stopPropagation();
             
+            const clickedNodeElement = d3.select(this);
+
+            // Position the clicked node
+            const clickednodeData = graphvizData.nodes[nodeName];
+            if (clickednodeData) {
+                const svgNode = svg.node();
+                const width = svgNode.clientWidth || 800;
+                const height = svgNode.clientHeight || 600;
+                
+                const currentTransform = d3.zoomTransform(svg.node());
+                const targetX = 0.4 * width - clickednodeData.position.x * currentTransform.k;
+                const targetY = 0.2 * height - clickednodeData.position.y * currentTransform.k;
+                
+                svg.call(zoom.transform, d3.zoomIdentity
+                    .translate(targetX, targetY)
+                    .scale(currentTransform.k));
+            }
+
+            clickedNodeElement.classed("highlight-node", true);
+            
+            setTimeout(() => {
+                clickedNodeElement.classed("highlight-node", false);
+            }, 2000); // Match the animation duration
+
+
             const popup = d3.select("#popup_${unique_id}");
             const clickedElement = d3.select(this).select("rect").node();
             const moduleTemplate = d3.select("#module-template_${unique_id}");
