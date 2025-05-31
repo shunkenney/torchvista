@@ -81,7 +81,7 @@ def get_all_nn_modules():
 MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
 
-def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors):
+def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes):
     last_successful_op = None
     current_op = None
     current_executing_module = None
@@ -215,7 +215,7 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
             if hasattr(inp, '_tensor_source_name'):
                 dims = format_dims(tuple(inp.shape))
                 adj_list[inp._tensor_source_name]['edges'].append({'target': op_name, 'dims': dims, 'edge_data_id': id(inp)})
-            elif isinstance(inp, torch.Tensor):
+            elif isinstance(inp, torch.Tensor) and show_non_gradient_nodes:
                 dims = format_dims(tuple(inp.shape))
                 adj_list[f'tensor_{last_tensor_input_id}'] = {
                     'edges': [],
@@ -227,29 +227,30 @@ def process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, f
                 constant_node_names.append(f'tensor_{last_tensor_input_id}')
                 last_tensor_input_id += 1
 
-        for inp in inputs:
-            if isinstance(inp, np.ndarray):
-                dims = format_dims(tuple(inp.shape))
-                adj_list[f'np_array_{last_np_array_input_id}'] = {
-                    'edges': [],
-                    'failed': False,
-                    'node_type': NodeType.CONSTANT.value,
-                }
-                adj_list[f'np_array_{last_np_array_input_id}']['edges'].append({'target': op_name, 'dims': dims, 'edge_data_id': id(inp),})
-                constant_node_names.append(f'np_array_{last_np_array_input_id}')
-                node_to_ancestors[f'np_array_{last_np_array_input_id}'] = module_stack[::-1]
-                last_np_array_input_id += 1
-            elif isinstance(inp, numbers.Number):
-                dims = "( )"
-                adj_list[f'scalar_{last_numeric_input_id}'] = {
-                    'edges': [],
-                    'failed': False,
-                    'node_type': NodeType.CONSTANT.value,
-                }
-                adj_list[f'scalar_{last_numeric_input_id}']['edges'].append({'target': op_name, 'dims': dims})
-                constant_node_names.append(f'scalar_{last_numeric_input_id}')
-                node_to_ancestors[f'scalar_{last_numeric_input_id}'] = module_stack[::-1]
-                last_numeric_input_id += 1
+        if show_non_gradient_nodes:
+            for inp in inputs:
+                if isinstance(inp, np.ndarray):
+                    dims = format_dims(tuple(inp.shape))
+                    adj_list[f'np_array_{last_np_array_input_id}'] = {
+                        'edges': [],
+                        'failed': False,
+                        'node_type': NodeType.CONSTANT.value,
+                    }
+                    adj_list[f'np_array_{last_np_array_input_id}']['edges'].append({'target': op_name, 'dims': dims, 'edge_data_id': id(inp),})
+                    constant_node_names.append(f'np_array_{last_np_array_input_id}')
+                    node_to_ancestors[f'np_array_{last_np_array_input_id}'] = module_stack[::-1]
+                    last_np_array_input_id += 1
+                elif isinstance(inp, numbers.Number):
+                    dims = "( )"
+                    adj_list[f'scalar_{last_numeric_input_id}'] = {
+                        'edges': [],
+                        'failed': False,
+                        'node_type': NodeType.CONSTANT.value,
+                    }
+                    adj_list[f'scalar_{last_numeric_input_id}']['edges'].append({'target': op_name, 'dims': dims})
+                    constant_node_names.append(f'scalar_{last_numeric_input_id}')
+                    node_to_ancestors[f'scalar_{last_numeric_input_id}'] = module_stack[::-1]
+                    last_numeric_input_id += 1
 
 
         record_op_parameters(op_name, *args, **kwargs)
@@ -642,7 +643,7 @@ def build_immediate_ancestor_map(ancestor_dict, adj_list):
     return immediate_ancestor_map
     
 
-def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map, max_module_expansion_depth):
+def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map, max_module_expansion_depth, show_non_gradient_nodes):
     unique_id = str(uuid.uuid4())
     template_str = resources.read_text('torchvista.templates', 'graph.html')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
@@ -671,7 +672,7 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, p
     display(HTML(output))
 
 
-def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=3):
+def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=3, show_non_gradient_nodes=True):
     max_module_expansion_depth = max(max_module_expansion_depth, 0)
     adj_list = {}
     module_info = {}
@@ -685,7 +686,7 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
     exception = None
 
     try:
-        process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors)
+        process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes=show_non_gradient_nodes)
     except Exception as e:
         exception = e
 
@@ -719,7 +720,7 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
     return output, exception
 
 
-def trace_model(model, inputs, max_module_expansion_depth=3):
+def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=False):
     adj_list = {}
     module_info = {}
     func_info_map = {}
@@ -733,11 +734,11 @@ def trace_model(model, inputs, max_module_expansion_depth=3):
     exception = None
 
     try:
-        process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors)
+        process_graph(model, inputs, adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes=show_non_gradient_nodes)
     except Exception as e:
         exception = e
 
-    plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), max_module_expansion_depth)
+    plot_graph(adj_list, node_to_base_name_map, module_info, func_info_map, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), max_module_expansion_depth, show_non_gradient_nodes)
 
 
     if exception is not None:

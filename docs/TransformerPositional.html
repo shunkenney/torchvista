@@ -478,7 +478,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(10, 1, 20)", "edge_data_id": 5195588400}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "__add___1", "dims": "(10, 1, 32)", "edge_data_id": 6071963376}], "failed": false, "node_type": "Module"}, "__getitem___1": {"edges": [{"target": "__add___1", "dims": "(10, 1, 32)", "edge_data_id": 6071964624}], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "__getitem___1", "dims": "(10, 1, 32)", "edge_data_id": 5195592144}], "failed": false, "node_type": "Constant"}, "__add___1": {"edges": [{"target": "TransformerEncoder_1", "dims": "(10, 1, 32)", "edge_data_id": 6071965008}], "failed": false, "node_type": "Operation"}, "TransformerEncoder_1": {"edges": [{"target": "__getitem___2", "dims": "(10, 1, 32)", "edge_data_id": 6071966640}], "failed": false, "node_type": "Module"}, "__getitem___2": {"edges": [{"target": "Linear_2", "dims": "(1, 32)", "edge_data_id": 6071965008}], "failed": false, "node_type": "Operation"}, "scalar_1": {"edges": [{"target": "__getitem___2", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "Linear_2": {"edges": [{"target": "output_0", "dims": "(1, 5)", "edge_data_id": 6071965680}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(10, 1, 20)", "edge_data_id": 5695777072}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "__add___1", "dims": "(10, 1, 32)", "edge_data_id": 6434646800}], "failed": false, "node_type": "Module"}, "__getitem___1": {"edges": [{"target": "__add___1", "dims": "(10, 1, 32)", "edge_data_id": 6434646896}], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "__getitem___1", "dims": "(10, 1, 32)", "edge_data_id": 5695781008}], "failed": false, "node_type": "Constant"}, "__add___1": {"edges": [{"target": "TransformerEncoder_1", "dims": "(10, 1, 32)", "edge_data_id": 6434646992}], "failed": false, "node_type": "Operation"}, "TransformerEncoder_1": {"edges": [{"target": "__getitem___2", "dims": "(10, 1, 32)", "edge_data_id": 6434647184}], "failed": false, "node_type": "Module"}, "__getitem___2": {"edges": [{"target": "Linear_2", "dims": "(1, 32)", "edge_data_id": 6434646992}], "failed": false, "node_type": "Operation"}, "scalar_1": {"edges": [{"target": "__getitem___2", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "Linear_2": {"edges": [{"target": "output_0", "dims": "(1, 5)", "edge_data_id": 6434647376}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"Linear_1": {"type": "Linear", "parameters": {"weight": {"shape": [32, 20], "requires_grad": true}, "bias": {"shape": [32], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 20, "out_features": 32, "training": true}, "extra_repr": "in_features=20, out_features=32, bias=True"}, "TransformerEncoder_1": {"type": "TransformerEncoder", "parameters": {}, "attributes": {"call_super_init": false, "dump_patches": false, "enable_nested_tensor": true, "mask_check": true, "num_layers": 2, "training": true, "use_nested_tensor": false}, "extra_repr": ""}, "Linear_2": {"type": "Linear", "parameters": {"weight": {"shape": [5, 32], "requires_grad": true}, "bias": {"shape": [5], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 32, "out_features": 5, "training": true}, "extra_repr": "in_features=32, out_features=5, bias=True"}};
     const func_info_map = {"Linear_1": {"positional_args": [{"_type": "tensor", "shape": [10, 1, 20], "dtype": "torch.float32"}], "keyword_args": {}}, "size_1": {"positional_args": [{"_type": "tensor", "shape": [10, 1, 20], "dtype": "torch.float32"}, 0], "keyword_args": {}}, "__getitem___1": {"positional_args": [{"_type": "tensor", "shape": [10, 1, 32], "dtype": "torch.float32"}, {"_type": "slice", "repr": "slice(None, 10, None)"}], "keyword_args": {}}, "__add___1": {"positional_args": [{"_type": "tensor", "shape": [10, 1, 32], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [10, 1, 32], "dtype": "torch.float32"}], "keyword_args": {}}, "TransformerEncoder_1": {"positional_args": [{"_type": "tensor", "shape": [10, 1, 32], "dtype": "torch.float32"}], "keyword_args": {}}, "__getitem___2": {"positional_args": [{"_type": "tensor", "shape": [10, 1, 32], "dtype": "torch.float32"}, 0], "keyword_args": {}}, "Linear_2": {"positional_args": [{"_type": "tensor", "shape": [1, 32], "dtype": "torch.float32"}], "keyword_args": {}}};
     const module_name_to_base_name = {"input_0": "input_0", "Linear_1": "Linear_1", "size_1": "size_1", "__getitem___1": "__getitem___1", "__add___1": "__add___1", "TransformerEncoder_1": "TransformerEncoder_1", "__getitem___2": "__getitem___2", "Linear_2": "Linear_2", "output_0": "output_0"};
@@ -865,7 +865,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         }
     }
     function reloadGraph() {
-        d3.select("#graph_d092e5cb-b18f-4084-a245-9b3ceb0a4187").html("");
+        d3.select("#graph_d6bc7f10-6aba-43c2-b961-895f432a6875").html("");
 
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
@@ -923,7 +923,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     // Add this function to render the raw Graphviz visualization
     function renderGraphvizImage(dotSource) {
         // Create a container for the Graphviz image
-        const graphvizContainer = d3.select("#graph-container_d092e5cb-b18f-4084-a245-9b3ceb0a4187")
+        const graphvizContainer = d3.select("#graph-container_d6bc7f10-6aba-43c2-b961-895f432a6875")
             .append("div")
             .attr("id", "graphviz-image-container")
             .style("margin-top", "20px")
@@ -948,7 +948,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     }
 
     function createGraph(graphvizData) {
-        const svg = d3.select("#graph_d092e5cb-b18f-4084-a245-9b3ceb0a4187")
+        const svg = d3.select("#graph_d6bc7f10-6aba-43c2-b961-895f432a6875")
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -966,7 +966,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
 
         // Define arrowhead marker
         svg.append("defs").append("marker")
-        .attr("id", "arrowhead_d092e5cb-b18f-4084-a245-9b3ceb0a4187")
+        .attr("id", "arrowhead_d6bc7f10-6aba-43c2-b961-895f432a6875")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 8)
         .attr("refY", 0)
@@ -1099,7 +1099,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             }
             return "";
         })
-        .attr("marker-end", "url(#arrowhead_d092e5cb-b18f-4084-a245-9b3ceb0a4187)");
+        .attr("marker-end", "url(#arrowhead_d6bc7f10-6aba-43c2-b961-895f432a6875)");
         
         // Add dimension labels on edges
         edges.each(function(edge) {
@@ -1416,15 +1416,15 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             }, 2000); // Match the animation duration
 
 
-            const popup = d3.select("#popup_d092e5cb-b18f-4084-a245-9b3ceb0a4187");
+            const popup = d3.select("#popup_d6bc7f10-6aba-43c2-b961-895f432a6875");
             const clickedElement = d3.select(this).select("rect").node();
-            const moduleTemplate = d3.select("#module-template_d092e5cb-b18f-4084-a245-9b3ceb0a4187");
-            const tensorOpTemplate = d3.select("#tensor-op-template_d092e5cb-b18f-4084-a245-9b3ceb0a4187");
-            const noInfoMessage = d3.select("#no-info_d092e5cb-b18f-4084-a245-9b3ceb0a4187");
+            const moduleTemplate = d3.select("#module-template_d6bc7f10-6aba-43c2-b961-895f432a6875");
+            const tensorOpTemplate = d3.select("#tensor-op-template_d6bc7f10-6aba-43c2-b961-895f432a6875");
+            const noInfoMessage = d3.select("#no-info_d6bc7f10-6aba-43c2-b961-895f432a6875");
             
             const nodeData = adj_list[nodeName];
             
-            d3.select("#popup-title_d092e5cb-b18f-4084-a245-9b3ceb0a4187").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
+            d3.select("#popup-title_d6bc7f10-6aba-43c2-b961-895f432a6875").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
 
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
@@ -1434,21 +1434,21 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#module-type_d092e5cb-b18f-4084-a245-9b3ceb0a4187").text(info.type || 'N/A');
-                d3.select("#module-extra-repr_d092e5cb-b18f-4084-a245-9b3ceb0a4187").text(info.extra_repr || 'N/A');
+                d3.select("#module-type_d6bc7f10-6aba-43c2-b961-895f432a6875").text(info.type || 'N/A');
+                d3.select("#module-extra-repr_d6bc7f10-6aba-43c2-b961-895f432a6875").text(info.extra_repr || 'N/A');
 
                 const forward_info = func_info_map[nodeName] ? func_info_map[nodeName] : func_info_map[module_name_to_base_name[nodeName]];
-                const attributesContainer = d3.select("#module-attributes_d092e5cb-b18f-4084-a245-9b3ceb0a4187").node();
+                const attributesContainer = d3.select("#module-attributes_d6bc7f10-6aba-43c2-b961-895f432a6875").node();
                 attributesContainer.innerHTML = '';
                 createJsonViewer(attributesContainer, info.attributes);
 
-                const parametersContainer = d3.select("#module-parameters_d092e5cb-b18f-4084-a245-9b3ceb0a4187").node();
+                const parametersContainer = d3.select("#module-parameters_d6bc7f10-6aba-43c2-b961-895f432a6875").node();
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, forward_info);
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
-                const parametersContainer = d3.select("#tensor-op-parameters_d092e5cb-b18f-4084-a245-9b3ceb0a4187").node();
+                const parametersContainer = d3.select("#tensor-op-parameters_d6bc7f10-6aba-43c2-b961-895f432a6875").node();
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, info);
             } else {
@@ -1456,7 +1456,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             }
             
             const boundingBox = clickedElement.getBoundingClientRect();
-            const containerRect = d3.select("#graph-container_d092e5cb-b18f-4084-a245-9b3ceb0a4187").node().getBoundingClientRect();
+            const containerRect = d3.select("#graph-container_d6bc7f10-6aba-43c2-b961-895f432a6875").node().getBoundingClientRect();
             
             const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
             const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
@@ -1464,17 +1464,17 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             popup.style("left", `${x}px`)
             .style("top", `${y}px`)
             .style("display", "flex");
-            d3.select("#popup-content_d092e5cb-b18f-4084-a245-9b3ceb0a4187").node().scrollTop = 0;
+            d3.select("#popup-content_d6bc7f10-6aba-43c2-b961-895f432a6875").node().scrollTop = 0;
         }
         
         function closePopup() {
-            d3.select("#popup_d092e5cb-b18f-4084-a245-9b3ceb0a4187").style("display", "none");
+            d3.select("#popup_d6bc7f10-6aba-43c2-b961-895f432a6875").style("display", "none");
         }
         
         d3.select(".popup-close").on("click", closePopup);
         svg.on("click", closePopup);
 
-        const popup = document.getElementById(`popup_d092e5cb-b18f-4084-a245-9b3ceb0a4187`);
+        const popup = document.getElementById(`popup_d6bc7f10-6aba-43c2-b961-895f432a6875`);
         const resizeObserver = new ResizeObserver(() => {
             const editorContainers = popup.querySelectorAll('.json-viewer');
             for (let container of editorContainers) {
@@ -1682,37 +1682,37 @@ trace_model(model, example_input)
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container_d092e5cb-b18f-4084-a245-9b3ceb0a4187" style="height: 97%; overflow: auto; position: relative;">
-                    <div id="graph_d092e5cb-b18f-4084-a245-9b3ceb0a4187" style="height: 100%"></div>
-                    <div id="popup_d092e5cb-b18f-4084-a245-9b3ceb0a4187" class="popup" style="display: none;">
+                <div id="graph-container_d6bc7f10-6aba-43c2-b961-895f432a6875" style="height: 97%; overflow: auto; position: relative;">
+                    <div id="graph_d6bc7f10-6aba-43c2-b961-895f432a6875" style="height: 100%"></div>
+                    <div id="popup_d6bc7f10-6aba-43c2-b961-895f432a6875" class="popup" style="display: none;">
                         <div class="popup-header">
-                            <h3 id="popup-title_d092e5cb-b18f-4084-a245-9b3ceb0a4187"></h3>
+                            <h3 id="popup-title_d6bc7f10-6aba-43c2-b961-895f432a6875"></h3>
                             <span class="popup-close">✕</span>
                         </div>
-                        <div id="popup-content_d092e5cb-b18f-4084-a245-9b3ceb0a4187" class="popup-content">
-                            <div id="common-info_d092e5cb-b18f-4084-a245-9b3ceb0a4187">
+                        <div id="popup-content_d6bc7f10-6aba-43c2-b961-895f432a6875" class="popup-content">
+                            <div id="common-info_d6bc7f10-6aba-43c2-b961-895f432a6875">
                             </div>
-                            <div id="module-template_d092e5cb-b18f-4084-a245-9b3ceb0a4187" style="display:none;">
+                            <div id="module-template_d6bc7f10-6aba-43c2-b961-895f432a6875" style="display:none;">
                                 <details open>
                                     <summary><strong>Type</strong></summary>
-                                    <p id="module-type_d092e5cb-b18f-4084-a245-9b3ceb0a4187"></p>
+                                    <p id="module-type_d6bc7f10-6aba-43c2-b961-895f432a6875"></p>
                                 </details>
                                 
-                                <details open id="module-attributes-details_d092e5cb-b18f-4084-a245-9b3ceb0a4187">
+                                <details open id="module-attributes-details_d6bc7f10-6aba-43c2-b961-895f432a6875">
                                     <summary><strong>Attributes</strong></summary>
-                                    <div id="module-attributes_d092e5cb-b18f-4084-a245-9b3ceb0a4187" class="json-viewer"></div>
+                                    <div id="module-attributes_d6bc7f10-6aba-43c2-b961-895f432a6875" class="json-viewer"></div>
                                 </details>
                                 
-                                <details open id="module-parameters-details_d092e5cb-b18f-4084-a245-9b3ceb0a4187">
+                                <details open id="module-parameters-details_d6bc7f10-6aba-43c2-b961-895f432a6875">
                                     <summary><strong>forward() Parameters</strong></summary>
-                                    <div id="module-parameters_d092e5cb-b18f-4084-a245-9b3ceb0a4187" class="json-viewer"></div>
+                                    <div id="module-parameters_d6bc7f10-6aba-43c2-b961-895f432a6875" class="json-viewer"></div>
                                 </details>
                             </div>
-                            <div id="tensor-op-template_d092e5cb-b18f-4084-a245-9b3ceb0a4187" style="display:none;">
+                            <div id="tensor-op-template_d6bc7f10-6aba-43c2-b961-895f432a6875" style="display:none;">
                                 <summary><strong>Parameters</strong></summary>
-                                <div id="tensor-op-parameters_d092e5cb-b18f-4084-a245-9b3ceb0a4187" class="json-viewer"></div>
+                                <div id="tensor-op-parameters_d6bc7f10-6aba-43c2-b961-895f432a6875" class="json-viewer"></div>
                             </div>
-                            <p id="no-info_d092e5cb-b18f-4084-a245-9b3ceb0a4187" style="display:none;">No further information available for this node.</p>
+                            <p id="no-info_d6bc7f10-6aba-43c2-b961-895f432a6875" style="display:none;">No further information available for this node.</p>
                         </div>
                 
                 </div>

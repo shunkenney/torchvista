@@ -14,6 +14,7 @@ def test_all_models():
         kwargs = {}
         if items["max_module_expansion_depth"] >= 0:
             kwargs["max_module_expansion_depth"] = items["max_module_expansion_depth"]
+        kwargs["show_non_gradient_nodes"] = items["show_non_gradient_nodes"]
         # error_contents = items["error_contents"]
         print(f"Testing {name}...")
         
