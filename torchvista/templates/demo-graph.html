@@ -157,7 +157,7 @@
                 background: white;
                 border: 1px solid #ccc;
                 width: 500px;
-                resize: both;
+                resize: horizontal;
                 overflow: auto;
                 max-height: 70vh;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.2);
@@ -344,6 +344,7 @@
             }
 
             .popup-content summary {
+                cursor: pointer;
                 margin: 5px;
             }
 
@@ -380,13 +381,13 @@
 
     const adj_list = ${adj_list_json};
     const module_info = ${module_info_json};
-    const func_info_map = ${func_info_map_json};
-    const module_name_to_base_name = ${module_name_to_base_name_json};
+    const func_info = ${func_info_json};
     const parent_module_to_nodes = ${parent_module_to_nodes_json};
     const parent_module_to_depth = ${parent_module_to_depth_json};
     const graph_node_name_to_without_suffix = ${graph_node_name_to_without_suffix};
     const ancestor_map = ${ancestor_map};
     const max_module_expansion_depth = ${max_module_expansion_depth};
+    const node_to_module_path = ${node_to_module_path};
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
@@ -1324,20 +1325,23 @@
             
             const nodeData = adj_list[nodeName];
             
-            d3.select("#popup-title_${unique_id}").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
+            let popupTitle = nodeName;
+            if (node_to_module_path[nodeName] && graph_node_name_to_without_suffix[nodeName]) {
+                popupTitle = node_to_module_path[nodeName] + "." + graph_node_name_to_without_suffix[nodeName];
+            }
+            d3.select("#popup-title_${unique_id}").text(popupTitle);
 
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
             noInfoMessage.style("display", "none");
             
-            if (module_info[nodeName] || (module_name_to_base_name[nodeName] && module_info[module_name_to_base_name[nodeName]])) {
-                const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
+            if (module_info[nodeName]) {
+                const info = module_info[nodeName];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#module-type_${unique_id}").text(info.type || 'N/A');
                 d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
 
-                const forward_info = func_info_map[nodeName] ? func_info_map[nodeName] : func_info_map[module_name_to_base_name[nodeName]];
+                const forward_info = func_info[nodeName];
                 const attributesContainer = d3.select("#module-attributes_${unique_id}").node();
                 attributesContainer.innerHTML = '';
                 createJsonViewer(attributesContainer, info.attributes);
@@ -1345,8 +1349,8 @@
                 const parametersContainer = d3.select("#module-parameters_${unique_id}").node();
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, forward_info);
-            } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
-                const info = func_info_map[nodeName];
+            } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info[nodeName]) {
+                const info = func_info[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
                 const parametersContainer = d3.select("#tensor-op-parameters_${unique_id}").node();
                 parametersContainer.innerHTML = '';
@@ -1570,11 +1574,6 @@ ${error_contents}
                             <div id="common-info_${unique_id}">
                             </div>
                             <div id="module-template_${unique_id}" style="display:none;">
-                                <details open>
-                                    <summary><strong>Type</strong></summary>
-                                    <p id="module-type_${unique_id}"></p>
-                                </details>
-                                
                                 <details open id="module-attributes-details_${unique_id}">
                                     <summary><strong>Attributes</strong></summary>
                                     <div id="module-attributes_${unique_id}" class="json-viewer"></div>
