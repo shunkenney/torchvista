@@ -31,6 +31,244 @@
             <p id="no-info_${unique_id}" style="display:none;">No further information available for this node.</p>
         </div>
     </div>
+
+    <style>
+            #graph {
+                width: 100%;
+                height: 100%;
+            }
+            .node rect {
+                stroke: #333;
+                fill: #fff;
+            }
+            text.node-label {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                cursor: default;
+                user-select: none;
+            }
+            text.type-indicator {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                cursor: default;
+                user-select: none;
+            }
+            text.collapse-icon {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-size: 14px
+                cursor: default;
+                user-select: none;
+            }
+            .edge {
+                stroke: #333333;
+                fill: none;
+            }
+            .node rect.input { fill: #FF9AFF; }
+            .node rect.constant { fill: rgb(235 235 235); }
+
+            .node rect.output { fill: #FF9AFF; }
+            .node rect.failed { fill: rgb(224 15 15); }
+            .node rect.module { fill: #8BDEDB; }
+            .node rect.operation { fill: #FEBC5A; }
+            .edgeLabelGroup {
+                pointer-events: none;
+            }
+            #arrowhead path {
+                fill: #333333;;
+            }
+            .node rect,
+            .node ellipse {
+                transition: fill 0.3s ease;
+            }
+
+            .node .type-indicator {
+                font-size: 5px;
+                fill: rgba(0, 0, 0, 1.0);  /* Dark grey, semi-transparent */
+                pointer-events: none;
+            }
+
+            .node.error rect {
+                stroke: black;
+                stroke-width: 1px;
+                /* stroke-dasharray: 3, 3; */
+                rx: 5px;
+                ry: 5px;
+            }
+
+            .boundary-box.error > rect:first-of-type {
+                fill: red;
+                fill-opacity: 0.2;
+            }
+
+            #graph-container {
+                position: relative;
+            }
+            .popup {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                position: absolute;
+                background: white;
+                border: 1px solid #ccc;
+                width: 500px;
+                resize: both;
+                overflow: auto;
+                max-height: 70%;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                display: none;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .popup-header {
+                position: sticky;
+                top: 0;
+                background: white;
+                padding: 5px 10px;
+                border-bottom: 1px solid #ccc;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 1;
+            }
+
+            .popup h3 {
+                margin: 0;
+                font-size: 16px;
+            }
+
+            .popup-content {
+                padding: 10px;
+                padding-bottom: 10px;
+                overflow-y: auto;
+                overflow-x: auto;
+                flex-grow: 1;
+            }
+
+            .popup pre {
+                white-space: pre;
+                overflow-x: auto;
+            }
+
+            .popup-close {
+                cursor: pointer;
+                font-size: 24px;
+                font-weight: bold;
+                line-height: 1;
+            }
+
+            #popup-title {
+                font-size: 24px;
+            }
+
+            #graph-container {
+                position: relative;
+            }
+
+            pre {
+                margin-bottom: 0;
+            }
+
+            .boundary-box rect {
+                pointer-events: none;
+            }
+            .boundary-box text {
+                pointer-events: none;
+                user-select: none;
+            }
+
+            .boundary-box rect {
+                pointer-events: none;
+            }
+            .boundary-box text {
+                pointer-events: none;
+                user-select: none;
+                font-weight: bold;
+            }
+            .edge-label text {
+                pointer-events: none;
+                user-select: none;
+                font-size: 4px;
+                font-family: "'Roboto', sans-serif";
+            }
+            
+            .collapse-button:hover {
+                fill: #eee;
+            }
+            .collapse-icon {
+                pointer-events: none;
+                user-select: none;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                fill: rgb(51, 51, 51);
+            }
+
+            /* Edge hover styles */
+            .edge-group path {
+               pointer-events: stroke;
+            }
+
+            .edge-label {
+                pointer-events: all;
+            }
+
+            @keyframes containerHighlight {
+                0% { 
+                    filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+                }
+                25% { 
+                    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+                }
+                50% { 
+                    filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+                }
+                75% { 
+                    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+                }
+                100% { 
+                    filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+                }
+            }
+
+            @keyframes containerStrokeHighlight {
+                0% { 
+                    stroke-width: 1px;
+                }
+                25% { 
+                    stroke-width: 3px;
+                }
+                50% { 
+                    stroke-width: 1px;
+                }
+                75% { 
+                    stroke-width: 3px;
+                }
+                100% { 
+                    stroke-width: 1px;
+                }
+            }
+
+            .highlight-cluster > rect:first-of-type {
+                animation: 
+                    containerStrokeHighlight 2.0s ease-in-out forwards;
+            }
+
+            .highlight-node rect {
+                animation: 
+                    containerStrokeHighlight 2.0s ease-in-out forwards;
+            }
+
+            text.node-label {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-size: 0.8rem;  /* Base size using rem units for accessibility */
+                cursor: default;
+                user-select: none;
+            }
+
+            .node.constant .node-label {
+                font-size: 0.7rem;
+            }
+
+            .popup-content summary {
+                margin: 5px;
+            }
+
+    </style>
     
     <script>
         ${d3_source}
@@ -39,9 +277,13 @@
         ${viz_source}
     </script>
 
-    <link href="https://cdn.jsdelivr.net/npm/jsoneditor@10.2.0/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <style>
+        ${jsoneditor_css}
+    </style>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsoneditor@10.2.0/dist/jsoneditor.min.js"></script>
+    <script>
+        ${jsoneditor_source}
+    </script>
 
     <script>
 
@@ -608,7 +850,6 @@
             .attr("stroke-width", 1)
             .attr("cursor", "pointer");
             
-            // Add "-" symbol
             group.append("text")
             .attr("class", "collapse-icon")
             .attr("x", x1 + 10)
@@ -616,9 +857,8 @@
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
             .attr("font-size", "10px")
-            .attr("font-weight", "bold")
             .attr("cursor", "pointer")
-            .text("—");
+            .text("-");
         });
 
         // Add click event handler for collapse buttons
@@ -886,7 +1126,6 @@
             .attr("stroke-width", 1)
             .attr("cursor", "pointer");
         
-            // Add "+" symbol
             nodeGroup.append("text")
             .attr("class", "collapse-icon")
             .attr("x", -width/2 + 8)
@@ -894,7 +1133,6 @@
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
             .attr("font-size", "10px")
-            .attr("font-weight", "bold")
             .attr("cursor", "pointer")
             .text("+");
             
@@ -941,8 +1179,8 @@
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            editorContainer.style.height = '250px';
-            editorContainer.style.width = '100%';
+            // editorContainer.style.height = '250px';
+            // editorContainer.style.width = '100%';
             container.appendChild(editorContainer);
 
             const options = {
@@ -1012,17 +1250,12 @@
 
                 const forward_info = func_info_map[nodeName] ? func_info_map[nodeName] : func_info_map[module_name_to_base_name[nodeName]];
                 const attributesContainer = d3.select("#module-attributes_${unique_id}").node();
-                attributesContainer.innerHTML = ''; // Clear first
+                attributesContainer.innerHTML = '';
                 createJsonViewer(attributesContainer, info.attributes);
 
                 const parametersContainer = d3.select("#module-parameters_${unique_id}").node();
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, forward_info);
-
-                // d3.select("#module-attributes-details_${unique_id}").node().open = false;
-                // d3.select("#module-parameters-details_${unique_id}").node().open = false;
-
-
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
@@ -1213,238 +1446,4 @@
 
 
     </script>
-
-    <style>
-        #graph {
-            width: 100%;
-            height: 100%;
-        }
-        .node rect {
-            stroke: #333;
-            fill: #fff;
-        }
-        text.node-label {
-            font-family: "'Roboto', sans-serif";
-            cursor: default;
-            user-select: none;
-        }
-        text.type-indicator {
-            font-family: "'Roboto', sans-serif";
-            cursor: default;
-            user-select: none;
-        }
-        text.collapse-icon {
-            font-family: "'Roboto', sans-serif";
-            font-size: 14px
-            cursor: default;
-            user-select: none;
-        }
-        .edge {
-            stroke: #333333;
-            fill: none;
-        }
-        .node rect.input { fill: #FF9AFF; }
-        .node rect.constant { fill: rgb(235 235 235); }
-
-        .node rect.output { fill: #FF9AFF; }
-        .node rect.failed { fill: rgb(224 15 15); }
-        .node rect.module { fill: #8BDEDB; }
-        .node rect.operation { fill: #FEBC5A; }
-        .edgeLabelGroup {
-            pointer-events: none;
-        }
-        #arrowhead path {
-            fill: #333333;;
-        }
-        .node rect,
-        .node ellipse {
-            transition: fill 0.3s ease;
-        }
-
-        .node .type-indicator {
-            font-size: 5px;
-            fill: rgba(0, 0, 0, 1.0);  /* Dark grey, semi-transparent */
-            pointer-events: none;
-        }
-
-        .node.error rect {
-            stroke: black;
-            stroke-width: 1px;
-            /* stroke-dasharray: 3, 3; */
-            rx: 5px;
-            ry: 5px;
-        }
-
-        .boundary-box.error > rect:first-of-type {
-            fill: red;
-            fill-opacity: 0.2;
-        }
-
-        #graph-container {
-            position: relative;
-        }
-        .popup {
-            position: absolute;
-            background: white;
-            border: 1px solid #ccc;
-            width: 500px;
-            resize: both;
-            overflow: auto;
-            max-height: 600px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            display: none;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .popup-header {
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 5px 10px;
-            border-bottom: 1px solid #ccc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1;
-        }
-
-        .popup h3 {
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .popup-content {
-            padding: 10px;
-            padding-bottom: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            flex-grow: 1;
-        }
-
-        .popup pre {
-            white-space: pre;
-            overflow-x: auto;
-            font-family: monospace;
-        }
-
-        .popup-close {
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        #popup-title {
-            font-size: 24px;
-        }
-
-        #graph-container {
-            position: relative;
-        }
-
-        pre {
-            margin-bottom: 0;
-        }
-
-        .boundary-box rect {
-            pointer-events: none;
-        }
-        .boundary-box text {
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .boundary-box rect {
-            pointer-events: none;
-        }
-        .boundary-box text {
-            pointer-events: none;
-            user-select: none;
-            font-weight: bold;
-        }
-        .edge-label text {
-            pointer-events: none;
-            user-select: none;
-            font-size: 4px;
-            font-family: "'Roboto', sans-serif";
-        }
-        
-        .collapse-button:hover {
-            fill: #eee;
-        }
-        .collapse-icon {
-            pointer-events: none;
-            user-select: none;
-            font-family: "'Roboto', sans-serif";
-            fill: rgb(51, 51, 51);
-        }
-
-        /* Edge hover styles */
-        .edge-group path {
-          pointer-events: stroke;
-        }
-
-        .edge-label {
-          pointer-events: all;
-        }
-
-        @keyframes containerHighlight {
-          0% { 
-            filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-          }
-          25% { 
-            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
-          }
-          50% { 
-            filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-          }
-          75% { 
-            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
-          }
-          100% { 
-            filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-          }
-        }
-
-        @keyframes containerStrokeHighlight {
-          0% { 
-            stroke-width: 1px;
-          }
-          25% { 
-            stroke-width: 3px;
-          }
-          50% { 
-            stroke-width: 1px;
-          }
-          75% { 
-            stroke-width: 3px;
-          }
-          100% { 
-            stroke-width: 1px;
-          }
-        }
-
-        .highlight-cluster > rect:first-of-type {
-          animation: 
-             containerStrokeHighlight 2.0s ease-in-out forwards;
-        }
-
-        .highlight-node rect {
-          animation: 
-             containerStrokeHighlight 2.0s ease-in-out forwards;
-        }
-
-        text.node-label {
-            font-family: "Roboto", sans-serif;
-            font-size: 0.8rem;  /* Base size using rem units for accessibility */
-            cursor: default;
-            user-select: none;
-        }
-
-        .node.constant .node-label {
-            font-size: 0.7rem;
-        }
-
-    </style>
 </div>

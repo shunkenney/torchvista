@@ -646,8 +646,9 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, p
     unique_id = str(uuid.uuid4())
     template_str = resources.read_text('torchvista.templates', 'graph.html')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
-    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
     viz_source = resources.read_text('torchvista.assets', 'viz-standalone.js')
+    jsoneditor_css = resources.read_text('torchvista.assets', 'jsoneditor-10.2.0.min.css')
+    jsoneditor_source = resources.read_text('torchvista.assets', 'jsoneditor-10.2.0.min.js')
 
     template = Template(template_str)
         
@@ -663,6 +664,8 @@ def plot_graph(adj_list, module_name_to_base_name, module_info, func_info_map, p
         'unique_id': unique_id,
         'd3_source': d3_source,
         'viz_source': viz_source,
+        'jsoneditor_css': jsoneditor_css,
+        'jsoneditor_source': jsoneditor_source,
         'max_module_expansion_depth': max_module_expansion_depth,
     })
     display(HTML(output))
@@ -689,8 +692,9 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
     unique_id = str(uuid.uuid4())
     template_str = resources.read_text('torchvista.templates', 'demo-graph.html')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
-    d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
     viz_source = resources.read_text('torchvista.assets', 'viz-standalone.js')
+    jsoneditor_css = resources.read_text('torchvista.assets', 'jsoneditor-10.2.0.min.css')
+    jsoneditor_source = resources.read_text('torchvista.assets', 'jsoneditor-10.2.0.min.js')
 
     template = Template(template_str)
         
@@ -708,6 +712,8 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
         'viz_source': viz_source,
         'code_contents': code_contents,
         'error_contents': str(exception) if exception else "",
+        'jsoneditor_css': jsoneditor_css,
+        'jsoneditor_source': jsoneditor_source,
         'max_module_expansion_depth': max_module_expansion_depth,
     })
     return output, exception

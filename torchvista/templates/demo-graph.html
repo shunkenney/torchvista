@@ -4,9 +4,9 @@
         <meta charset="UTF-8">
         <style>
             html, body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 height: 100%;
                 margin: 0;
-                font-family: monospace;
             }
 
             .container {
@@ -39,7 +39,6 @@
                 padding: 16px;
                 overflow: auto;
                 color: red;
-                font-family: monospace;
                 box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
             }
             .code-box-header {
@@ -69,7 +68,6 @@
                 font-size: large;
             }
 
-            /* Added for syntax highlighting */
             .code-box pre {
                 margin: 0;
                 padding: 0;
@@ -94,18 +92,18 @@
                 fill: #fff;
             }
             text.node-label {
-                font-family: "'Roboto', sans-serif";
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 cursor: default;
                 user-select: none;
             }
             text.type-indicator {
-                font-family: "'Roboto', sans-serif";
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 cursor: default;
                 user-select: none;
             }
             text.collapse-icon {
-                font-family: "'Roboto', sans-serif";
-                font-size: 14px
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-size: 14px;
                 cursor: default;
                 user-select: none;
             }
@@ -154,11 +152,14 @@
                 position: relative;
             }
             .popup {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 position: absolute;
                 background: white;
                 border: 1px solid #ccc;
-                width: 300px;
-                max-height: 400px;
+                width: 500px;
+                resize: both;
+                overflow: auto;
+                max-height: 70vh;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.2);
                 display: none;
                 display: flex;
@@ -193,7 +194,6 @@
             .popup pre {
                 white-space: pre;
                 overflow-x: auto;
-                font-family: monospace;
             }
 
             .popup-close {
@@ -244,67 +244,67 @@
             .collapse-icon {
                 pointer-events: none;
                 user-select: none;
-                font-family: "'Roboto', sans-serif";
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 fill: rgb(51, 51, 51);
             }
 
-            /* Edge hover styles */
+            /* Edge hover styles */`
             .edge-group path {
-              pointer-events: stroke;
+               pointer-events: stroke;
             }
 
             .edge-label {
-              pointer-events: all;
+                pointer-events: all;
             }
 
             @keyframes containerHighlight {
-              0% { 
-                filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-              }
-              25% { 
-                filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
-              }
-              50% { 
-                filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-              }
-              75% { 
-                filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
-              }
-              100% { 
-                filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
-              }
+                0% { 
+                    filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+                }
+                25% { 
+                    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+                }
+                50% { 
+                    filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+                }
+                75% { 
+                    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+                }
+                100% { 
+                    filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+                }
             }
 
             @keyframes containerStrokeHighlight {
-              0% { 
-                stroke-width: 1px;
-              }
-              25% { 
-                stroke-width: 3px;
-              }
-              50% { 
-                stroke-width: 1px;
-              }
-              75% { 
-                stroke-width: 3px;
-              }
-              100% { 
-                stroke-width: 1px;
-              }
+                0% { 
+                    stroke-width: 1px;
+                }
+                25% { 
+                    stroke-width: 3px;
+                }
+                50% { 
+                    stroke-width: 1px;
+                }
+                75% { 
+                    stroke-width: 3px;
+                }
+                100% { 
+                    stroke-width: 1px;
+                }
             }
 
             .highlight-cluster > rect:first-of-type {
-              animation: 
-                         containerStrokeHighlight 2.0s ease-in-out forwards;
+                animation: 
+                    containerStrokeHighlight 2.0s ease-in-out forwards;
             }
 
             .highlight-node rect {
-              animation: 
-                         containerStrokeHighlight 2.0s ease-in-out forwards;
+                animation: 
+                    containerStrokeHighlight 2.0s ease-in-out forwards;
             }
 
             text.node-label {
-                font-family: "Roboto", sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 font-size: 0.8rem;  /* Base size using rem units for accessibility */
                 cursor: default;
                 user-select: none;
@@ -329,7 +329,7 @@
                 font-size: 24px;
                 font-weight: bold;
                 margin: 0;
-                font-family: 'Arial', sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             }
 
             /* GitHub button iframe styling */
@@ -338,16 +338,38 @@
                 overflow: hidden;
             }
 
+            .json-viewer {
+                height: 60%;
+                width: 100%;
+            }
+
+            .popup-content summary {
+                margin: 5px;
+            }
 
         </style>
     </head>
     <body>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-        <script src="https://unpkg.com/@viz-js/viz@3.12.0/lib/viz-standalone.js"></script>
+        <script>
+            ${d3_source}
+        </script>
+        <script>
+            ${viz_source}
+        </script>
+    
+        <style>
+            ${jsoneditor_css}
+        </style>
+    
+        <script>
+            ${jsoneditor_source}
+        </script>
+    
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
         <script>
+        
 (function() {
     document.addEventListener('DOMContentLoaded', (event) => {
         document.querySelectorAll('pre code').forEach((block) => {
@@ -424,14 +446,14 @@
         for (const edge of graphData.edges) {
             const sourceId = edge.tail;
             const targetId = edge.head;
-            
+
             // Find node names by their _gvid
             const sourceName = Object.values(result.nodes).find(n => n.id === sourceId)?.name;
             const targetName = Object.values(result.nodes).find(n => n.id === targetId)?.name;
-            
+
             if (!sourceName || !targetName) continue;
-            
-                // Extract path points from the pos attribute
+
+            // Extract path points from the pos attribute
             let pathPoints = [];
             if (edge.pos) {
                 // IMPORTANT CHANGE: Correctly handle the "e," prefix
@@ -447,14 +469,14 @@
                         const [x, y] = point.split(',').map(Number);
                         return { x, y };
                     });
-                    
+
                     // Add the endpoint as the last point in the path
                     pathPoints.push({ x: endPoint[0], y: endPoint[1] });
                 } else {
                     // Handle normal path without "e," prefix
                     pathPoints = posStr.split(' ').map(point => {
-                    const [x, y] = point.split(',').map(Number);
-                    return { x, y };
+                        const [x, y] = point.split(',').map(Number);
+                        return { x, y };
                     });
                 }
             }
@@ -462,7 +484,8 @@
             result.edges.push({
                 source: sourceName,
                 target: targetName,
-                path: pathPoints
+                path: pathPoints,
+                edge_data_id: edge.edge_data_id
             });
         }
 
@@ -471,9 +494,9 @@
 
     function identifyContainersWithFailedNodes() {
         const failedNodes = Object.keys(adj_list).filter(node => adj_list[node].failed);
-      
+        
         const containersWithFailedNodes = new Set();
-      
+        
         failedNodes.forEach(failedNode => {
             let currentNode = failedNode;
 
@@ -483,7 +506,7 @@
                 currentNode = container;
             }
         });
-      
+        
         return containersWithFailedNodes;
     }
 
@@ -568,34 +591,56 @@
         
         // Process edges
         for (const [node, data] of Object.entries(adj_list)) {
+            let seenEdgeDataIds = {};
+
             for (const edge of data.edges) {
                 let sourceNode = node;
                 let targetNode = edge.target;
                 let skipEdge = false;
-                
+
                 for (const collapsedContainer of visibleCollapsedContainers) {
                     const descendants = getAllDescendants(collapsedContainer);
-                    
+
                     if (descendants.includes(node)) {
                         sourceNode = collapsedContainer;
                     }
-                    
+
                     if (descendants.includes(edge.target)) {
                         targetNode = collapsedContainer;
                     }
-                    
+
                     // Skip internal edges within collapsed containers
                     if (descendants.includes(node) && descendants.includes(edge.target)) {
                         skipEdge = true;
                     }
                 }
-                
-                if (!skipEdge && sourceNode !== targetNode && adj_list_collapsed_nodes[sourceNode]) {
-                    adj_list_collapsed_nodes[sourceNode].edges.push({
-                        target: targetNode,
-                        dims: edge.dims
-                    });
+
+                if (skipEdge || sourceNode === targetNode || !adj_list_collapsed_nodes[sourceNode]) {
+                    continue;
                 }
+
+                // Create a consistent key for the source-target pair
+                const pairKey = `${sourceNode}->${targetNode}`;
+                const edgeId = edge.edge_data_id;
+
+                if (edgeId) {
+                    if (!seenEdgeDataIds[pairKey]) {
+                        seenEdgeDataIds[pairKey] = new Set();
+                    }
+
+                    // Skip if this edge_data_id is already added between this pair
+                    if (seenEdgeDataIds[pairKey].has(edgeId)) {
+                        continue;
+                    }
+
+                    seenEdgeDataIds[pairKey].add(edgeId);
+                }
+
+                adj_list_collapsed_nodes[sourceNode].edges.push({
+                    target: targetNode,
+                    dims: edge.dims,
+                    edge_data_id: edge.edge_data_id,
+                });
             }
         }
     }
@@ -677,7 +722,11 @@
         // Add all edges
         for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             for (const edge of data.edges) {
-                dotSource += `  "${node}" -> "${edge.target}";\n`;
+                if (edge.edge_data_id) {
+                    dotSource += `  "${node}" -> "${edge.target}" [edge_data_id="${edge.edge_data_id}"];\n`;
+                } else {
+                    dotSource += `  "${node}" -> "${edge.target}";\n`;
+                }
             }
         }
 
@@ -759,7 +808,7 @@
         }
     }
 
-    waitForLibs(function() {        
+    waitForLibs(function() {
         initContainerNodes();
         initializeCollapsedContainersFromGraph();
         reloadGraph();
@@ -780,7 +829,7 @@
             .style("margin-top", "20px")
             .style("border-top", "1px solid #ccc")
             .style("padding-top", "20px");
-      
+        
         graphvizContainer.append("h3")
             .text("Original Graphviz Rendering")
             .style("text-align", "center");
@@ -789,7 +838,7 @@
         svgElement = vizInstance.renderSVGElement(dotSource)
         // Append the SVG element to the container
         graphvizContainer.node().appendChild(svgElement);
-          
+            
         // Style the SVG
         d3.select(svgElement)
             .attr("width", "100%")
@@ -890,7 +939,6 @@
             .attr("stroke-width", 1)
             .attr("cursor", "pointer");
             
-            // Add "-" symbol
             group.append("text")
             .attr("class", "collapse-icon")
             .attr("x", x1 + 10)
@@ -898,9 +946,8 @@
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
             .attr("font-size", "10px")
-            .attr("font-weight", "bold")
             .attr("cursor", "pointer")
-            .text("—");
+            .text("-");
         });
 
         // Add click event handler for collapse buttons
@@ -969,7 +1016,10 @@
             if (!sourceNodeData) {
                 sourceNodeData = adj_list[edge.source];
             }
-            const edgeData = sourceNodeData.edges.find(e => e.target === edge.target);
+            const edgeData = sourceNodeData.edges.find(e => 
+                e.target === edge.target && 
+                (e.edge_data_id === undefined || e.edge_data_id.toString() === edge.edge_data_id)
+            );
             if (!edgeData || !edgeData.dims) return;
             
             // Calculate position for label - near the start of the edge
@@ -1165,7 +1215,6 @@
             .attr("stroke-width", 1)
             .attr("cursor", "pointer");
         
-            // Add "+" symbol
             nodeGroup.append("text")
             .attr("class", "collapse-icon")
             .attr("x", -width/2 + 8)
@@ -1173,7 +1222,6 @@
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
             .attr("font-size", "10px")
-            .attr("font-weight", "bold")
             .attr("cursor", "pointer")
             .text("+");
             
@@ -1213,12 +1261,61 @@
                 rect.style("fill", originalColor);
             });
         });
-        
-        
-        // Implement popup functionality
+
+        function createJsonViewer(container, data) {
+            // Clear previous contents
+            container.innerHTML = '';
+
+            // Create a new div to hold the editor
+            const editorContainer = document.createElement('div');
+            // editorContainer.style.height = '250px';
+            // editorContainer.style.width = '100%';
+            container.appendChild(editorContainer);
+
+            const options = {
+                mode: 'code',
+                mainMenuBar: false,
+                navigationBar: false,
+                statusBar: false,
+                indentation: 2,
+                onChange: function() {
+                    editor.set(data);
+                }
+            };
+            const editor = new JSONEditor(editorContainer, options);
+            editor.set(data);
+            // set a reference for later use during resizing
+            container.jsonEditor = editor;
+        }
+
         function showPopup(event, [nodeName]) {
             event.stopPropagation();
             
+            const clickedNodeElement = d3.select(this);
+
+            // Position the clicked node
+            const clickednodeData = graphvizData.nodes[nodeName];
+            if (clickednodeData) {
+                const svgNode = svg.node();
+                const width = svgNode.clientWidth || 800;
+                const height = svgNode.clientHeight || 600;
+                
+                const currentTransform = d3.zoomTransform(svg.node());
+                const targetX = 0.4 * width - clickednodeData.position.x * currentTransform.k;
+                const targetY = 0.2 * height - clickednodeData.position.y * currentTransform.k;
+                
+                svg.call(zoom.transform, d3.zoomIdentity
+                    .translate(targetX, targetY)
+                    .scale(currentTransform.k));
+            }
+
+            clickedNodeElement.classed("highlight-node", true);
+            
+            setTimeout(() => {
+                clickedNodeElement.classed("highlight-node", false);
+            }, 2000); // Match the animation duration
+
+
             const popup = d3.select("#popup_${unique_id}");
             const clickedElement = d3.select(this).select("rect").node();
             const moduleTemplate = d3.select("#module-template_${unique_id}");
@@ -1228,28 +1325,32 @@
             const nodeData = adj_list[nodeName];
             
             d3.select("#popup-title_${unique_id}").text(graph_node_name_to_without_suffix[nodeName] || nodeName);
-            
-            // d3.select("#input-dims_${unique_id}").text(nodeData.input_dims);
-            // d3.select("#output-dims_${unique_id}").text(nodeData.output_dims);
-            
+
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
             noInfoMessage.style("display", "none");
             
-            if (module_name_to_base_name[nodeName] && module_info[module_name_to_base_name[nodeName]]) {
+            if (module_info[nodeName] || (module_name_to_base_name[nodeName] && module_info[module_name_to_base_name[nodeName]])) {
                 const info = module_info[nodeName] ? module_info[nodeName] : module_info[module_name_to_base_name[nodeName]];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
                 d3.select("#module-type_${unique_id}").text(info.type || 'N/A');
-                d3.select("#module-attributes_${unique_id}").text(JSON.stringify(info.attributes, null, 2));
                 d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
+
                 const forward_info = func_info_map[nodeName] ? func_info_map[nodeName] : func_info_map[module_name_to_base_name[nodeName]];
-                d3.select("#module-parameters_${unique_id}").text(JSON.stringify(forward_info, null, 2));
+                const attributesContainer = d3.select("#module-attributes_${unique_id}").node();
+                attributesContainer.innerHTML = '';
+                createJsonViewer(attributesContainer, info.attributes);
+
+                const parametersContainer = d3.select("#module-parameters_${unique_id}").node();
+                parametersContainer.innerHTML = '';
+                createJsonViewer(parametersContainer, forward_info);
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info_map[nodeName]) {
                 const info = func_info_map[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
-                
-                d3.select("#tensor-parameters_${unique_id}").text(JSON.stringify(info, null, 2));
+                const parametersContainer = d3.select("#tensor-op-parameters_${unique_id}").node();
+                parametersContainer.innerHTML = '';
+                createJsonViewer(parametersContainer, info);
             } else {
                 noInfoMessage.style("display", "block").classed("content-shown", true);
             }
@@ -1272,6 +1373,17 @@
         
         d3.select(".popup-close").on("click", closePopup);
         svg.on("click", closePopup);
+
+        const popup = document.getElementById(`popup_${unique_id}`);
+        const resizeObserver = new ResizeObserver(() => {
+            const editorContainers = popup.querySelectorAll('.json-viewer');
+            for (let container of editorContainers) {
+                if (container.jsonEditor) {
+                    container.jsonEditor.resize();
+                }
+            }
+        });
+        resizeObserver.observe(popup);
         
         // Calculate view box to ensure the graph is properly scaled and centered
         const findErrorNode = (nodes) => {
@@ -1420,8 +1532,10 @@
             
     }
 })();
-       </script>
 
+            
+        </script>
+            
         <div class="container">
             <div class="top-bar">
                 <h1 class="repo-title">TorchVista</h1>
@@ -1456,22 +1570,28 @@ ${error_contents}
                             <div id="common-info_${unique_id}">
                             </div>
                             <div id="module-template_${unique_id}" style="display:none;">
-                                <p><strong>Type:</strong> <span id="module-type_${unique_id}"></span></p>
-                                <p><strong>Attributes:</strong></p>
-                                <pre id="module-attributes_${unique_id}"></pre>
-                                <p><strong>forward() Parameters:</strong></p>
-                                <pre id="module-parameters_${unique_id}"></pre>
-                                <p><strong>Extra Repr:</strong></p>
-                                <pre id="module-extra-repr_${unique_id}"></pre>
+                                <details open>
+                                    <summary><strong>Type</strong></summary>
+                                    <p id="module-type_${unique_id}"></p>
+                                </details>
+                                
+                                <details open id="module-attributes-details_${unique_id}">
+                                    <summary><strong>Attributes</strong></summary>
+                                    <div id="module-attributes_${unique_id}" class="json-viewer"></div>
+                                </details>
+                                
+                                <details open id="module-parameters-details_${unique_id}">
+                                    <summary><strong>forward() Parameters</strong></summary>
+                                    <div id="module-parameters_${unique_id}" class="json-viewer"></div>
+                                </details>
                             </div>
                             <div id="tensor-op-template_${unique_id}" style="display:none;">
-                                <p><strong>Parameters:</strong></p>
-                                <pre id="tensor-parameters_${unique_id}"></pre>
+                                <summary><strong>Parameters</strong></summary>
+                                <div id="tensor-op-parameters_${unique_id}" class="json-viewer"></div>
                             </div>
                             <p id="no-info_${unique_id}" style="display:none;">No further information available for this node.</p>
                         </div>
-                    </div>
-                    <div id="popup-content_${unique_id}"></div>
+                
                 </div>
             </div>
         </div>
