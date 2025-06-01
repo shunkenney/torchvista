@@ -75,5 +75,4 @@ trace_model(model, example_input)
   Maximum depth for expanding nested modules. Default is `3`.
 
 - **show_non_gradient_nodes** (*bool*, optional):
-  Whether to show nodes for scalars, tensors, and NumPy arrays that are not part of the gradient graph  
-  (typically constants passed into operations or modules). Default is `False`.
+  Whether to show nodes for scalars, tensors, and NumPy arrays that are not part of the gradient graph (typically constants passed into operations or modules). Default is `False`.
