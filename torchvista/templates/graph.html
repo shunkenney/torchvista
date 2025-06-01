@@ -1,86 +1,82 @@
 <div id="graph-container_${unique_id}" style="height: 800px; overflow: auto;">
     <div id="graph_${unique_id}"></div>
-    <div id="popup_${unique_id}" class="popup" style="display: none;">
-        <div class="popup-header">
+    <div id="popup_${unique_id}" class="popup_${unique_id}" style="display: none;">
+        <div class="popup-header_${unique_id}">
             <h3 id="popup-title_${unique_id}"></h3>
-            <span class="popup-close">✕</span>
+            <span class="popup-close_${unique_id}">✕</span>
         </div>
-        <div id="popup-content_${unique_id}" class="popup-content">
+        <div id="popup-content_${unique_id}" class="popup-content_${unique_id}">
             <div id="common-info_${unique_id}">
             </div>
             <div id="module-template_${unique_id}" style="display:none;">
                 <details open id="module-attributes-details_${unique_id}">
                     <summary><strong>Attributes</strong></summary>
-                    <div id="module-attributes_${unique_id}" class="json-viewer"></div>
+                    <div id="module-attributes_${unique_id}" class="json-viewer_${unique_id}"></div>
                 </details>
                 
                 <details open id="module-parameters-details_${unique_id}">
                     <summary><strong>forward() Parameters</strong></summary>
-                    <div id="module-parameters_${unique_id}" class="json-viewer"></div>
+                    <div id="module-parameters_${unique_id}" class="json-viewer_${unique_id}"></div>
                 </details>
             </div>
             <div id="tensor-op-template_${unique_id}" style="display:none;">
                 <summary><strong>Parameters</strong></summary>
-                <div id="tensor-op-parameters_${unique_id}" class="json-viewer"></div>
+                <div id="tensor-op-parameters_${unique_id}" class="json-viewer_${unique_id}"></div>
             </div>
             <p id="no-info_${unique_id}" style="display:none;">No further information available for this node.</p>
         </div>
     </div>
 
     <style>
-            #graph {
-                width: 100%;
-                height: 100%;
-            }
-            .node rect {
+            .node_${unique_id} rect {
                 stroke: #333;
                 fill: #fff;
             }
-            text.node-label {
+            text.node-label_${unique_id} {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 cursor: default;
                 user-select: none;
             }
-            text.type-indicator {
+            text.type-indicator_${unique_id} {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 cursor: default;
                 user-select: none;
             }
-            text.collapse-icon {
+            text.collapse-icon_${unique_id} {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 font-size: 14px
                 cursor: default;
                 user-select: none;
             }
-            .edge {
+            .edge_${unique_id} {
                 stroke: #333333;
                 fill: none;
             }
-            .node rect.input { fill: #FF9AFF; }
-            .node rect.constant { fill: rgb(235 235 235); }
+            .node_${unique_id} rect.input_${unique_id} { fill: #FF9AFF; }
+            .node_${unique_id} rect.constant_${unique_id} { fill: rgb(235 235 235); }
 
-            .node rect.output { fill: #FF9AFF; }
-            .node rect.failed { fill: rgb(224 15 15); }
-            .node rect.module { fill: #8BDEDB; }
-            .node rect.operation { fill: #FEBC5A; }
-            .edgeLabelGroup {
+            .node_${unique_id} rect.output_${unique_id} { fill: #FF9AFF; }
+            .node_${unique_id} rect.failed_${unique_id} { fill: rgb(224 15 15); }
+            .node_${unique_id} rect.module_${unique_id} { fill: #8BDEDB; }
+            .node_${unique_id} rect.operation_${unique_id} { fill: #FEBC5A; }
+            .edgeLabelGroup_${unique_id} {
                 pointer-events: none;
             }
-            #arrowhead path {
+            #arrowhead_${unique_id} path {
                 fill: #333333;;
             }
-            .node rect,
-            .node ellipse {
+            .node_${unique_id} rect,
+            .node_${unique_id} ellipse {
                 transition: fill 0.3s ease;
             }
 
-            .node .type-indicator {
+            .node_${unique_id} .type-indicator_${unique_id} {
                 font-size: 5px;
                 fill: rgba(0, 0, 0, 1.0);  /* Dark grey, semi-transparent */
                 pointer-events: none;
             }
 
-            .node.error rect {
+            .node_${unique_id}.error_${unique_id} rect {
                 stroke: black;
                 stroke-width: 1px;
                 /* stroke-dasharray: 3, 3; */
@@ -88,15 +84,16 @@
                 ry: 5px;
             }
 
-            .boundary-box.error > rect:first-of-type {
+            .boundary-box_${unique_id}.error_${unique_id} > rect:first-of-type {
                 fill: red;
                 fill-opacity: 0.2;
             }
 
-            #graph-container {
+            #graph-container_${unique_id} {
                 position: relative;
             }
-            .popup {
+            
+            .popup_${unique_id} {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 position: absolute;
                 background: white;
@@ -111,7 +108,7 @@
                 flex-direction: column;
             }
 
-            .popup-header {
+            .popup-header_${unique_id} {
                 position: sticky;
                 top: 0;
                 background: white;
@@ -123,12 +120,12 @@
                 z-index: 1;
             }
 
-            .popup h3 {
+            .popup_${unique_id} h3 {
                 margin: 0;
                 font-size: 16px;
             }
 
-            .popup-content {
+            .popup-content_${unique_id} {
                 padding: 10px;
                 padding-bottom: 10px;
                 overflow-y: auto;
@@ -136,57 +133,58 @@
                 flex-grow: 1;
             }
 
-            .popup pre {
+            .popup_${unique_id} pre {
                 white-space: pre;
                 overflow-x: auto;
             }
 
-            .popup-close {
+            .popup-close_${unique_id} {
                 cursor: pointer;
                 font-size: 24px;
                 font-weight: bold;
                 line-height: 1;
             }
 
-            #popup-title {
-                font-size: 24px;
+            #popup-title_${unique_id} {
+                font-size: 16px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             }
 
-            #graph-container {
+            #graph-container_${unique_id} {
                 position: relative;
             }
 
-            pre {
+            #graph-container_${unique_id} pre {
                 margin-bottom: 0;
             }
 
-            .boundary-box rect {
+            .boundary-box_${unique_id} rect {
                 pointer-events: none;
             }
-            .boundary-box text {
+            .boundary-box_${unique_id} text {
                 pointer-events: none;
                 user-select: none;
             }
 
-            .boundary-box rect {
+            .boundary-box_${unique_id} rect {
                 pointer-events: none;
             }
-            .boundary-box text {
+            .boundary-box_${unique_id} text {
                 pointer-events: none;
                 user-select: none;
                 font-weight: bold;
             }
-            .edge-label text {
+            .edge-label_${unique_id} text {
                 pointer-events: none;
                 user-select: none;
                 font-size: 4px;
                 font-family: "'Roboto', sans-serif";
             }
             
-            .collapse-button:hover {
+            .collapse-button_${unique_id}:hover {
                 fill: #eee;
             }
-            .collapse-icon {
+            .collapse-icon_${unique_id} {
                 pointer-events: none;
                 user-select: none;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -194,11 +192,11 @@
             }
 
             /* Edge hover styles */
-            .edge-group path {
+            .edge-group_${unique_id} path {
                pointer-events: stroke;
             }
 
-            .edge-label {
+            .edge-label_${unique_id} {
                 pointer-events: all;
             }
 
@@ -238,28 +236,28 @@
                 }
             }
 
-            .highlight-cluster > rect:first-of-type {
+            .highlight-cluster_${unique_id} > rect:first-of-type {
                 animation: 
                     containerStrokeHighlight 2.0s ease-in-out forwards;
             }
 
-            .highlight-node rect {
+            .highlight-node_${unique_id} rect {
                 animation: 
                     containerStrokeHighlight 2.0s ease-in-out forwards;
             }
 
-            text.node-label {
+            text.node-label_${unique_id} {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 font-size: 0.8rem;  /* Base size using rem units for accessibility */
                 cursor: default;
                 user-select: none;
             }
 
-            .node.constant .node-label {
+            .node_${unique_id}.constant_${unique_id} .node-label_${unique_id} {
                 font-size: 0.7rem;
             }
 
-            .popup-content summary {
+            .popup-content_${unique_id} summary_${unique_id} {
                 cursor: pointer;
                 margin: 5px;
             }
@@ -732,7 +730,7 @@
         // Create a container for the Graphviz image
         const graphvizContainer = d3.select("#graph-container_${unique_id}")
             .append("div")
-            .attr("id", "graphviz-image-container")
+            .attr("id", "graphviz-image-container_${unique_id}")
             .style("margin-top", "20px")
             .style("border-top", "1px solid #ccc")
             .style("padding-top", "20px");
@@ -785,11 +783,11 @@
         .attr("fill", "#333");
 
         // Draw clusters (container boxes) first so they're behind nodes
-        const clusters = inner.selectAll(".boundary-box")
+        const clusters = inner.selectAll(".boundary-box_${unique_id}")
         .data(Object.entries(graphvizData.clusters))
         .enter()
         .append("g")
-        .attr("class", "boundary-box");
+        .attr("class", "boundary-box_${unique_id}");
 
         const containersWithFailedNodes = identifyContainersWithFailedNodes(adj_list, ancestor_map);
 
@@ -800,7 +798,7 @@
 
             const hasFailedNodes = containersWithFailedNodes.has(clusterName);
             if (hasFailedNodes) {
-                group.classed("error", true);
+                group.classed("error_${unique_id}", true);
             }
 
             // Parse bounding box coordinates
@@ -837,7 +835,7 @@
             
             // Add collapse/expand button
             group.append("circle")
-            .attr("class", "collapse-button")
+            .attr("class", "collapse-button_${unique_id}")
             .attr("cx", x1 + 10)
             .attr("cy", y1 + 10)
             .attr("r", 6)
@@ -847,7 +845,7 @@
             .attr("cursor", "pointer");
             
             group.append("text")
-            .attr("class", "collapse-icon")
+            .attr("class", "collapse-icon_${unique_id}")
             .attr("x", x1 + 10)
             .attr("y", y1 + 10)
             .attr("text-anchor", "middle")
@@ -858,7 +856,7 @@
         });
 
         // Add click event handler for collapse buttons
-        clusters.selectAll(".collapse-button, .collapse-icon")
+        clusters.selectAll(".collapse-button_${unique_id}, .collapse-icon_${unique_id}")
         .on("click", function(event, [clusterName, clusterData]) {
             event.stopPropagation(); // Prevent event from bubbling to SVG
             // Collapse the container
@@ -872,15 +870,15 @@
 
         
         // Create edges using the path points from Graphviz
-        const edges = inner.selectAll(".edge")
+        const edges = inner.selectAll(".edge_${unique_id}")
         .data(graphvizData.edges)
         .enter()
         .append("g")
-        .attr("class", "edge-group");
+        .attr("class", "edge-group_${unique_id}");
         
         // Add the actual path
         edges.append("path")
-        .attr("class", "edge")
+        .attr("class", "edge_${unique_id}")
         .attr("d", function(edge) {
             if (edge.path && edge.path.length > 0) {
                     // Create a proper SVG path using Bézier curves
@@ -942,7 +940,7 @@
             
             // Create a background for the text
             const labelGroup = edgeGroup.append("g")
-            .attr("class", "edge-label")
+            .attr("class", "edge-label_${unique_id}")
             .attr("transform", `translate(${pointAtStart.x}, ${pointAtStart.y})`);
             
             const text = labelGroup.append("text")
@@ -975,7 +973,7 @@
         edges.each(function() {
             const edgeGroup = d3.select(this);
             const path = edgeGroup.select("path");
-            const labelGroup = edgeGroup.select(".edge-label");
+            const labelGroup = edgeGroup.select(".edge-label_${unique_id}");
             const labelText = labelGroup.select("text");
             const labelBg = labelGroup.select("rect");
             const originalStrokeWidth = path.attr("stroke-width") || 1;
@@ -1040,19 +1038,19 @@
 
 
         // Create nodes using positions from Graphviz
-        const nodes = inner.selectAll(".node")
+        const nodes = inner.selectAll(".node_${unique_id}")
             .data(Object.entries(graphvizData.nodes))
             .enter()
             .append("g")
             // In the createGraph function, when you're creating nodes, modify the class assignment:
             .attr("class", function([nodeName, nodeData]) {
-                let classes = "node";
-                if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) classes += " error";
-                if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) classes += " input";
-                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName))) classes += " module";
-                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) classes += " output";
-                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Operation")) classes += " operation";
-                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")) classes += " constant";
+                let classes = "node_${unique_id}";
+                if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) classes += " error_${unique_id}";
+                if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) classes += " input_${unique_id}";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName))) classes += " module_${unique_id}";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) classes += " output_${unique_id}";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Operation")) classes += " operation_${unique_id}";
+                else if ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")) classes += " constant_${unique_id}";
                 return classes;
             })
             .attr("transform", function([nodeName, nodeData]) {
@@ -1060,7 +1058,7 @@
             });
         
         // Filter nodes for click event - don't include input or output nodes
-        inner.selectAll(".node")
+        inner.selectAll(".node_${unique_id}")
             .filter(function([nodeName]) {
                 return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")))
             })
@@ -1074,16 +1072,16 @@
         .attr("x", function([nodeName, nodeData]) { return -nodeData.width / 2; })
         .attr("y", function([nodeName, nodeData]) { return -nodeData.height / 2; })
         .attr("class", function([nodeName]) { 
-            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Input") return "input";
-            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Output") return "output";
-            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Constant") return "constant";
-            if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) return "failed";
-            return ((adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName))) ? "module" : "operation";
+            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Input") return "input_${unique_id}";
+            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Output") return "output_${unique_id}";
+            if (adj_list[nodeName] && adj_list[nodeName].node_type === "Constant") return "constant_${unique_id}";
+            if ((adj_list[nodeName] && adj_list[nodeName].failed) || containersWithFailedNodes.has(nodeName)) return "failed_${unique_id}";
+            return ((adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName))) ? "module_${unique_id}" : "operation_${unique_id}";
         });
         
         // Add labels for nodes
         nodes.append("text")
-        .attr("class", "node-label")
+        .attr("class", "node-label_${unique_id}")
         .text(function([nodeName]) { return graph_node_name_to_without_suffix[nodeName] || nodeName; })
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "central");
@@ -1092,7 +1090,7 @@
         nodes.filter(function([nodeName]) {
             return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")));
         }).append("text")
-        .attr("class", "type-indicator")
+        .attr("class", "type-indicator_${unique_id}")
         .attr("text-anchor", "end")
         .attr("dominant-baseline", "hanging")
         .attr("transform", function([nodeName, nodeData]) {
@@ -1103,7 +1101,7 @@
         });
 
         // Add collapse/expand buttons to collapsed container nodes
-        inner.selectAll(".node")
+        inner.selectAll(".node_${unique_id}")
         .filter(function([nodeName]) {
             return collapsedContainers.has(nodeName);
         })
@@ -1113,7 +1111,7 @@
             const height = nodeData.height;        
             // Add collapse/expand button (with "+" since it's collapsed)
             nodeGroup.append("circle")
-            .attr("class", "collapse-button")
+            .attr("class", "collapse-button_${unique_id}")
             .attr("cx", -width/2 + 8)
             .attr("cy", -height/2 + 8)
             .attr("r", 6)
@@ -1123,7 +1121,7 @@
             .attr("cursor", "pointer");
         
             nodeGroup.append("text")
-            .attr("class", "collapse-icon")
+            .attr("class", "collapse-icon_${unique_id}")
             .attr("x", -width/2 + 8)
             .attr("y", -height/2 + 8) 
             .attr("text-anchor", "middle")
@@ -1133,7 +1131,7 @@
             .text("+");
             
             // Add click handler using the existing reloadGraph function
-            nodeGroup.selectAll(".collapse-button, .collapse-icon")
+            nodeGroup.selectAll(".collapse-button_${unique_id}, .collapse-icon_${unique_id}")
             .on("click", function(event) {
                 event.stopPropagation();
                 
@@ -1216,10 +1214,10 @@
                     .scale(currentTransform.k));
             }
 
-            clickedNodeElement.classed("highlight-node", true);
+            clickedNodeElement.classed("highlight-node_${unique_id}", true);
             
             setTimeout(() => {
-                clickedNodeElement.classed("highlight-node", false);
+                clickedNodeElement.classed("highlight-node_${unique_id}", false);
             }, 2000); // Match the animation duration
 
 
@@ -1243,7 +1241,7 @@
             
             if (module_info[nodeName]) {
                 const info = module_info[nodeName];
-                moduleTemplate.style("display", "block").classed("content-shown", true);
+                moduleTemplate.style("display", "block").classed("content-shown_${unique_id}", true);
                 
                 d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
 
@@ -1257,12 +1255,12 @@
                 createJsonViewer(parametersContainer, forward_info);
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info[nodeName]) {
                 const info = func_info[nodeName];
-                tensorOpTemplate.style("display", "block").classed("content-shown", true);
+                tensorOpTemplate.style("display", "block").classed("content-shown_${unique_id}", true);
                 const parametersContainer = d3.select("#tensor-op-parameters_${unique_id}").node();
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, info);
             } else {
-                noInfoMessage.style("display", "block").classed("content-shown", true);
+                noInfoMessage.style("display", "block").classed("content-shown_${unique_id}", true);
             }
             
             const boundingBox = clickedElement.getBoundingClientRect();
@@ -1281,12 +1279,12 @@
             d3.select("#popup_${unique_id}").style("display", "none");
         }
         
-        d3.select(".popup-close").on("click", closePopup);
+        d3.select(".popup-close_${unique_id}").on("click", closePopup);
         svg.on("click", closePopup);
 
         const popup = document.getElementById(`popup_${unique_id}`);
         const resizeObserver = new ResizeObserver(() => {
-            const editorContainers = popup.querySelectorAll('.json-viewer');
+            const editorContainers = popup.querySelectorAll('.json-viewer_${unique_id}');
             for (let container of editorContainers) {
                 if (container.jsonEditor) {
                     container.jsonEditor.resize();
@@ -1355,30 +1353,30 @@
                 // Apply highlight effect to the target container
                 if (Object.keys(graphvizData.nodes).includes(lastModifiedContainer)) {
                     // Highlight the node (collapsed container)
-                    const targetElement = inner.selectAll(".node")
+                    const targetElement = inner.selectAll(".node_${unique_id}")
                         .filter(([nodeName]) => nodeName === lastModifiedContainer);
                         
                     if (!targetElement.empty()) {
-                        targetElement.classed("highlight-node", true);
+                        targetElement.classed("highlight-node_${unique_id}", true);
                         
                         // Remove the highlight class after animation completes
                         setTimeout(() => {
-                            targetElement.classed("highlight-node", false);
+                            targetElement.classed("highlight-node_${unique_id}", false);
                         }, 2000); // Match the animation duration
                     }
                 } else if (Object.keys(graphvizData.clusters).includes(lastModifiedContainer)) {
                     // Highlight the cluster (expanded container)
-                    const targetElement = inner.selectAll(".boundary-box")
+                    const targetElement = inner.selectAll(".boundary-box_${unique_id}")
                         .filter(function([clusterName]) {
                             return clusterName === lastModifiedContainer;
                         });
                         
                     if (!targetElement.empty()) {
-                        targetElement.classed("highlight-cluster", true);
+                        targetElement.classed("highlight-cluster_${unique_id}", true);
                         
                         // Remove the highlight class after animation completes
                         setTimeout(() => {
-                            targetElement.classed("highlight-cluster", false);
+                            targetElement.classed("highlight-cluster_${unique_id}", false);
                         }, 2000); // Match the animation duration
                     }
                 }

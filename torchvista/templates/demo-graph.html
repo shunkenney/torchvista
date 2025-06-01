@@ -159,7 +159,7 @@
                 width: 500px;
                 resize: horizontal;
                 overflow: auto;
-                max-height: 70vh;
+                max-height: 70%;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.2);
                 display: none;
                 display: flex;
@@ -204,7 +204,8 @@
             }
 
             #popup-title {
-                font-size: 24px;
+                font-size: 16px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             }
 
             #graph-container {
@@ -766,7 +767,7 @@
         }
     }
     function reloadGraph() {
-        d3.select("#graph_${unique_id}").html("");
+        d3.select("#graph").html("");
 
         const dotSource = generateDotSource(adj_list, ancestor_map);
 
@@ -824,7 +825,7 @@
     // Add this function to render the raw Graphviz visualization
     function renderGraphvizImage(dotSource) {
         // Create a container for the Graphviz image
-        const graphvizContainer = d3.select("#graph-container_${unique_id}")
+        const graphvizContainer = d3.select("#graph-container")
             .append("div")
             .attr("id", "graphviz-image-container")
             .style("margin-top", "20px")
@@ -849,7 +850,7 @@
     }
 
     function createGraph(graphvizData) {
-        const svg = d3.select("#graph_${unique_id}")
+        const svg = d3.select("#graph")
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -867,7 +868,7 @@
 
         // Define arrowhead marker
         svg.append("defs").append("marker")
-        .attr("id", "arrowhead_${unique_id}")
+        .attr("id", "arrowhead")
         .attr("viewBox", "0 -5 10 10")
         .attr("refX", 8)
         .attr("refY", 0)
@@ -1000,7 +1001,7 @@
             }
             return "";
         })
-        .attr("marker-end", "url(#arrowhead_${unique_id})");
+        .attr("marker-end", "url(#arrowhead)");
         
         // Add dimension labels on edges
         edges.each(function(edge) {
@@ -1317,11 +1318,11 @@
             }, 2000); // Match the animation duration
 
 
-            const popup = d3.select("#popup_${unique_id}");
+            const popup = d3.select("#popup");
             const clickedElement = d3.select(this).select("rect").node();
-            const moduleTemplate = d3.select("#module-template_${unique_id}");
-            const tensorOpTemplate = d3.select("#tensor-op-template_${unique_id}");
-            const noInfoMessage = d3.select("#no-info_${unique_id}");
+            const moduleTemplate = d3.select("#module-template");
+            const tensorOpTemplate = d3.select("#tensor-op-template");
+            const noInfoMessage = d3.select("#no-info");
             
             const nodeData = adj_list[nodeName];
             
@@ -1329,7 +1330,7 @@
             if (node_to_module_path[nodeName] && graph_node_name_to_without_suffix[nodeName]) {
                 popupTitle = node_to_module_path[nodeName] + "." + graph_node_name_to_without_suffix[nodeName];
             }
-            d3.select("#popup-title_${unique_id}").text(popupTitle);
+            d3.select("#popup-title").text(popupTitle);
 
             moduleTemplate.style("display", "none");
             tensorOpTemplate.style("display", "none");
@@ -1339,20 +1340,20 @@
                 const info = module_info[nodeName];
                 moduleTemplate.style("display", "block").classed("content-shown", true);
                 
-                d3.select("#module-extra-repr_${unique_id}").text(info.extra_repr || 'N/A');
+                d3.select("#module-extra-repr").text(info.extra_repr || 'N/A');
 
                 const forward_info = func_info[nodeName];
-                const attributesContainer = d3.select("#module-attributes_${unique_id}").node();
+                const attributesContainer = d3.select("#module-attributes").node();
                 attributesContainer.innerHTML = '';
                 createJsonViewer(attributesContainer, info.attributes);
 
-                const parametersContainer = d3.select("#module-parameters_${unique_id}").node();
+                const parametersContainer = d3.select("#module-parameters").node();
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, forward_info);
             } else if (!(adj_list[nodeName] && adj_list[nodeName].node_type === "Input") && func_info[nodeName]) {
                 const info = func_info[nodeName];
                 tensorOpTemplate.style("display", "block").classed("content-shown", true);
-                const parametersContainer = d3.select("#tensor-op-parameters_${unique_id}").node();
+                const parametersContainer = d3.select("#tensor-op-parameters").node();
                 parametersContainer.innerHTML = '';
                 createJsonViewer(parametersContainer, info);
             } else {
@@ -1360,7 +1361,7 @@
             }
             
             const boundingBox = clickedElement.getBoundingClientRect();
-            const containerRect = d3.select("#graph-container_${unique_id}").node().getBoundingClientRect();
+            const containerRect = d3.select("#graph-container").node().getBoundingClientRect();
             
             const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
             const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
@@ -1368,17 +1369,17 @@
             popup.style("left", `${x}px`)
             .style("top", `${y}px`)
             .style("display", "flex");
-            d3.select("#popup-content_${unique_id}").node().scrollTop = 0;
+            d3.select("#popup-content").node().scrollTop = 0;
         }
         
         function closePopup() {
-            d3.select("#popup_${unique_id}").style("display", "none");
+            d3.select("#popup").style("display", "none");
         }
         
         d3.select(".popup-close").on("click", closePopup);
         svg.on("click", closePopup);
 
-        const popup = document.getElementById(`popup_${unique_id}`);
+        const popup = document.getElementById(`popup`);
         const resizeObserver = new ResizeObserver(() => {
             const editorContainers = popup.querySelectorAll('.json-viewer');
             for (let container of editorContainers) {
@@ -1563,32 +1564,32 @@ ${error_contents}
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container_${unique_id}" style="height: 97%; overflow: auto; position: relative;">
-                    <div id="graph_${unique_id}" style="height: 100%"></div>
-                    <div id="popup_${unique_id}" class="popup" style="display: none;">
+                <div id="graph-container" style="height: 97%; overflow: auto; position: relative;">
+                    <div id="graph" style="height: 100%"></div>
+                    <div id="popup" class="popup" style="display: none;">
                         <div class="popup-header">
-                            <h3 id="popup-title_${unique_id}"></h3>
+                            <h3 id="popup-title"></h3>
                             <span class="popup-close">✕</span>
                         </div>
-                        <div id="popup-content_${unique_id}" class="popup-content">
-                            <div id="common-info_${unique_id}">
+                        <div id="popup-content" class="popup-content">
+                            <div id="common-info">
                             </div>
-                            <div id="module-template_${unique_id}" style="display:none;">
-                                <details open id="module-attributes-details_${unique_id}">
+                            <div id="module-template" style="display:none;">
+                                <details open id="module-attributes-details">
                                     <summary><strong>Attributes</strong></summary>
-                                    <div id="module-attributes_${unique_id}" class="json-viewer"></div>
+                                    <div id="module-attributes" class="json-viewer"></div>
                                 </details>
                                 
-                                <details open id="module-parameters-details_${unique_id}">
+                                <details open id="module-parameters-details">
                                     <summary><strong>forward() Parameters</strong></summary>
-                                    <div id="module-parameters_${unique_id}" class="json-viewer"></div>
+                                    <div id="module-parameters" class="json-viewer"></div>
                                 </details>
                             </div>
-                            <div id="tensor-op-template_${unique_id}" style="display:none;">
+                            <div id="tensor-op-template" style="display:none;">
                                 <summary><strong>Parameters</strong></summary>
-                                <div id="tensor-op-parameters_${unique_id}" class="json-viewer"></div>
+                                <div id="tensor-op-parameters" class="json-viewer"></div>
                             </div>
-                            <p id="no-info_${unique_id}" style="display:none;">No further information available for this node.</p>
+                            <p id="no-info" style="display:none;">No further information available for this node.</p>
                         </div>
                 
                 </div>
