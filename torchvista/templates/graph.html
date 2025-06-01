@@ -9,14 +9,13 @@
             <div id="common-info_${unique_id}">
             </div>
             <div id="module-template_${unique_id}" style="display:none;">
-                <details open id="module-attributes-details_${unique_id}">
-                    <summary><strong>Attributes</strong></summary>
-                    <div id="module-attributes_${unique_id}" class="json-viewer_${unique_id}"></div>
-                </details>
-                
                 <details open id="module-parameters-details_${unique_id}">
                     <summary><strong>forward() Parameters</strong></summary>
                     <div id="module-parameters_${unique_id}" class="json-viewer_${unique_id}"></div>
+                </details>
+                <details open id="module-attributes-details_${unique_id}">
+                    <summary><strong>Attributes</strong></summary>
+                    <div id="module-attributes_${unique_id}" class="json-viewer_${unique_id}"></div>
                 </details>
             </div>
             <div id="tensor-op-template_${unique_id}" style="display:none;">
@@ -257,9 +256,10 @@
                 font-size: 0.7rem;
             }
 
-            .popup-content_${unique_id} summary_${unique_id} {
+            .popup-content_${unique_id} summary {
                 cursor: pointer;
                 margin: 5px;
+                user-select: none;
             }
 
     </style>
@@ -1173,8 +1173,7 @@
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            // editorContainer.style.height = '250px';
-            // editorContainer.style.width = '100%';
+            editorContainer.style.height = '25vh';
             container.appendChild(editorContainer);
 
             const options = {

@@ -347,6 +347,7 @@
             .popup-content summary {
                 cursor: pointer;
                 margin: 5px;
+                user-select: none;
             }
 
         </style>
@@ -1270,8 +1271,7 @@
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            // editorContainer.style.height = '250px';
-            // editorContainer.style.width = '100%';
+            editorContainer.style.height = '25vh';
             container.appendChild(editorContainer);
 
             const options = {
@@ -1574,15 +1574,14 @@ ${error_contents}
                         <div id="popup-content" class="popup-content">
                             <div id="common-info">
                             </div>
+                            <details open id="module-parameters-details">
+                                <summary><strong>forward() Parameters</strong></summary>
+                                <div id="module-parameters" class="json-viewer"></div>
+                            </details>
                             <div id="module-template" style="display:none;">
                                 <details open id="module-attributes-details">
                                     <summary><strong>Attributes</strong></summary>
                                     <div id="module-attributes" class="json-viewer"></div>
-                                </details>
-                                
-                                <details open id="module-parameters-details">
-                                    <summary><strong>forward() Parameters</strong></summary>
-                                    <div id="module-parameters" class="json-viewer"></div>
                                 </details>
                             </div>
                             <div id="tensor-op-template" style="display:none;">

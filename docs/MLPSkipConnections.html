@@ -347,6 +347,7 @@
             .popup-content summary {
                 cursor: pointer;
                 margin: 5px;
+                user-select: none;
             }
 
         </style>
@@ -480,7 +481,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(1, 64)", "edge_data_id": 5448892144}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "relu_1", "dims": "(1, 128)", "edge_data_id": 5766947344}], "failed": false, "node_type": "Module"}, "relu_1": {"edges": [{"target": "Linear_2", "dims": "(1, 128)", "edge_data_id": 5766944944}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 5766944944}], "failed": false, "node_type": "Operation"}, "Linear_2": {"edges": [{"target": "relu_2", "dims": "(1, 128)", "edge_data_id": 5766941488}], "failed": false, "node_type": "Module"}, "relu_2": {"edges": [{"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 5766946768}], "failed": false, "node_type": "Operation"}, "__add___1": {"edges": [{"target": "Linear_3", "dims": "(1, 128)", "edge_data_id": 5766941488}], "failed": false, "node_type": "Operation"}, "Linear_3": {"edges": [{"target": "relu_3", "dims": "(1, 64)", "edge_data_id": 5766946384}], "failed": false, "node_type": "Module"}, "relu_3": {"edges": [{"target": "Linear_4", "dims": "(1, 64)", "edge_data_id": 5766941488}], "failed": false, "node_type": "Operation"}, "Linear_4": {"edges": [{"target": "output_0", "dims": "(1, 10)", "edge_data_id": 5766947632}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(1, 64)", "edge_data_id": 5853609712}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "relu_1", "dims": "(1, 128)", "edge_data_id": 6374592048}], "failed": false, "node_type": "Module"}, "relu_1": {"edges": [{"target": "Linear_2", "dims": "(1, 128)", "edge_data_id": 6374591952}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6374591952}], "failed": false, "node_type": "Operation"}, "Linear_2": {"edges": [{"target": "relu_2", "dims": "(1, 128)", "edge_data_id": 6374596464}], "failed": false, "node_type": "Module"}, "relu_2": {"edges": [{"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6376940048}], "failed": false, "node_type": "Operation"}, "__add___1": {"edges": [{"target": "Linear_3", "dims": "(1, 128)", "edge_data_id": 6374596464}], "failed": false, "node_type": "Operation"}, "Linear_3": {"edges": [{"target": "relu_3", "dims": "(1, 64)", "edge_data_id": 6376939472}], "failed": false, "node_type": "Module"}, "relu_3": {"edges": [{"target": "Linear_4", "dims": "(1, 64)", "edge_data_id": 6374596464}], "failed": false, "node_type": "Operation"}, "Linear_4": {"edges": [{"target": "output_0", "dims": "(1, 10)", "edge_data_id": 6376938224}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"Linear_1": {"type": "Linear", "parameters": {"weight": {"shape": [128, 64], "requires_grad": true}, "bias": {"shape": [128], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 128, "training": true}, "extra_repr": "in_features=64, out_features=128, bias=True"}, "Linear_2": {"type": "Linear", "parameters": {"weight": {"shape": [128, 128], "requires_grad": true}, "bias": {"shape": [128], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 128, "out_features": 128, "training": true}, "extra_repr": "in_features=128, out_features=128, bias=True"}, "Linear_3": {"type": "Linear", "parameters": {"weight": {"shape": [64, 128], "requires_grad": true}, "bias": {"shape": [64], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 128, "out_features": 64, "training": true}, "extra_repr": "in_features=128, out_features=64, bias=True"}, "Linear_4": {"type": "Linear", "parameters": {"weight": {"shape": [10, 64], "requires_grad": true}, "bias": {"shape": [10], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 10, "training": true}, "extra_repr": "in_features=64, out_features=10, bias=True"}};
     const func_info = {"Linear_1": {"positional_args": [{"_type": "tensor", "shape": [1, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_1": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_2": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_2": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "__add___1": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_3": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_3": {"positional_args": [{"_type": "tensor", "shape": [1, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_4": {"positional_args": [{"_type": "tensor", "shape": [1, 64], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {};
@@ -1370,8 +1371,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            // editorContainer.style.height = '250px';
-            // editorContainer.style.width = '100%';
+            editorContainer.style.height = '25vh';
             container.appendChild(editorContainer);
 
             const options = {
@@ -1697,15 +1697,14 @@ trace_model(model, example_input)
                         <div id="popup-content" class="popup-content">
                             <div id="common-info">
                             </div>
+                            <details open id="module-parameters-details">
+                                <summary><strong>forward() Parameters</strong></summary>
+                                <div id="module-parameters" class="json-viewer"></div>
+                            </details>
                             <div id="module-template" style="display:none;">
                                 <details open id="module-attributes-details">
                                     <summary><strong>Attributes</strong></summary>
                                     <div id="module-attributes" class="json-viewer"></div>
-                                </details>
-                                
-                                <details open id="module-parameters-details">
-                                    <summary><strong>forward() Parameters</strong></summary>
-                                    <div id="module-parameters" class="json-viewer"></div>
                                 </details>
                             </div>
                             <div id="tensor-op-template" style="display:none;">

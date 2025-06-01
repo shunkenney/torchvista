@@ -347,6 +347,7 @@
             .popup-content summary {
                 cursor: pointer;
                 margin: 5px;
+                user-select: none;
             }
 
         </style>
@@ -480,7 +481,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(3, 10)", "edge_data_id": 5449350512}, {"target": "__iadd___1", "dims": "(3, 10)", "edge_data_id": 5449350512}], "failed": false, "node_type": "Input"}, "input_1": {"edges": [{"target": "__iadd___1", "dims": "(3, 10)", "edge_data_id": 5449349936}], "failed": false, "node_type": "Input"}, "input_2": {"edges": [{"target": "relu_1", "dims": "(3, 10)", "edge_data_id": 5449350032}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "__getitem___1", "dims": "(3, 5)", "edge_data_id": 5764075248}, {"target": "__getitem___2", "dims": "(3, 5)", "edge_data_id": 5764075248}], "failed": false, "node_type": "Module"}, "__iadd___1": {"edges": [{"target": "__imul___1", "dims": "(3, 10)", "edge_data_id": 5449350512}], "failed": false, "node_type": "Operation"}, "relu_1": {"edges": [{"target": "__imul___1", "dims": "(3, 10)", "edge_data_id": 5764075152}], "failed": false, "node_type": "Operation"}, "__imul___1": {"edges": [], "failed": false, "node_type": "Operation"}, "__radd___1": {"edges": [{"target": "__add___1", "dims": "(1)", "edge_data_id": 5764074960}], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "__radd___1", "dims": "(1)", "edge_data_id": 5449350128}], "failed": false, "node_type": "Constant"}, "scalar_1": {"edges": [{"target": "__radd___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__add___1": {"edges": [{"target": "__add___2", "dims": "(1)", "edge_data_id": 5764074864}], "failed": false, "node_type": "Operation"}, "tensor_1": {"edges": [{"target": "__add___1", "dims": "(1)", "edge_data_id": 5449350224}], "failed": false, "node_type": "Constant"}, "__getitem___1": {"edges": [{"target": "__add___2", "dims": "(3, 5)", "edge_data_id": 5764074960}], "failed": false, "node_type": "Operation"}, "__add___2": {"edges": [{"target": "__add___3", "dims": "(3, 5)", "edge_data_id": 5764074768}], "failed": false, "node_type": "Operation"}, "__add___3": {"edges": [], "failed": false, "node_type": "Operation"}, "tensor_2": {"edges": [{"target": "__add___3", "dims": "(3, 5)", "edge_data_id": 5764075152}], "failed": false, "node_type": "Constant"}, "__getitem___2": {"edges": [], "failed": true, "node_type": "Operation"}, "scalar_2": {"edges": [{"target": "__getitem___2", "dims": "( )"}], "failed": false, "node_type": "Constant"}};
+    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(3, 10)", "edge_data_id": 5854084560}, {"target": "__iadd___1", "dims": "(3, 10)", "edge_data_id": 5854084560}], "failed": false, "node_type": "Input"}, "input_1": {"edges": [{"target": "__iadd___1", "dims": "(3, 10)", "edge_data_id": 5854083984}], "failed": false, "node_type": "Input"}, "input_2": {"edges": [{"target": "relu_1", "dims": "(3, 10)", "edge_data_id": 5854084080}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "__getitem___1", "dims": "(3, 5)", "edge_data_id": 6374118928}, {"target": "__getitem___2", "dims": "(3, 5)", "edge_data_id": 6374118928}], "failed": false, "node_type": "Module"}, "__iadd___1": {"edges": [{"target": "__imul___1", "dims": "(3, 10)", "edge_data_id": 5854084560}], "failed": false, "node_type": "Operation"}, "relu_1": {"edges": [{"target": "__imul___1", "dims": "(3, 10)", "edge_data_id": 6374125360}], "failed": false, "node_type": "Operation"}, "__imul___1": {"edges": [], "failed": false, "node_type": "Operation"}, "__radd___1": {"edges": [{"target": "__add___1", "dims": "(1)", "edge_data_id": 6374119120}], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "__radd___1", "dims": "(1)", "edge_data_id": 5854084176}], "failed": false, "node_type": "Constant"}, "scalar_1": {"edges": [{"target": "__radd___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__add___1": {"edges": [{"target": "__add___2", "dims": "(1)", "edge_data_id": 6374119216}], "failed": false, "node_type": "Operation"}, "tensor_1": {"edges": [{"target": "__add___1", "dims": "(1)", "edge_data_id": 5854084272}], "failed": false, "node_type": "Constant"}, "__getitem___1": {"edges": [{"target": "__add___2", "dims": "(3, 5)", "edge_data_id": 6374119120}], "failed": false, "node_type": "Operation"}, "__add___2": {"edges": [{"target": "__add___3", "dims": "(3, 5)", "edge_data_id": 6374119312}], "failed": false, "node_type": "Operation"}, "__add___3": {"edges": [], "failed": false, "node_type": "Operation"}, "tensor_2": {"edges": [{"target": "__add___3", "dims": "(3, 5)", "edge_data_id": 6374125360}], "failed": false, "node_type": "Constant"}, "__getitem___2": {"edges": [], "failed": true, "node_type": "Operation"}, "scalar_2": {"edges": [{"target": "__getitem___2", "dims": "( )"}], "failed": false, "node_type": "Constant"}};
     const module_info = {"Linear_1": {"type": "Linear", "parameters": {"weight": {"shape": [5, 10], "requires_grad": true}, "bias": {"shape": [5], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 10, "out_features": 5, "training": true}, "extra_repr": "in_features=10, out_features=5, bias=True"}};
     const func_info = {"Linear_1": {"positional_args": [{"_type": "tensor", "shape": [3, 10], "dtype": "torch.float32"}], "keyword_args": {}}, "__iadd___1": {"positional_args": [{"_type": "tensor", "shape": [3, 10], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [3, 10], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_1": {"positional_args": [{"_type": "tensor", "shape": [3, 10], "dtype": "torch.float32"}], "keyword_args": {}}, "__imul___1": {"positional_args": [{"_type": "tensor", "shape": [3, 10], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [3, 10], "dtype": "torch.float32"}], "keyword_args": {}}, "size_1": {"positional_args": [{"_type": "tensor", "shape": [3, 10], "dtype": "torch.float32"}, 0], "keyword_args": {}}, "__radd___1": {"positional_args": [{"_type": "tensor", "shape": [1], "dtype": "torch.float32"}, 5], "keyword_args": {}}, "__add___1": {"positional_args": [{"_type": "tensor", "shape": [1], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [1], "dtype": "torch.float32"}], "keyword_args": {}}, "__getitem___1": {"positional_args": [{"_type": "tensor", "shape": [3, 5], "dtype": "torch.float32"}, [{"_type": "slice", "repr": "slice(None, None, None)"}, {"_type": "slice", "repr": "slice(None, None, None)"}]], "keyword_args": {}}, "__add___2": {"positional_args": [{"_type": "tensor", "shape": [1], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [3, 5], "dtype": "torch.float32"}], "keyword_args": {}}, "__add___3": {"positional_args": [{"_type": "tensor", "shape": [3, 5], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [3, 5], "dtype": "torch.float32"}], "keyword_args": {}}, "__getitem___2": {"positional_args": [{"_type": "tensor", "shape": [3, 5], "dtype": "torch.float32"}, -5], "keyword_args": {}}};
     const parent_module_to_nodes = {};
@@ -1370,8 +1371,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            // editorContainer.style.height = '250px';
-            // editorContainer.style.width = '100%';
+            editorContainer.style.height = '25vh';
             container.appendChild(editorContainer);
 
             const options = {
@@ -1717,15 +1717,14 @@ index -5 is out of bounds for dimension 0 with size 3
                         <div id="popup-content" class="popup-content">
                             <div id="common-info">
                             </div>
+                            <details open id="module-parameters-details">
+                                <summary><strong>forward() Parameters</strong></summary>
+                                <div id="module-parameters" class="json-viewer"></div>
+                            </details>
                             <div id="module-template" style="display:none;">
                                 <details open id="module-attributes-details">
                                     <summary><strong>Attributes</strong></summary>
                                     <div id="module-attributes" class="json-viewer"></div>
-                                </details>
-                                
-                                <details open id="module-parameters-details">
-                                    <summary><strong>forward() Parameters</strong></summary>
-                                    <div id="module-parameters" class="json-viewer"></div>
                                 </details>
                             </div>
                             <div id="tensor-op-template" style="display:none;">

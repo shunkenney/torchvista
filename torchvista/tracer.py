@@ -640,7 +640,7 @@ def build_immediate_ancestor_map(ancestor_dict, adj_list):
     return immediate_ancestor_map
     
 
-def plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map, max_module_expansion_depth, show_non_gradient_nodes):
+def plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map, max_module_expansion_depth):
     unique_id = str(uuid.uuid4())
     template_str = resources.read_text('torchvista.templates', 'graph.html')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
@@ -717,7 +717,7 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
     return output, exception
 
 
-def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=False):
+def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=True):
     adj_list = {}
     module_info = {}
     func_info = {}
@@ -735,7 +735,7 @@ def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_n
     except Exception as e:
         exception = e
 
-    plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), max_module_expansion_depth, show_non_gradient_nodes)
+    plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), max_module_expansion_depth)
 
 
     if exception is not None:
