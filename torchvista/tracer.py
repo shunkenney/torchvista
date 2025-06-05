@@ -81,7 +81,7 @@ def get_all_nn_modules():
 MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
 
-def process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes):
+def process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes, forced_module_tracing_depth):
     last_successful_op = None
     current_op = None
     current_executing_module = None
@@ -95,7 +95,7 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
     original_ops = {}
     module_reuse_count = {}
     module_hierarchy = {}
-    traced_modules = set()
+    wrapped_modules = set()
     module_stack = []
     original_module_forwards = {}
     nodes_to_delete = []
@@ -340,14 +340,14 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
 
         return output
 
-    def wrap_traced_module(module):
+    def wrap_module(module, is_traced):
         nonlocal current_executing_module
         if module in original_module_forwards:
             return
         orig_forward = module.forward
         original_module_forwards[module] = orig_forward
 
-        def wrapped_forward(*args, **kwargs):
+        def wrapped_forward_traced(*args, **kwargs):
             nonlocal current_executing_module
             current_executing_module = module
             op_name = pre_trace_op(type(module).__name__, type(module).__module__, args, module, *args, **kwargs)
@@ -355,17 +355,8 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
             result = trace_op(op_name, output)
             current_executing_module = None
             return result
-
-        module.forward = wrapped_forward
-        traced_modules.add(module)
-
-    def wrap_untraced_module(module):
-        if module in original_module_forwards:
-            return
-        orig_forward = module.forward
-        original_module_forwards[module] = orig_forward
-
-        def wrapped_forward(*args, **kwargs):
+        
+        def wrapped_forward_untraced(*args, **kwargs):
             module_name = get_unique_op_name(type(module).__name__, module)[0]
             module_stack.append(module_name)
             record_op_parameters(module_name, *args, **kwargs)
@@ -373,16 +364,25 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
             module_stack.pop()
             return output
 
-        module.forward = wrapped_forward
-        traced_modules.add(module)
+        if forced_module_tracing_depth is not None:
+            if len(module_stack) < forced_module_tracing_depth:
+                module.forward = wrapped_forward_untraced
+            else:
+                module.forward = wrapped_forward_traced
+        else:
+            if is_traced:
+                module.forward = wrapped_forward_traced
+            else:
+                module.forward = wrapped_forward_untraced
+        wrapped_modules.add(module)
 
     def traverse_model(model, parent=None):
         for name, module in model.named_children():
             module_hierarchy[module] = parent
             if type(module) in MODULES:
-                wrap_traced_module(module)
+                wrap_module(module, True)
             else:
-                wrap_untraced_module(module)
+                wrap_module(module, False)
                 if list(model.named_children()):
                     traverse_model(module, parent=module)
 
@@ -476,7 +476,7 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
     def restore_modules():
         for module, original_call in original_module_forwards.items():
             module.forward = original_call
-        traced_modules.clear()
+        wrapped_modules.clear()
 
     def cleanup_tensor_attributes(obj):
         if isinstance(obj, torch.Tensor):
@@ -717,7 +717,7 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
     return output, exception
 
 
-def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=True):
+def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
     adj_list = {}
     module_info = {}
     func_info = {}
@@ -731,7 +731,7 @@ def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_n
     exception = None
 
     try:
-        process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes=show_non_gradient_nodes)
+        process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes=show_non_gradient_nodes, forced_module_tracing_depth=forced_module_tracing_depth)
     except Exception as e:
         exception = e
 
