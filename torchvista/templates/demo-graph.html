@@ -919,7 +919,7 @@
             .attr("transform", `translate(${x1 + 10}, ${y1 + 3})`);
             
             const text = textGroup.append("text")
-            .text(clusterData.label)
+            .text(graph_node_name_to_without_suffix[clusterData.label] || clusterData.label)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "hanging")
             .attr("dy", "-6")

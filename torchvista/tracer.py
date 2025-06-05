@@ -192,17 +192,14 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
             "keyword_args": formatted_kwargs
         }
 
-    def pre_trace_op(op_type, module_path, inputs, module=None, *args, **kwargs):
+    def pre_trace_op(op_name, node_type, inputs, *args, **kwargs):
         # This can happen in some discovered operations which don't take any inputs. For these, we don't
         # have to put nodes in the graph.
         if not inputs:
             return
         
         nonlocal current_op, last_successful_op, last_tensor_input_id, last_np_array_input_id, last_numeric_input_id
-        op_name, node_type = get_unique_op_name(op_type, module)
-        
-        graph_node_name_to_without_suffix[op_name] = op_type
-        node_to_module_path[op_name] = module_path
+
         adj_list[op_name] = {
             'edges': [],
             'failed': True,
@@ -350,14 +347,19 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
         def wrapped_forward_traced(*args, **kwargs):
             nonlocal current_executing_module
             current_executing_module = module
-            op_name = pre_trace_op(type(module).__name__, type(module).__module__, args, module, *args, **kwargs)
+            module_name, node_type = get_unique_op_name(type(module).__name__, module)
+            graph_node_name_to_without_suffix[module_name] = type(module).__name__
+            node_to_module_path[module_name] = type(module).__module__
+            pre_trace_op(module_name, node_type, args, *args, **kwargs)
             output = orig_forward(*args, **kwargs)
-            result = trace_op(op_name, output)
+            result = trace_op(module_name, output)
             current_executing_module = None
             return result
         
         def wrapped_forward_untraced(*args, **kwargs):
-            module_name = get_unique_op_name(type(module).__name__, module)[0]
+            module_name, _ = get_unique_op_name(type(module).__name__, module)
+            graph_node_name_to_without_suffix[module_name] = type(module).__name__
+            node_to_module_path[module_name] = type(module).__module__
             module_stack.append(module_name)
             record_op_parameters(module_name, *args, **kwargs)
             output = orig_forward(*args, **kwargs)
@@ -392,7 +394,11 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
                 nonlocal current_executing_module, current_executing_function
                 if current_executing_module is None and current_executing_function is None:
                     current_executing_function = func_name
-                    node_name = pre_trace_op(func_name, namespace, args, None, *args, **kwargs)
+                    node_to_module_path[func_name] = namespace
+                    node_name, node_type = get_unique_op_name(func_name)
+                    graph_node_name_to_without_suffix[node_name] = func_name
+                    node_to_module_path[node_name] = namespace
+                    pre_trace_op(node_name, node_type, args, *args, **kwargs)
                     output = orig_func(*args, **kwargs)
                     current_executing_function = None
                     output = trace_op(node_name, output)

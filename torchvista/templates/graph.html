@@ -794,8 +794,6 @@
         clusters.each(function([clusterName, clusterData]) {
             const group = d3.select(this);
 
-            
-
             const hasFailedNodes = containersWithFailedNodes.has(clusterName);
             if (hasFailedNodes) {
                 group.classed("error_${unique_id}", true);
@@ -821,7 +819,7 @@
             .attr("transform", `translate(${x1 + 10}, ${y1 + 3})`);
             
             const text = textGroup.append("text")
-            .text(clusterData.label)
+            .text(graph_node_name_to_without_suffix[clusterData.label] || clusterData.label)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "hanging")
             .attr("dy", "-6")
@@ -832,7 +830,6 @@
             .attr("paint-order", "stroke")
             .attr("stroke-linejoin", "round");
                         
-            
             // Add collapse/expand button
             group.append("circle")
             .attr("class", "collapse-button_${unique_id}")
