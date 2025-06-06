@@ -241,6 +241,7 @@
             
             .collapse-button:hover {
                 fill: #eee;
+                cursor: pointer;
             }
             .collapse-icon {
                 pointer-events: none;
@@ -395,6 +396,7 @@
     var adj_list_collapsed_nodes = {};
     let containerHierarchy = {};
     let vizInstance = null;
+    let containerNodeCounts = {};
 
     const EXPAND_TARGET_COVERAGE = 0.8;
     const COLLAPSE_TARGET_COVERAGE = 0.2;
@@ -767,6 +769,27 @@
             }
         }
     }
+
+    function calculateContainerNodeCounts() {
+        containerNodeCounts = {};
+        
+        for (const container of containerNodes) {
+            containerNodeCounts[container] = 0;
+        }
+        
+        for (const [node, parent] of Object.entries(ancestor_map)) {
+            if (parent) {
+                containerNodeCounts[parent] = (containerNodeCounts[parent] || 0) + 1;
+                
+                let currentParent = ancestor_map[parent];
+                while (currentParent && !collapsedContainers.has(parent)) {
+                    containerNodeCounts[currentParent] = (containerNodeCounts[currentParent] || 0) + 1;
+                    currentParent = ancestor_map[currentParent];
+                }
+            }
+        }
+    }
+
     function reloadGraph() {
         d3.select("#graph").html("");
 
@@ -779,6 +802,10 @@
         
         // Now create the graph with the Graphviz layout data
         createGraph(extractedGraphData);
+
+         
+        // Needed to get the right vp coverage when containers are expanded
+        calculateContainerNodeCounts();
 
         // renderGraphvizImage(dotSource);
     }
@@ -1411,7 +1438,17 @@
             Object.keys(graphvizData.clusters).includes(lastModifiedContainer))) {
             
             // Center on the container that was just expanded or collapsed
-            let targetCoverage = lastOperation === "expand" ? EXPAND_TARGET_COVERAGE : COLLAPSE_TARGET_COVERAGE;
+            let targetCoverage;
+            if (lastOperation === "expand") {
+                const nodeCount = containerNodeCounts[lastModifiedContainer] || 1;
+
+                const minCoverage = 0.3;
+                const maxNodes = 20;
+                const scaleFactor = Math.min(nodeCount, maxNodes) / maxNodes;
+                targetCoverage = Math.min(EXPAND_TARGET_COVERAGE, minCoverage + (EXPAND_TARGET_COVERAGE - minCoverage) * scaleFactor);
+            } else {
+                targetCoverage = COLLAPSE_TARGET_COVERAGE;
+            }
             let targetNode;
             let targetPos;
             let containerWidth, containerHeight;

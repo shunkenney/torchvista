@@ -241,6 +241,7 @@
             
             .collapse-button:hover {
                 fill: #eee;
+                cursor: pointer;
             }
             .collapse-icon {
                 pointer-events: none;
@@ -481,20 +482,21 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(2, 10, 32)", "edge_data_id": 5664887952}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "Linear_2", "dims": "(2, 10, 64)", "edge_data_id": 6166330064}, {"target": "Linear_3", "dims": "(2, 10, 64)", "edge_data_id": 6166330064}, {"target": "Linear_4", "dims": "(2, 10, 64)", "edge_data_id": 6166330064}], "failed": false, "node_type": "Module"}, "Linear_2": {"edges": [{"target": "__matmul___1", "dims": "(2, 10, 64)", "edge_data_id": 6166329872}], "failed": false, "node_type": "Module"}, "Linear_3": {"edges": [{"target": "transpose_1", "dims": "(2, 10, 64)", "edge_data_id": 6166322288}], "failed": false, "node_type": "Module"}, "Linear_4": {"edges": [{"target": "__matmul___2", "dims": "(2, 10, 64)", "edge_data_id": 6166322480}], "failed": false, "node_type": "Module"}, "transpose_1": {"edges": [{"target": "__matmul___1", "dims": "(2, 64, 10)", "edge_data_id": 6166322576}], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "transpose_1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "scalar_1": {"edges": [{"target": "transpose_1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__matmul___1": {"edges": [{"target": "__truediv___1", "dims": "(2, 10, 10)", "edge_data_id": 6166322768}], "failed": false, "node_type": "Operation"}, "__truediv___1": {"edges": [{"target": "softmax_1", "dims": "(2, 10, 10)", "edge_data_id": 6166322576}], "failed": false, "node_type": "Operation"}, "scalar_2": {"edges": [{"target": "__truediv___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "softmax_1": {"edges": [{"target": "__matmul___2", "dims": "(2, 10, 10)", "edge_data_id": 6166322768}], "failed": false, "node_type": "Operation"}, "__matmul___2": {"edges": [{"target": "mean_1", "dims": "(2, 10, 64)", "edge_data_id": 6166322576}], "failed": false, "node_type": "Operation"}, "mean_1": {"edges": [{"target": "Linear_5", "dims": "(2, 64)", "edge_data_id": 6166330064}], "failed": false, "node_type": "Operation"}, "Linear_5": {"edges": [{"target": "output_0", "dims": "(2, 5)", "edge_data_id": 6166322480}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(2, 10, 32)", "edge_data_id": 5414311152}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "Linear_2", "dims": "(2, 10, 64)", "edge_data_id": 6059150608}, {"target": "Linear_3", "dims": "(2, 10, 64)", "edge_data_id": 6059150608}, {"target": "Linear_4", "dims": "(2, 10, 64)", "edge_data_id": 6059150608}], "failed": false, "node_type": "Module"}, "Linear_2": {"edges": [{"target": "__matmul___1", "dims": "(2, 10, 64)", "edge_data_id": 6059157904}], "failed": false, "node_type": "Module"}, "Linear_3": {"edges": [{"target": "transpose_1", "dims": "(2, 10, 64)", "edge_data_id": 6059156560}], "failed": false, "node_type": "Module"}, "Linear_4": {"edges": [{"target": "__matmul___2", "dims": "(2, 10, 64)", "edge_data_id": 6059156080}], "failed": false, "node_type": "Module"}, "transpose_1": {"edges": [{"target": "__matmul___1", "dims": "(2, 64, 10)", "edge_data_id": 6059157136}], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "transpose_1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "scalar_1": {"edges": [{"target": "transpose_1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__matmul___1": {"edges": [{"target": "__truediv___1", "dims": "(2, 10, 10)", "edge_data_id": 6059157520}], "failed": false, "node_type": "Operation"}, "__truediv___1": {"edges": [{"target": "softmax_1", "dims": "(2, 10, 10)", "edge_data_id": 6059157136}], "failed": false, "node_type": "Operation"}, "scalar_2": {"edges": [{"target": "__truediv___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "softmax_1": {"edges": [{"target": "__matmul___2", "dims": "(2, 10, 10)", "edge_data_id": 6059157520}], "failed": false, "node_type": "Operation"}, "__matmul___2": {"edges": [{"target": "mean_1", "dims": "(2, 10, 64)", "edge_data_id": 6059157136}], "failed": false, "node_type": "Operation"}, "mean_1": {"edges": [{"target": "Linear_5", "dims": "(2, 64)", "edge_data_id": 6059150608}], "failed": false, "node_type": "Operation"}, "Linear_5": {"edges": [{"target": "output_0", "dims": "(2, 5)", "edge_data_id": 6059156080}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"Linear_1": {"type": "Linear", "parameters": {"weight": {"shape": [64, 32], "requires_grad": true}, "bias": {"shape": [64], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 32, "out_features": 64, "training": true}, "extra_repr": "in_features=32, out_features=64, bias=True"}, "SelfAttention_1": {"type": "SelfAttention", "parameters": {}, "attributes": {"call_super_init": false, "dump_patches": false, "scale": 8.0, "training": true}, "extra_repr": ""}, "Linear_2": {"type": "Linear", "parameters": {"weight": {"shape": [64, 64], "requires_grad": true}, "bias": {"shape": [64], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 64, "training": true}, "extra_repr": "in_features=64, out_features=64, bias=True"}, "Linear_3": {"type": "Linear", "parameters": {"weight": {"shape": [64, 64], "requires_grad": true}, "bias": {"shape": [64], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 64, "training": true}, "extra_repr": "in_features=64, out_features=64, bias=True"}, "Linear_4": {"type": "Linear", "parameters": {"weight": {"shape": [64, 64], "requires_grad": true}, "bias": {"shape": [64], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 64, "training": true}, "extra_repr": "in_features=64, out_features=64, bias=True"}, "Linear_5": {"type": "Linear", "parameters": {"weight": {"shape": [5, 64], "requires_grad": true}, "bias": {"shape": [5], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 5, "training": true}, "extra_repr": "in_features=64, out_features=5, bias=True"}};
     const func_info = {"Linear_1": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 32], "dtype": "torch.float32"}], "keyword_args": {}}, "SelfAttention_1": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_2": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_3": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_4": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "transpose_1": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}, -2, -1], "keyword_args": {}}, "__matmul___1": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [2, 64, 10], "dtype": "torch.float32"}], "keyword_args": {}}, "__truediv___1": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 10], "dtype": "torch.float32"}, 8.0], "keyword_args": {}}, "softmax_1": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 10], "dtype": "torch.float32"}], "keyword_args": {"dim": -1}}, "__matmul___2": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 10], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "mean_1": {"positional_args": [{"_type": "tensor", "shape": [2, 10, 64], "dtype": "torch.float32"}], "keyword_args": {"dim": 1}}, "Linear_5": {"positional_args": [{"_type": "tensor", "shape": [2, 64], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {"SelfAttention_1": ["Linear_2", "Linear_3", "Linear_4", "transpose_1", "__matmul___1", "__truediv___1", "softmax_1", "__matmul___2"]};
     const parent_module_to_depth = {"SelfAttention_1": 1};
-    const graph_node_name_to_without_suffix = {"input_0": "input_0", "Linear_1": "Linear", "Linear_2": "Linear", "Linear_3": "Linear", "Linear_4": "Linear", "transpose_1": "transpose", "__matmul___1": "__matmul__", "__truediv___1": "__truediv__", "softmax_1": "softmax", "__matmul___2": "__matmul__", "mean_1": "mean", "Linear_5": "Linear", "output": "output"};
+    const graph_node_name_to_without_suffix = {"input_0": "input_0", "Linear_1": "Linear", "SelfAttention_1": "SelfAttention", "Linear_2": "Linear", "Linear_3": "Linear", "Linear_4": "Linear", "transpose_1": "transpose", "__matmul___1": "__matmul__", "__truediv___1": "__truediv__", "softmax_1": "softmax", "__matmul___2": "__matmul__", "mean_1": "mean", "Linear_5": "Linear", "output": "output"};
     const ancestor_map = {"Linear_2": "SelfAttention_1", "Linear_3": "SelfAttention_1", "Linear_4": "SelfAttention_1", "scalar_0": "SelfAttention_1", "scalar_1": "SelfAttention_1", "transpose_1": "SelfAttention_1", "__matmul___1": "SelfAttention_1", "scalar_2": "SelfAttention_1", "__truediv___1": "SelfAttention_1", "softmax_1": "SelfAttention_1", "__matmul___2": "SelfAttention_1"};
     const max_module_expansion_depth = 3;
-    const node_to_module_path = {'Linear_1': 'torch.nn.modules.linear', 'Linear_2': 'torch.nn.modules.linear', 'Linear_3': 'torch.nn.modules.linear', 'Linear_4': 'torch.nn.modules.linear', 'transpose_1': 'torch.Tensor', '__matmul___1': 'torch.Tensor', '__truediv___1': 'torch.Tensor', 'softmax_1': 'torch', '__matmul___2': 'torch.Tensor', 'mean_1': 'torch.Tensor', 'Linear_5': 'torch.nn.modules.linear'};
+    const node_to_module_path = {'Linear_1': 'torch.nn.modules.linear', 'SelfAttention_1': 'tests.models.SelfAttentionClassifier', 'Linear_2': 'torch.nn.modules.linear', 'Linear_3': 'torch.nn.modules.linear', 'Linear_4': 'torch.nn.modules.linear', 'transpose': 'torch.Tensor', 'transpose_1': 'torch.Tensor', '__matmul__': 'torch.Tensor', '__matmul___1': 'torch.Tensor', '__truediv__': 'torch.Tensor', '__truediv___1': 'torch.Tensor', 'softmax': 'torch', 'softmax_1': 'torch', '__matmul___2': 'torch.Tensor', 'mean': 'torch.Tensor', 'mean_1': 'torch.Tensor', 'Linear_5': 'torch.nn.modules.linear'};
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
     let containerHierarchy = {};
     let vizInstance = null;
+    let containerNodeCounts = {};
 
     const EXPAND_TARGET_COVERAGE = 0.8;
     const COLLAPSE_TARGET_COVERAGE = 0.2;
@@ -867,6 +869,27 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             }
         }
     }
+
+    function calculateContainerNodeCounts() {
+        containerNodeCounts = {};
+        
+        for (const container of containerNodes) {
+            containerNodeCounts[container] = 0;
+        }
+        
+        for (const [node, parent] of Object.entries(ancestor_map)) {
+            if (parent) {
+                containerNodeCounts[parent] = (containerNodeCounts[parent] || 0) + 1;
+                
+                let currentParent = ancestor_map[parent];
+                while (currentParent && !collapsedContainers.has(parent)) {
+                    containerNodeCounts[currentParent] = (containerNodeCounts[currentParent] || 0) + 1;
+                    currentParent = ancestor_map[currentParent];
+                }
+            }
+        }
+    }
+
     function reloadGraph() {
         d3.select("#graph").html("");
 
@@ -879,6 +902,10 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         
         // Now create the graph with the Graphviz layout data
         createGraph(extractedGraphData);
+
+         
+        // Needed to get the right vp coverage when containers are expanded
+        calculateContainerNodeCounts();
 
         // renderGraphvizImage(dotSource);
     }
@@ -1019,7 +1046,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             .attr("transform", `translate(${x1 + 10}, ${y1 + 3})`);
             
             const text = textGroup.append("text")
-            .text(clusterData.label)
+            .text(graph_node_name_to_without_suffix[clusterData.label] || clusterData.label)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "hanging")
             .attr("dy", "-6")
@@ -1511,7 +1538,17 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             Object.keys(graphvizData.clusters).includes(lastModifiedContainer))) {
             
             // Center on the container that was just expanded or collapsed
-            let targetCoverage = lastOperation === "expand" ? EXPAND_TARGET_COVERAGE : COLLAPSE_TARGET_COVERAGE;
+            let targetCoverage;
+            if (lastOperation === "expand") {
+                const nodeCount = containerNodeCounts[lastModifiedContainer] || 1;
+
+                const minCoverage = 0.3;
+                const maxNodes = 20;
+                const scaleFactor = Math.min(nodeCount, maxNodes) / maxNodes;
+                targetCoverage = Math.min(EXPAND_TARGET_COVERAGE, minCoverage + (EXPAND_TARGET_COVERAGE - minCoverage) * scaleFactor);
+            } else {
+                targetCoverage = COLLAPSE_TARGET_COVERAGE;
+            }
             let targetNode;
             let targetPos;
             let containerWidth, containerHeight;

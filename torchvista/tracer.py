@@ -675,7 +675,7 @@ def plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_mod
     display(HTML(output))
 
 
-def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=3, show_non_gradient_nodes=True):
+def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=3, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
     max_module_expansion_depth = max(max_module_expansion_depth, 0)
     adj_list = {}
     module_info = {}
@@ -689,7 +689,7 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
     exception = None
 
     try:
-        process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes=show_non_gradient_nodes)
+        process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes=show_non_gradient_nodes, forced_module_tracing_depth=forced_module_tracing_depth)
     except Exception as e:
         exception = e
 

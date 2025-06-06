@@ -241,6 +241,7 @@
             
             .collapse-button:hover {
                 fill: #eee;
+                cursor: pointer;
             }
             .collapse-icon {
                 pointer-events: none;
@@ -481,20 +482,21 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(2, 4)", "edge_data_id": 4382283952}, {"target": "Linear_2", "dims": "(2, 4)", "edge_data_id": 4382283952}, {"target": "Linear_4", "dims": "(2, 4)", "edge_data_id": 4382283952}, {"target": "__sub___1", "dims": "(2, 4)", "edge_data_id": 4382283952}, {"target": "output_0", "dims": "(2, 4)", "edge_data_id": 4382283952}, {"target": "output_0", "dims": "(2, 4)", "edge_data_id": 4382283952}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "__sub___2", "dims": "(2, 4)", "edge_data_id": 6166319888}], "failed": false, "node_type": "Module"}, "Linear_2": {"edges": [{"target": "__add___1", "dims": "(2, 4)", "edge_data_id": 6166320080}], "failed": false, "node_type": "Module"}, "__add___1": {"edges": [{"target": "Linear_3", "dims": "(2, 4)", "edge_data_id": 6166320176}], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__add___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "Linear_3": {"edges": [{"target": "output_1", "dims": "(2, 4)", "edge_data_id": 6166320368}, {"target": "output_1", "dims": "(2, 4)", "edge_data_id": 6166320368}], "failed": false, "node_type": "Module"}, "Linear_4": {"edges": [{"target": "__add___2", "dims": "(2, 4)", "edge_data_id": 6166320464}], "failed": false, "node_type": "Module"}, "__add___2": {"edges": [], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "__add___2", "dims": "(2, 4)", "edge_data_id": 6166320560}], "failed": false, "node_type": "Constant"}, "__sub___1": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_1": {"edges": [{"target": "__sub___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__sub___2": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_2": {"edges": [{"target": "__sub___2", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}, "output_1": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(2, 4)", "edge_data_id": 4310030512}, {"target": "Linear_2", "dims": "(2, 4)", "edge_data_id": 4310030512}, {"target": "Linear_4", "dims": "(2, 4)", "edge_data_id": 4310030512}, {"target": "__sub___1", "dims": "(2, 4)", "edge_data_id": 4310030512}, {"target": "output_0", "dims": "(2, 4)", "edge_data_id": 4310030512}, {"target": "output_0", "dims": "(2, 4)", "edge_data_id": 4310030512}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "__sub___2", "dims": "(2, 4)", "edge_data_id": 6059275952}], "failed": false, "node_type": "Module"}, "Linear_2": {"edges": [{"target": "__add___1", "dims": "(2, 4)", "edge_data_id": 6059275568}], "failed": false, "node_type": "Module"}, "__add___1": {"edges": [{"target": "Linear_3", "dims": "(2, 4)", "edge_data_id": 6059275472}], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__add___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "Linear_3": {"edges": [{"target": "output_1", "dims": "(2, 4)", "edge_data_id": 6059275280}, {"target": "output_1", "dims": "(2, 4)", "edge_data_id": 6059275280}], "failed": false, "node_type": "Module"}, "Linear_4": {"edges": [{"target": "__add___2", "dims": "(2, 4)", "edge_data_id": 6059275184}], "failed": false, "node_type": "Module"}, "__add___2": {"edges": [], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "__add___2", "dims": "(2, 4)", "edge_data_id": 6059274992}], "failed": false, "node_type": "Constant"}, "__sub___1": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_1": {"edges": [{"target": "__sub___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__sub___2": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_2": {"edges": [{"target": "__sub___2", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}, "output_1": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"CM_1": {"type": "CM", "parameters": {}, "attributes": {"call_super_init": false, "dump_patches": false, "training": true}, "extra_repr": ""}, "Linear_1": {"type": "Linear", "parameters": {"weight": {"shape": [4, 4], "requires_grad": true}, "bias": {"shape": [4], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 4, "out_features": 4, "training": true}, "extra_repr": "in_features=4, out_features=4, bias=True"}, "Linear_2": {"type": "Linear", "parameters": {"weight": {"shape": [4, 4], "requires_grad": true}, "bias": {"shape": [4], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 4, "out_features": 4, "training": true}, "extra_repr": "in_features=4, out_features=4, bias=True"}, "Linear_3": {"type": "Linear", "parameters": {"weight": {"shape": [4, 4], "requires_grad": true}, "bias": {"shape": [4], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 4, "out_features": 4, "training": true}, "extra_repr": "in_features=4, out_features=4, bias=True"}, "Linear_4": {"type": "Linear", "parameters": {"weight": {"shape": [4, 4], "requires_grad": true}, "bias": {"shape": [4], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 4, "out_features": 4, "training": true}, "extra_repr": "in_features=4, out_features=4, bias=True"}};
     const func_info = {"CM_1": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_1": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_2": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}], "keyword_args": {}}, "__add___1": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}, 3], "keyword_args": {}}, "Linear_3": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_4": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}], "keyword_args": {}}, "__add___2": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}], "keyword_args": {}}, "__sub___1": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}, 2], "keyword_args": {}}, "__sub___2": {"positional_args": [{"_type": "tensor", "shape": [2, 4], "dtype": "torch.float32"}, 2], "keyword_args": {}}};
     const parent_module_to_nodes = {"CM_1": ["Linear_1", "Linear_2", "__add___1", "Linear_3", "Linear_4", "__add___2", "__sub___1", "__sub___2"]};
     const parent_module_to_depth = {"CM_1": 1};
-    const graph_node_name_to_without_suffix = {"input_0": "input_0", "Linear_1": "Linear", "Linear_2": "Linear", "__add___1": "__add__", "Linear_3": "Linear", "Linear_4": "Linear", "__add___2": "__add__", "__sub___1": "__sub__", "__sub___2": "__sub__", "output": "output"};
+    const graph_node_name_to_without_suffix = {"input_0": "input_0", "CM_1": "CM", "Linear_1": "Linear", "Linear_2": "Linear", "__add___1": "__add__", "Linear_3": "Linear", "Linear_4": "Linear", "__add___2": "__add__", "__sub___1": "__sub__", "__sub___2": "__sub__", "output": "output"};
     const ancestor_map = {"Linear_1": "CM_1", "Linear_2": "CM_1", "scalar_0": "CM_1", "__add___1": "CM_1", "Linear_3": "CM_1", "Linear_4": "CM_1", "tensor_0": "CM_1", "__add___2": "CM_1", "scalar_1": "CM_1", "__sub___1": "CM_1", "scalar_2": "CM_1", "__sub___2": "CM_1"};
     const max_module_expansion_depth = 3;
-    const node_to_module_path = {'Linear_1': 'torch.nn.modules.linear', 'Linear_2': 'torch.nn.modules.linear', '__add___1': 'torch.Tensor', 'Linear_3': 'torch.nn.modules.linear', 'Linear_4': 'torch.nn.modules.linear', '__add___2': 'torch.Tensor', '__sub___1': 'torch.Tensor', '__sub___2': 'torch.Tensor'};
+    const node_to_module_path = {'CM_1': 'tests.models.RepeatedOutputTensors', 'Linear_1': 'torch.nn.modules.linear', 'Linear_2': 'torch.nn.modules.linear', '__add__': 'torch.Tensor', '__add___1': 'torch.Tensor', 'Linear_3': 'torch.nn.modules.linear', 'Linear_4': 'torch.nn.modules.linear', '__add___2': 'torch.Tensor', '__sub__': 'torch.Tensor', '__sub___1': 'torch.Tensor', '__sub___2': 'torch.Tensor'};
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
     let containerHierarchy = {};
     let vizInstance = null;
+    let containerNodeCounts = {};
 
     const EXPAND_TARGET_COVERAGE = 0.8;
     const COLLAPSE_TARGET_COVERAGE = 0.2;
@@ -867,6 +869,27 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             }
         }
     }
+
+    function calculateContainerNodeCounts() {
+        containerNodeCounts = {};
+        
+        for (const container of containerNodes) {
+            containerNodeCounts[container] = 0;
+        }
+        
+        for (const [node, parent] of Object.entries(ancestor_map)) {
+            if (parent) {
+                containerNodeCounts[parent] = (containerNodeCounts[parent] || 0) + 1;
+                
+                let currentParent = ancestor_map[parent];
+                while (currentParent && !collapsedContainers.has(parent)) {
+                    containerNodeCounts[currentParent] = (containerNodeCounts[currentParent] || 0) + 1;
+                    currentParent = ancestor_map[currentParent];
+                }
+            }
+        }
+    }
+
     function reloadGraph() {
         d3.select("#graph").html("");
 
@@ -879,6 +902,10 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         
         // Now create the graph with the Graphviz layout data
         createGraph(extractedGraphData);
+
+         
+        // Needed to get the right vp coverage when containers are expanded
+        calculateContainerNodeCounts();
 
         // renderGraphvizImage(dotSource);
     }
@@ -1019,7 +1046,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             .attr("transform", `translate(${x1 + 10}, ${y1 + 3})`);
             
             const text = textGroup.append("text")
-            .text(clusterData.label)
+            .text(graph_node_name_to_without_suffix[clusterData.label] || clusterData.label)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "hanging")
             .attr("dy", "-6")
@@ -1511,7 +1538,17 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             Object.keys(graphvizData.clusters).includes(lastModifiedContainer))) {
             
             // Center on the container that was just expanded or collapsed
-            let targetCoverage = lastOperation === "expand" ? EXPAND_TARGET_COVERAGE : COLLAPSE_TARGET_COVERAGE;
+            let targetCoverage;
+            if (lastOperation === "expand") {
+                const nodeCount = containerNodeCounts[lastModifiedContainer] || 1;
+
+                const minCoverage = 0.3;
+                const maxNodes = 20;
+                const scaleFactor = Math.min(nodeCount, maxNodes) / maxNodes;
+                targetCoverage = Math.min(EXPAND_TARGET_COVERAGE, minCoverage + (EXPAND_TARGET_COVERAGE - minCoverage) * scaleFactor);
+            } else {
+                targetCoverage = COLLAPSE_TARGET_COVERAGE;
+            }
             let targetNode;
             let targetPos;
             let containerWidth, containerHeight;
