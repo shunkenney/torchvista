@@ -723,7 +723,7 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
     return output, exception
 
 
-def trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
+def trace_model(model, inputs, max_module_expansion_depth=2, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
     adj_list = {}
     module_info = {}
     func_info = {}
