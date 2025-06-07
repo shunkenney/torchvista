@@ -5,7 +5,7 @@ import timm
 model = timm.create_model('mobilevit_s', pretrained=True)
 example_input = torch.randn(1, 3, 256, 256)
 
-max_module_expansion_depth = 2
+collapse_modules_after_depth = 2
 
 show_non_gradient_nodes = False
 
@@ -19,5 +19,5 @@ import timm
 model = timm.create_model('mobilevit_s', pretrained=True)
 example_input = torch.randn(1, 3, 256, 256)
 
-trace_model(model, example_input, max_module_expansion_depth=2, show_non_gradient_nodes=False)
+trace_model(model, example_input, collapse_modules_after_depth=2, show_non_gradient_nodes=False)
 """

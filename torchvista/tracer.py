@@ -646,7 +646,7 @@ def build_immediate_ancestor_map(ancestor_dict, adj_list):
     return immediate_ancestor_map
     
 
-def plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map, max_module_expansion_depth):
+def plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, ancestor_map, collapse_modules_after_depth):
     unique_id = str(uuid.uuid4())
     template_str = resources.read_text('torchvista.templates', 'graph.html')
     d3_source = resources.read_text('torchvista.assets', 'd3.min.js')
@@ -669,14 +669,14 @@ def plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_mod
         'viz_source': viz_source,
         'jsoneditor_css': jsoneditor_css,
         'jsoneditor_source': jsoneditor_source,
-        'max_module_expansion_depth': max_module_expansion_depth,
+        'collapse_modules_after_depth': collapse_modules_after_depth,
         'node_to_module_path': node_to_module_path,
     })
     display(HTML(output))
 
 
-def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=3, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
-    max_module_expansion_depth = max(max_module_expansion_depth, 0)
+def _get_demo_html_str(model, inputs, code_contents, collapse_modules_after_depth=2, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
+    collapse_modules_after_depth = max(collapse_modules_after_depth, 0)
     adj_list = {}
     module_info = {}
     func_info = {}
@@ -717,13 +717,13 @@ def _get_demo_html_str(model, inputs, code_contents, max_module_expansion_depth=
         'error_contents': str(exception) if exception else "",
         'jsoneditor_css': jsoneditor_css,
         'jsoneditor_source': jsoneditor_source,
-        'max_module_expansion_depth': max_module_expansion_depth,
+        'collapse_modules_after_depth': collapse_modules_after_depth,
         'node_to_module_path': node_to_module_path,
     })
     return output, exception
 
 
-def trace_model(model, inputs, max_module_expansion_depth=2, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
+def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradient_nodes=True, forced_module_tracing_depth=None, collapse_modules_after_depth=2):
     adj_list = {}
     module_info = {}
     func_info = {}
@@ -732,7 +732,10 @@ def trace_model(model, inputs, max_module_expansion_depth=2, show_non_gradient_n
     graph_node_name_to_without_suffix = {}
     node_to_module_path = {}
     node_to_ancestors = defaultdict(list)
-    max_module_expansion_depth = max(max_module_expansion_depth, 0)
+    if max_module_expansion_depth is not None:
+        # hacky backwards compatibility
+        collapse_modules_after_depth = max_module_expansion_depth
+    collapse_modules_after_depth = max(collapse_modules_after_depth, 0)
 
     exception = None
 
@@ -741,7 +744,7 @@ def trace_model(model, inputs, max_module_expansion_depth=2, show_non_gradient_n
     except Exception as e:
         exception = e
 
-    plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), max_module_expansion_depth)
+    plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), collapse_modules_after_depth)
 
 
     if exception is not None:

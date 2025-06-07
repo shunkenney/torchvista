@@ -138,9 +138,6 @@
             .node.error rect {
                 stroke: black;
                 stroke-width: 1px;
-                /* stroke-dasharray: 3, 3; */
-                rx: 5px;
-                ry: 5px;
             }
 
             .boundary-box.error > rect:first-of-type {
@@ -398,7 +395,7 @@
     const parent_module_to_depth = ${parent_module_to_depth_json};
     const graph_node_name_to_without_suffix = ${graph_node_name_to_without_suffix};
     const ancestor_map = ${ancestor_map};
-    const max_module_expansion_depth = ${max_module_expansion_depth};
+    const collapse_modules_after_depth = ${collapse_modules_after_depth};
     const node_to_module_path = ${node_to_module_path};
     var collapsedContainers = new Set();
     const containerNodes = new Set();
@@ -850,7 +847,7 @@
         
         for (const container of containerNodes) {
             const depth = getContainerDepth(container);
-            if (depth >= max_module_expansion_depth) {
+            if (depth >= collapse_modules_after_depth) {
                 collapsedContainers.add(container);
             }
         }

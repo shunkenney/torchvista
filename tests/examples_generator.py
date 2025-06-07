@@ -12,9 +12,10 @@ def test_all_models():
         example_input = items["example_input"]
         code_contents = items["code_contents"]
         kwargs = {}
-        if items["max_module_expansion_depth"] >= 0:
-            kwargs["max_module_expansion_depth"] = items["max_module_expansion_depth"]
+        if items["collapse_modules_after_depth"] >= 0:
+            kwargs["collapse_modules_after_depth"] = items["collapse_modules_after_depth"]
         kwargs["show_non_gradient_nodes"] = items["show_non_gradient_nodes"]
+        kwargs["forced_module_tracing_depth"] = items["forced_module_tracing_depth"]
         # error_contents = items["error_contents"]
         print(f"Testing {name}...")
         
