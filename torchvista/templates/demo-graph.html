@@ -108,13 +108,13 @@
                 user-select: none;
             }
             .edge {
-                stroke: #A53F2B;
+                stroke: #797979;
                 fill: none;
             }
             .node rect.input { fill: #FF9AFF; }
             .node rect.constant { fill: rgb(235 235 235); }
 
-            .node rect.output { fill: #FF9AFF; }
+            .node rect.output { fill: #74e071; }
             .node rect.failed { fill: rgb(224 15 15); }
             .node rect.module { fill: #8BDEDB; }
             .node rect.operation { fill: #FEBC5A; }
@@ -349,6 +349,15 @@
                 cursor: pointer;
                 margin: 5px;
                 user-select: none;
+            }
+
+            .node.input rect,
+            .node.output rect,
+            .node.constant rect {
+                stroke-width: 1px;
+                rx: 8px;
+                ry: 8px;
+                stroke-dasharray: none;
             }
 
         </style>
@@ -704,7 +713,7 @@
                     if (nodeData.node_type === "Constant") {
                         dotSource += `${indent}  "${child}" [width=0.7, height=0.3];\n`;
                     } else if (nodeData.node_type === "Input" || nodeData.node_type === "Output") {
-                        dotSource += `${indent}  "${child}" [width=1.1, height=0.5];\n`;
+                        dotSource += `${indent}  "${child}" [width=1.2, height=0.5];\n`;
                     } else {
                         dotSource += `${indent}  "${child}";\n`;
                     }
@@ -725,7 +734,7 @@
                 if (data.node_type === "Constant") {
                     dotSource += `  "${node}" [width=0.7, height=0.3];\n`;
                 } else if (data.node_type === "Input" || data.node_type === "Output") {
-                    dotSource += `  "${node}" [width=1.1, height=0.5];\n`;
+                    dotSource += `  "${node}" [width=1.2, height=0.5];\n`;
                 } else {
                     dotSource += `  "${node}";\n`;
                 }
@@ -1090,7 +1099,7 @@
             .attr("width", bbox.width + 4)
             .attr("height", bbox.height + 4)
             .attr("fill", "rgb(243, 243, 235) ")
-            .attr("stroke", "#A53F2B33")
+            .attr("stroke", "#79797933")
             .attr("stroke-width", "0.5px")
             .attr("fill-opacity", 1.0);
             // .attr("transform", `rotate(${angle})`);

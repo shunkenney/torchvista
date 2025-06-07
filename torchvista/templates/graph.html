@@ -48,13 +48,13 @@
                 user-select: none;
             }
             .edge_${unique_id} {
-                stroke: #A53F2B;
+                stroke: #797979;
                 fill: none;
             }
             .node_${unique_id} rect.input_${unique_id} { fill: #FF9AFF; }
             .node_${unique_id} rect.constant_${unique_id} { fill: rgb(235 235 235); }
 
-            .node_${unique_id} rect.output_${unique_id} { fill: #FF9AFF; }
+            .node_${unique_id} rect.output_${unique_id} { fill: #74e071; }
             .node_${unique_id} rect.failed_${unique_id} { fill: rgb(224 15 15); }
             .node_${unique_id} rect.module_${unique_id} { fill: #8BDEDB; }
             .node_${unique_id} rect.operation_${unique_id} { fill: #FEBC5A; }
@@ -263,6 +263,14 @@
                 user-select: none;
             }
 
+            .node_${unique_id}.input_${unique_id} rect,
+            .node_${unique_id}.output_${unique_id} rect,
+            .node_${unique_id}.constant_${unique_id} rect {
+                stroke-width: 1px;
+                rx: 8px;
+                ry: 8px;
+                stroke-dasharray: none;
+            }
     </style>
     
     <script>
@@ -608,7 +616,7 @@
                     if (nodeData.node_type === "Constant") {
                         dotSource += `${indent}  "${child}" [width=0.7, height=0.3];\n`;
                     } else if (nodeData.node_type === "Input" || nodeData.node_type === "Output") {
-                        dotSource += `${indent}  "${child}" [width=1.1, height=0.5];\n`;
+                        dotSource += `${indent}  "${child}" [width=1.2, height=0.5];\n`;
                     } else {
                         dotSource += `${indent}  "${child}";\n`;
                     }
@@ -629,7 +637,7 @@
                 if (data.node_type === "Constant") {
                     dotSource += `  "${node}" [width=0.7, height=0.3];\n`;
                 } else if (data.node_type === "Input" || data.node_type === "Output") {
-                    dotSource += `  "${node}" [width=1.1, height=0.5];\n`;
+                    dotSource += `  "${node}" [width=1.2, height=0.5];\n`;
                 } else {
                     dotSource += `  "${node}";\n`;
                 }
@@ -991,7 +999,7 @@
             .attr("width", bbox.width + 4)
             .attr("height", bbox.height + 4)
             .attr("fill", "rgb(243, 243, 235) ")
-            .attr("stroke", "#A53F2B33")
+            .attr("stroke", "#79797933")
             .attr("stroke-width", "0.5px")
             .attr("fill-opacity", 1.0);
             // .attr("transform", `rotate(${angle})`);
