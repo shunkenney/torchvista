@@ -108,7 +108,7 @@
                 user-select: none;
             }
             .edge {
-                stroke: #333333;
+                stroke: #A53F2B;
                 fill: none;
             }
             .node rect.input { fill: #FF9AFF; }
@@ -486,11 +486,17 @@
                 }
             }
         
+            let labelPos = null;
+            if (edge.lp) {
+                const [lx, ly] = edge.lp.split(',').map(Number);
+                labelPos = { x: lx, y: ly };
+            }
             result.edges.push({
                 source: sourceName,
                 target: targetName,
                 path: pathPoints,
-                edge_data_id: edge.edge_data_id
+                edge_data_id: edge.edge_data_id,
+                labelPos: labelPos
             });
         }
 
@@ -654,6 +660,8 @@
         let dotSource = 'digraph G {\n';
         dotSource += '  rankdir=BT;\n';
         dotSource += '  node [shape=box];\n';
+        dotSource += '  ranksep=0.5;\n';
+        dotSource += '  nodesep=0.4;\n';
 
         // Find top containers
         const topContainers = new Set();
@@ -727,10 +735,11 @@
         // Add all edges
         for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             for (const edge of data.edges) {
+                let edgeLabelFontSize = "10";
                 if (edge.edge_data_id) {
-                    dotSource += `  "${node}" -> "${edge.target}" [edge_data_id="${edge.edge_data_id}"];\n`;
+                    dotSource += `  "${node}" -> "${edge.target}"[label="${edge.dims}", fontsize="${edgeLabelFontSize}", edge_data_id="${edge.edge_data_id}" ];\n`;
                 } else {
-                    dotSource += `  "${node}" -> "${edge.target}";\n`;
+                    dotSource += `  "${node}" -> "${edge.target}"[label="${edge.dims}", fontsize="${edgeLabelFontSize}" ];\n`;
                 }
             }
         }
@@ -1052,15 +1061,7 @@
             );
             if (!edgeData || !edgeData.dims) return;
             
-            // Calculate position for label - near the start of the edge
-            // Get a point that's 20% along the path
-            const pathLength = path.getTotalLength();
-            const pointAtStart = path.getPointAtLength(pathLength * 0.5);
-            
-            // Get path direction at that point for text rotation
-            const pointBefore = path.getPointAtLength(pathLength * 0.4);
-            const pointAfter = path.getPointAtLength(pathLength * 0.6);
-            // const angle = Math.atan2(pointAfter.y - pointBefore.y, pointAfter.x - pointBefore.x) * 180 / Math.PI;
+            const pointAtStart = edge.labelPos;
             const angle = 0.0;
             
             // Create a background for the text
@@ -1071,11 +1072,11 @@
             const text = labelGroup.append("text")
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .style("font-size", "5px")
+            .style("font-size", "6pt")
             .text(edgeData.dims)
             .attr("transform", `rotate(${angle})`)
             .attr("stroke", "#f3f3eb")
-            .attr("stroke-width", "5px")
+            .attr("stroke-width", "3pt")
             .attr("paint-order", "stroke")
             .attr("stroke-linejoin", "round");
 
@@ -1089,8 +1090,10 @@
             .attr("width", bbox.width + 4)
             .attr("height", bbox.height + 4)
             .attr("fill", "rgb(243, 243, 235) ")
-            .attr("fill-opacity", 1.0)
-            .attr("transform", `rotate(${angle})`);
+            .attr("stroke", "#A53F2B33")
+            .attr("stroke-width", "0.5px")
+            .attr("fill-opacity", 1.0);
+            // .attr("transform", `rotate(${angle})`);
         });
         
 
@@ -1102,7 +1105,7 @@
             const labelText = labelGroup.select("text");
             const labelBg = labelGroup.select("rect");
             const originalStrokeWidth = path.attr("stroke-width") || 1;
-            const originalFontSize = labelText.style("font-size") || "5px";
+            const originalFontSize = labelText.style("font-size") || "6pt";
             const originalParent = edgeGroup.node().parentNode;
             const originalPosition = Array.from(originalParent.childNodes).indexOf(edgeGroup.node());
             
@@ -1114,7 +1117,7 @@
                 path.attr("stroke-width", parseFloat(originalStrokeWidth) * 1.4);
                 
                 // Make label text larger
-                labelText.style("font-size", "7px");
+                labelText.style("font-size", "7pt");
                     
                 // Adjust the background rectangle for the label
                 const bbox = labelText.node().getBBox();
