@@ -746,7 +746,7 @@ def _get_demo_html_str(model, inputs, code_contents, collapse_modules_after_dept
     return output, exception
 
 
-def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradient_nodes=True, forced_module_tracing_depth=None, collapse_modules_after_depth=1):
+def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradient_nodes=True, collapse_modules_after_depth=1):
     adj_list = {}
     module_info = {}
     func_info = {}
@@ -760,6 +760,7 @@ def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradien
         collapse_modules_after_depth = max_module_expansion_depth
     collapse_modules_after_depth = max(collapse_modules_after_depth, 0)
 
+    forced_module_tracing_depth = None
     exception = None
 
     try:

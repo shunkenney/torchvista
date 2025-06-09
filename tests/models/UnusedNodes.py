@@ -52,4 +52,5 @@ model = MainModule()
 example_input = torch.ones(3,  4)
 
 trace_model(model, example_input)
+
 """

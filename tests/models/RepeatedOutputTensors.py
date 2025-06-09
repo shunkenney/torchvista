@@ -78,4 +78,5 @@ model = CustomModel()
 example_input = torch.randn(2, 4)
 
 trace_model(model, example_input)
+
 """

@@ -41,4 +41,5 @@ model = DeepMLP()
 example_input = torch.randn(1, 64)
 
 trace_model(model, example_input)
+
 """

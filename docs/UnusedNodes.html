@@ -488,7 +488,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "__add___1", "dims": "(3, 4)", "edge_data_id": 6315303056}], "failed": false, "node_type": "Input"}, "to_1": {"edges": [{"target": "__add___1", "dims": "(3, 4)", "edge_data_id": 10994429168}, {"target": "output_0", "dims": "(3, 4)", "edge_data_id": 10994429168}], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "to_1", "dims": "(3, 4)", "edge_data_id": 10994429168}], "failed": false, "node_type": "Constant"}, "__add___1": {"edges": [], "failed": false, "node_type": "Operation"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "__add___1", "dims": "(3, 4)", "edge_data_id": 5782659792}], "failed": false, "node_type": "Input"}, "to_1": {"edges": [{"target": "__add___1", "dims": "(3, 4)", "edge_data_id": 5890904560}, {"target": "output_0", "dims": "(3, 4)", "edge_data_id": 5890904560}], "failed": false, "node_type": "Operation"}, "tensor_0": {"edges": [{"target": "to_1", "dims": "(3, 4)", "edge_data_id": 5890904560}], "failed": false, "node_type": "Constant"}, "__add___1": {"edges": [], "failed": false, "node_type": "Operation"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"DynamicLayerSelector_1": {"type": "DynamicLayerSelector", "parameters": {}, "attributes": {"call_super_init": false, "dump_patches": false, "training": true}, "extra_repr": ""}};
     const func_info = {"DynamicLayerSelector_1": {"positional_args": [{"_type": "tensor", "shape": [3, 4], "dtype": "torch.float32"}], "keyword_args": {}}, "size_1": {"positional_args": [{"_type": "tensor", "shape": [3, 4], "dtype": "torch.float32"}, 0], "keyword_args": {}}, "size_2": {"positional_args": [{"_type": "tensor", "shape": [3, 4], "dtype": "torch.float32"}, 1], "keyword_args": {}}, "to_1": {"positional_args": [{"_type": "tensor", "shape": [3, 4], "dtype": "torch.float32"}, {"_type": "device", "repr": "cpu"}], "keyword_args": {}}, "__add___1": {"positional_args": [{"_type": "tensor", "shape": [3, 4], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [3, 4], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {"DynamicLayerSelector_1": ["size_1", "size_2", "to_1", "__add___1"]};
@@ -1726,6 +1726,7 @@ model = MainModule()
 example_input = torch.ones(3,  4)
 
 trace_model(model, example_input)
+
 </code></pre>
 </div>
 

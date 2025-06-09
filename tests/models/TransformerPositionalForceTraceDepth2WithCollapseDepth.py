@@ -43,4 +43,5 @@ model = PositionalTransformer()
 example_input = torch.randn(10, 1, 20)
 
 trace_model(model, example_input, forced_module_tracing_depth=2, collapse_modules_after_depth=2)
+
 """

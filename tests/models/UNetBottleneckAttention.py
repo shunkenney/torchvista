@@ -193,6 +193,7 @@ model = UNetBAM()
 example_input = torch.randn(1, 3, 256, 256)
 
 trace_model(model, example_input)
+
 """
 
 error_contents = """

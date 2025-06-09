@@ -15,4 +15,5 @@ model = XLNetModel.from_pretrained("xlnet-base-cased")
 example_input = torch.randint(0, 32000, (1, 10))
 
 trace_model(model, example_input)
+
 """

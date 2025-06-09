@@ -30,4 +30,5 @@ model = LinearModel()
 example_input = torch.randn(2, 10)
 
 trace_model(model, example_input)
+
 """

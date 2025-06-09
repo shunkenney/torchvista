@@ -67,4 +67,5 @@ model = AttentionClassifier()
 example_input = torch.randn(2, 10, 32)
 
 trace_model(model, example_input)
+
 """

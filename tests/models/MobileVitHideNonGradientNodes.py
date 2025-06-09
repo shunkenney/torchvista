@@ -7,6 +7,7 @@ example_input = torch.randn(1, 3, 256, 256)
 
 collapse_modules_after_depth = 2
 
+
 show_non_gradient_nodes = False
 
 code_contents = """
@@ -20,4 +21,5 @@ model = timm.create_model('mobilevit_s', pretrained=True)
 example_input = torch.randn(1, 3, 256, 256)
 
 trace_model(model, example_input, collapse_modules_after_depth=2, show_non_gradient_nodes=False)
+
 """

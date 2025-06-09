@@ -61,4 +61,5 @@ example_input = {
 }
 
 trace_model(model, example_input)
+
 """

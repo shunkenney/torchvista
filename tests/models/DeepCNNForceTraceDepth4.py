@@ -79,4 +79,5 @@ model = DeepCNN()
 example_input = torch.randn(1, 3, 64, 64)
 
 trace_model(model, example_input, forced_module_tracing_depth=4)
+
 """

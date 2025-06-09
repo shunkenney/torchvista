@@ -75,4 +75,5 @@ model = SimpleResNet()
 example_input = torch.randn(1, 3, 32, 32)
 
 trace_model(model, example_input)
+
 """
