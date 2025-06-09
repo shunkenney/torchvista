@@ -310,14 +310,20 @@
         <div class="demo-section" data-theme="teal">
             <div class="section-header">
                 <h2 class="section-title">Forced module tracing up to a depth</h2>
-                <div class="section-description">Pytorch <b>standard</b> modules' internals aren't traced unless you use this flag to force trace all modules up to a desired depth</div>
+                <div class="section-description">By default Pytorch standard or inbuilt modules' internals aren't traced. Use this flag to force trace all modules (including standard Pytorch modules) up to a desired depth</div>
             </div>
             <div class="demos-grid">
                 <div class="demo-item">
                     <a href="TransformerPositionalForceTraceDepth.html">Force trace to see the contents of the TransformerEncoder module</a>
                 </div>
                 <div class="demo-item">
-                    <a href="TransformerPositionalForceTraceDepthWithCollapseDepth.html">Force tracing in conjunction with collapse depth control</a>
+                    <a href="TransformerPositionalForceTraceDepth2.html">Force trace deeper (depth = 2)</a>
+                </div>
+                <div class="demo-item">
+                    <a href="TransformerPositionalForceTraceDepth3.html">Force trace deeper (depth = 3) in conjunction with visual collapse control</a>
+                </div>
+                <div class="demo-item">
+                    <a href="DeepCNNForceTraceDepth4.html">Force trace (depth = 4) on a deep CNN model</a>
                 </div>
             </div>
         </div>
