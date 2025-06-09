@@ -337,56 +337,79 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
 
         return output
 
-    def wrap_module(module, is_traced):
-        nonlocal current_executing_module
+    def wrap_module(module):
+        nonlocal current_executing_module, forced_module_tracing_depth
         if module in original_module_forwards:
             return
         orig_forward = module.forward
         original_module_forwards[module] = orig_forward
 
-        def wrapped_forward_traced(*args, **kwargs):
-            nonlocal current_executing_module
-            current_executing_module = module
-            module_name, node_type = get_unique_op_name(type(module).__name__, module)
-            graph_node_name_to_without_suffix[module_name] = type(module).__name__
-            node_to_module_path[module_name] = type(module).__module__
-            pre_trace_op(module_name, node_type, args, *args, **kwargs)
-            output = orig_forward(*args, **kwargs)
-            result = trace_op(module_name, output)
-            current_executing_module = None
-            return result
-        
-        def wrapped_forward_untraced(*args, **kwargs):
-            module_name, _ = get_unique_op_name(type(module).__name__, module)
-            graph_node_name_to_without_suffix[module_name] = type(module).__name__
-            node_to_module_path[module_name] = type(module).__module__
-            module_stack.append(module_name)
-            record_op_parameters(module_name, *args, **kwargs)
-            output = orig_forward(*args, **kwargs)
-            module_stack.pop()
-            return output
-
-        if forced_module_tracing_depth is not None:
-            if len(module_stack) < forced_module_tracing_depth:
-                module.forward = wrapped_forward_untraced
-            else:
-                module.forward = wrapped_forward_traced
-        else:
+        def wrapped_forward(*args, **kwargs):
+            nonlocal current_executing_module, forced_module_tracing_depth
+            if forced_module_tracing_depth is not None and forced_module_tracing_depth < len(module_stack):
+                # This module might have been overriden as a false positive
+                # (because it was at a lower depth in the named_children hierarchy)
+                return orig_forward(*args, **kwargs)
+            is_traced = False
+            if forced_module_tracing_depth is None and type(module) in MODULES:
+                is_traced = True
+            elif forced_module_tracing_depth is not None and forced_module_tracing_depth <= len(module_stack):
+                is_traced = True
             if is_traced:
-                module.forward = wrapped_forward_traced
+                current_executing_module = module
+                module_name, node_type = get_unique_op_name(type(module).__name__, module)
+                graph_node_name_to_without_suffix[module_name] = type(module).__name__
+                node_to_module_path[module_name] = type(module).__module__
+                pre_trace_op(module_name, node_type, args, *args, **kwargs)
+                module_stack.append(module_name)
+                output = orig_forward(*args, **kwargs)
+                module_stack.pop()
+                result = trace_op(module_name, output)
+                current_executing_module = None
+                return result
             else:
-                module.forward = wrapped_forward_untraced
+                module_name, _ = get_unique_op_name(type(module).__name__, module)
+                graph_node_name_to_without_suffix[module_name] = type(module).__name__
+                node_to_module_path[module_name] = type(module).__module__
+                module_stack.append(module_name)
+                record_op_parameters(module_name, *args, **kwargs)
+                output = orig_forward(*args, **kwargs)
+                module_stack.pop()
+                return output
+
+        module.forward = wrapped_forward
         wrapped_modules.add(module)
 
-    def traverse_model(model, parent=None):
+    def has_forward_method(module):
+        return module.__class__.forward is not torch.nn.Module.forward
+
+    def traverse_model(model, depth=0, parent=None):
         for name, module in model.named_children():
             module_hierarchy[module] = parent
-            if type(module) in MODULES:
-                wrap_module(module, True)
-            else:
-                wrap_module(module, False)
-                if list(model.named_children()):
-                    traverse_model(module, parent=module)
+            
+            if has_forward_method(module):
+                # Some modules like ModuleList don't have forward() implemented
+                wrap_module(module)
+
+            if (forced_module_tracing_depth is not None and depth < forced_module_tracing_depth) \
+                or (forced_module_tracing_depth is None and type(module) not in MODULES) or not has_forward_method(module):
+                # This is an approximate control with potential false positives getting traced.
+                # But during tracing, the wrapped forward will check the depth and decide whether to actually wrap it or not.
+                # Think of a case like
+                # class PositionalTransformer(nn.Module):
+                # def __init__(self):
+                #     super().__init__()
+                #     self.pos_embed = nn.Parameter(torch.randn(10, 1, 32))
+                #     self.encoder_layer = nn.TransformerEncoderLayer(d_model=32, nhead=4) <- gets passed below to TransformerEncoder
+                #     self.encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=2)
+                # 
+                if list(module.named_children()):
+                    if has_forward_method(module):
+                        traverse_model(module, depth=depth+1, parent=module)
+                    else:
+                        # If the module doesn't have a forward method this doesn't count towards the depth, and we want to traverse its children
+                        # This happens to modules like ModuleList.
+                        traverse_model(module, depth=depth, parent=module)
 
     def wrap_functions():
         def make_wrapped(orig_func, func_name, namespace):
