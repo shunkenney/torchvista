@@ -79,8 +79,8 @@ trace_model(model, example_input)
 - **inputs** (*Any*):
   Input(s) to be passed to the model. Can be a single input or a tuple of inputs.
 
-- **max_module_expansion_depth** (*int*, optional):
-  Maximum depth for expanding nested modules in the initial view. 0 means everything is collapsed. Default is `3`.
+- **collapse_modules_after_depth** (*int*, optional):
+  Maximum depth for expanding nested modules in the initial view. 0 means everything is collapsed. Default is `1`.
 
 - **show_non_gradient_nodes** (*bool*, optional):
   Whether to show nodes for scalars, tensors, and NumPy arrays that are not part of the gradient graph (typically constants passed into operations or modules). Default is `True`.
