@@ -446,6 +446,8 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
                 module = torch.nn.init
             elif namespace == 'torch.linalg':
                 module = torch.linalg
+            elif namespace == 'torch.ops.torchvision':
+                module = torch.ops.torchvision
             else:
                 continue
 
@@ -472,6 +474,8 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
                 module = torch.nn.init
             elif namespace == 'torch.linalg':
                 module = torch.linalg
+            elif namespace == 'torch.ops.torchvision':
+                module = torch.ops.torchvision
             else:
                 continue
 
@@ -497,6 +501,8 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
                 module = torch.nn.init
             elif namespace == 'torch.linalg':
                 module = torch.linalg
+            elif namespace == 'torch.ops.torchvision':
+                module = torch.ops.torchvision
             else:
                 continue
 
