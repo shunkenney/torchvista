@@ -642,11 +642,12 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
                     # Always create the edge, pointing to the *correct* output node
                     dims = format_dims(tuple(output_tensor.shape))
                     target_node_name = seen_tensors[tensor_id]
-                    adj_list[output_tensor._tensor_source_name]['edges'].append({
-                        'target': target_node_name,
-                        'dims': dims,
-                        'edge_data_id': id(output_tensor),
-                    })
+                    if hasattr(output_tensor, '_tensor_source_name'):
+                        adj_list[output_tensor._tensor_source_name]['edges'].append({
+                            'target': target_node_name,
+                            'dims': dims,
+                            'edge_data_id': id(output_tensor),
+                        })
         
                 for output_tensor in output_tensors:
                     cleanup_tensor_attributes(output)
