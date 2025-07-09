@@ -40,10 +40,18 @@ def get_all_nn_modules():
         import torchaudio
     except ImportError:
         torchaudio = None
+    except Exception:
+        print('[warning] torchaudio available, but import failed and hence torchvista cannot trace torchaudio operations.\
+               If you need torchaudio tracing, run `import torchaudio` separately to debug what is wrong.')
+        torchaudio = None
     
     try:
         import torchtext
     except ImportError:
+        torchtext = None
+    except Exception:
+        print('[warning] torchtext available, but import failed and hence torchvista cannot trace torchtext operations.\
+               If you need torchtext tracing, run `import torchtext` separately to debug what is wrong.')
         torchtext = None
 
     modules_to_scan = [nn, torchvision, torchaudio, torchtext]
