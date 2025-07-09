@@ -200,20 +200,19 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
             "keyword_args": formatted_kwargs
         }
 
-    def pre_trace_op(op_name, node_type, inputs, *args, **kwargs):
-        # This can happen in some discovered operations which don't take any inputs. For these, we don't
-        # have to put nodes in the graph.
-        if not inputs:
-            return
-        
+    def pre_trace_op(op_name, node_type, inputs, *args, **kwargs):        
         nonlocal current_op, last_successful_op, last_tensor_input_id, last_np_array_input_id, last_numeric_input_id
 
+        input_tensors = extract_tensors_from_obj(inputs) + extract_tensors_from_obj(args) + extract_tensors_from_obj(kwargs)
+        # This can happen in some discovered operations which don't take any inputs. For these, we don't
+        # have to put nodes in the graph.
+        if len(input_tensors) == 0:
+            return
         adj_list[op_name] = {
             'edges': [],
             'failed': True,
             'node_type': node_type,
         }
-        input_tensors = extract_tensors_from_obj(inputs)
         
         for inp in input_tensors:
             if hasattr(inp, '_tensor_source_name'):
@@ -282,6 +281,8 @@ def process_graph(model, inputs, adj_list, module_info, func_info, node_to_modul
         Returns:
             List of tensors found in the object
         """
+        if obj is None:
+            return []
         if current_depth >= max_depth:
             return []
         
