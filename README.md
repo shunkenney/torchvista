@@ -71,17 +71,25 @@ trace_model(model, example_input)
 ## API Reference: `trace_model`
 
     trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=False)
-
 ### Parameters
 
-- **model** (*torch.nn.Module*):
-  The model instance to trace.
+#### `model` (`torch.nn.Module`)
+- The model instance to trace.
 
-- **inputs** (*Any*):
-  Input(s) to be passed to the model. Can be a single input or a tuple of inputs.
+#### `inputs` (`Any`)
+- Input(s) to be passed to the model. Can be a single input or a tuple of inputs.
 
-- **collapse_modules_after_depth** (*int*, optional):
-  Maximum depth for expanding nested modules in the initial view. 0 means everything is collapsed. Default is `1`.
+#### `collapse_modules_after_depth` (`int`, optional)
+- Maximum depth for expanding nested modules in the initial view. `0` means everything is collapsed.
+- **Category:** Visual control
+- **Default:** `1`
 
-- **show_non_gradient_nodes** (*bool*, optional):
-  Whether to show nodes for scalars, tensors, and NumPy arrays that are not part of the gradient graph (typically constants passed into operations or modules). Default is `True`.
+#### `show_non_gradient_nodes` (`bool`, optional)
+- Whether to show nodes for scalars, tensors, and NumPy arrays not part of the gradient graph (e.g., constants).
+- **Category:** Visual control  
+- **Default:** `True`
+
+#### `forced_module_tracing_depth` (`int`, optional)
+- Maximum depth to which modules' internals are traced. `None` means only user-defined modules are traced, not pre-defined library modules.
+- **Category:** Tracing  
+- **Default:** `None`
