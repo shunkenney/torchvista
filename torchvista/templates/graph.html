@@ -1,4 +1,4 @@
-<div id="graph-container_${unique_id}" style="height: 800px; overflow: auto;">
+<div id="graph-container_${unique_id}">
     <div id="graph_${unique_id}"></div>
     <div id="popup_${unique_id}" class="popup_${unique_id}" style="display: none;">
         <div class="popup-header_${unique_id}">
@@ -87,6 +87,12 @@
 
             #graph-container_${unique_id} {
                 position: relative;
+                height: 800px;
+                overflow: auto;
+            }
+
+            #graph_${unique_id} {
+                height: 100%;
             }
             
             .popup_${unique_id} {
@@ -823,8 +829,9 @@
         const svg = d3.select("#graph_${unique_id}")
         .append("svg")
         .attr("width", "100%")
-        .attr("height", "800px")
-        .style("background-color", "#f3f3eb");
+        .attr("height", "100%")
+        .style("background-color", "#f3f3eb")
+        .style("height", "100%");
 
         const inner = svg.append("g");
 
