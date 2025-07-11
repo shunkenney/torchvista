@@ -10,11 +10,11 @@
             </div>
             <div id="module-template_${unique_id}" style="display:none;">
                 <details open id="module-parameters-details_${unique_id}">
-                    <summary><strong>forward() Parameters</strong></summary>
+                    <summary style="color: black"><strong>forward() Parameters</strong></summary>
                     <div id="module-parameters_${unique_id}" class="json-viewer_${unique_id}"></div>
                 </details>
                 <details open id="module-attributes-details_${unique_id}">
-                    <summary><strong>Attributes</strong></summary>
+                    <summary style="color: black"><strong>Attributes</strong></summary>
                     <div id="module-attributes_${unique_id}" class="json-viewer_${unique_id}"></div>
                 </details>
             </div>
@@ -144,6 +144,7 @@
             #popup-title_${unique_id} {
                 font-size: 16px;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                color: black;
             }
 
             #graph-container_${unique_id} {
@@ -274,7 +275,19 @@
         ${d3_source}
     </script>
     <script>
+        var _module = window.module;
+        var _exports = window.exports;
+        var _define = window.define;
+        
+        window.module = undefined;
+        window.exports = undefined;
+        window.define = undefined;
+        
         ${viz_source}
+        
+        window.module = _module;
+        window.exports = _exports;
+        window.define = _define;
     </script>
 
     <style>
@@ -282,7 +295,19 @@
     </style>
 
     <script>
+        var _module = window.module;
+        var _exports = window.exports;
+        var _define = window.define;
+        
+        window.module = undefined;
+        window.exports = undefined;
+        window.define = undefined;
+        
         ${jsoneditor_source}
+        
+        window.module = _module;
+        window.exports = _exports;
+        window.define = _define;
     </script>
 
     <script>
@@ -1207,7 +1232,7 @@
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            editorContainer.style.height = '25vh';
+            editorContainer.style.height = '180px';
             container.appendChild(editorContainer);
 
             const options = {
