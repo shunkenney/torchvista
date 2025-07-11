@@ -488,7 +488,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "__rmul___1", "dims": "(1, 3, 64, 64)", "edge_data_id": 6166371152}], "failed": false, "node_type": "Input"}, "__rmul___1": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__rmul___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "__rmul___1", "dims": "(1, 3, 64, 64)", "edge_data_id": 5474466800}, {"target": "__rmul___1", "dims": "(1, 3, 64, 64)", "edge_data_id": 5474466800}], "failed": false, "node_type": "Input"}, "__rmul___1": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__rmul___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {};
     const func_info = {"__rmul___1": {"positional_args": [{"_type": "tensor", "shape": [1, 3, 64, 64], "dtype": "torch.float32"}, 2], "keyword_args": {}}, "__setitem___1": {"positional_args": [{"_type": "tensor", "shape": [1, 3, 64, 64], "dtype": "torch.float32"}, [{"_type": "slice", "repr": "slice(None, None, None)"}, {"_type": "slice", "repr": "slice(None, None, None)"}, {"_type": "slice", "repr": "slice(None, None, None)"}, {"_type": "slice", "repr": "slice(None, None, None)"}], {"_type": "tensor", "shape": [1, 3, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {};
@@ -1407,7 +1407,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
 
             // Create a new div to hold the editor
             const editorContainer = document.createElement('div');
-            editorContainer.style.height = '25vh';
+            editorContainer.style.height = '180px';
             container.appendChild(editorContainer);
 
             const options = {
@@ -1717,6 +1717,7 @@ class TensorInjector(nn.Module):
         # Example manipulation: double the input and write into new tensor
         new_tensor[:, :, :, :] = 2 * x
 
+        # Return the new tensor
         return new_tensor
 
 model = TensorInjector()
