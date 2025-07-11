@@ -147,6 +147,8 @@
 
             #graph-container {
                 position: relative;
+                height: 95%;
+                overflow: hidden;
             }
             .popup {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -488,7 +490,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "Conv2d_1", "dims": "(1, 1, 64, 64)", "edge_data_id": 11164021296}, {"target": "Conv2d_1", "dims": "(1, 1, 64, 64)", "edge_data_id": 11164021296}], "failed": false, "node_type": "Input"}, "Conv2d_1": {"edges": [{"target": "relu_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163920304}, {"target": "relu_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163920304}], "failed": false, "node_type": "Module"}, "relu_1": {"edges": [{"target": "MaxPool2d_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163921936}, {"target": "MaxPool2d_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163921936}, {"target": "cat_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163921936}, {"target": "cat_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163921936}], "failed": false, "node_type": "Operation"}, "MaxPool2d_1": {"edges": [{"target": "Conv2d_2", "dims": "(1, 16, 32, 32)", "edge_data_id": 11163920304}, {"target": "Conv2d_2", "dims": "(1, 16, 32, 32)", "edge_data_id": 11163920304}], "failed": false, "node_type": "Module"}, "Conv2d_2": {"edges": [{"target": "relu_2", "dims": "(1, 32, 32, 32)", "edge_data_id": 11163922608}, {"target": "relu_2", "dims": "(1, 32, 32, 32)", "edge_data_id": 11163922608}], "failed": false, "node_type": "Module"}, "relu_2": {"edges": [{"target": "Upsample_1", "dims": "(1, 32, 32, 32)", "edge_data_id": 11163920304}, {"target": "Upsample_1", "dims": "(1, 32, 32, 32)", "edge_data_id": 11163920304}], "failed": false, "node_type": "Operation"}, "Upsample_1": {"edges": [{"target": "cat_1", "dims": "(1, 32, 64, 64)", "edge_data_id": 11163925968}, {"target": "cat_1", "dims": "(1, 32, 64, 64)", "edge_data_id": 11163925968}], "failed": false, "node_type": "Module"}, "cat_1": {"edges": [{"target": "Conv2d_3", "dims": "(1, 48, 64, 64)", "edge_data_id": 11163915216}, {"target": "Conv2d_3", "dims": "(1, 48, 64, 64)", "edge_data_id": 11163915216}], "failed": false, "node_type": "Operation"}, "Conv2d_3": {"edges": [{"target": "relu_3", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163919248}, {"target": "relu_3", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163919248}], "failed": false, "node_type": "Module"}, "relu_3": {"edges": [{"target": "Conv2d_4", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163915216}, {"target": "Conv2d_4", "dims": "(1, 16, 64, 64)", "edge_data_id": 11163915216}], "failed": false, "node_type": "Operation"}, "Conv2d_4": {"edges": [{"target": "output_0", "dims": "(1, 1, 64, 64)", "edge_data_id": 11163916176}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "Conv2d_1", "dims": "(1, 1, 64, 64)", "edge_data_id": 11302416656}, {"target": "Conv2d_1", "dims": "(1, 1, 64, 64)", "edge_data_id": 11302416656}], "failed": false, "node_type": "Input"}, "Conv2d_1": {"edges": [{"target": "relu_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302414256}, {"target": "relu_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302414256}], "failed": false, "node_type": "Module"}, "relu_1": {"edges": [{"target": "MaxPool2d_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302413968}, {"target": "MaxPool2d_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302413968}, {"target": "cat_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302413968}, {"target": "cat_1", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302413968}], "failed": false, "node_type": "Operation"}, "MaxPool2d_1": {"edges": [{"target": "Conv2d_2", "dims": "(1, 16, 32, 32)", "edge_data_id": 11302414256}, {"target": "Conv2d_2", "dims": "(1, 16, 32, 32)", "edge_data_id": 11302414256}], "failed": false, "node_type": "Module"}, "Conv2d_2": {"edges": [{"target": "relu_2", "dims": "(1, 32, 32, 32)", "edge_data_id": 11302409744}, {"target": "relu_2", "dims": "(1, 32, 32, 32)", "edge_data_id": 11302409744}], "failed": false, "node_type": "Module"}, "relu_2": {"edges": [{"target": "Upsample_1", "dims": "(1, 32, 32, 32)", "edge_data_id": 11302414256}, {"target": "Upsample_1", "dims": "(1, 32, 32, 32)", "edge_data_id": 11302414256}], "failed": false, "node_type": "Operation"}, "Upsample_1": {"edges": [{"target": "cat_1", "dims": "(1, 32, 64, 64)", "edge_data_id": 11302416464}, {"target": "cat_1", "dims": "(1, 32, 64, 64)", "edge_data_id": 11302416464}], "failed": false, "node_type": "Module"}, "cat_1": {"edges": [{"target": "Conv2d_3", "dims": "(1, 48, 64, 64)", "edge_data_id": 11302405616}, {"target": "Conv2d_3", "dims": "(1, 48, 64, 64)", "edge_data_id": 11302405616}], "failed": false, "node_type": "Operation"}, "Conv2d_3": {"edges": [{"target": "relu_3", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302406672}, {"target": "relu_3", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302406672}], "failed": false, "node_type": "Module"}, "relu_3": {"edges": [{"target": "Conv2d_4", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302405616}, {"target": "Conv2d_4", "dims": "(1, 16, 64, 64)", "edge_data_id": 11302405616}], "failed": false, "node_type": "Operation"}, "Conv2d_4": {"edges": [{"target": "output_0", "dims": "(1, 1, 64, 64)", "edge_data_id": 11302407152}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"Conv2d_1": {"type": "Conv2d", "parameters": {"weight": {"shape": [16, 1, 3, 3], "requires_grad": true}, "bias": {"shape": [16], "requires_grad": true}}, "attributes": {"call_super_init": false, "dilation": [1, 1], "dump_patches": false, "groups": 1, "in_channels": 1, "kernel_size": [3, 3], "out_channels": 16, "output_padding": [0, 0], "padding": [1, 1], "padding_mode": "zeros", "stride": [1, 1], "training": true, "transposed": false}, "extra_repr": "1, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)"}, "MaxPool2d_1": {"type": "MaxPool2d", "parameters": {}, "attributes": {"call_super_init": false, "ceil_mode": false, "dilation": 1, "dump_patches": false, "kernel_size": 2, "padding": 0, "return_indices": false, "stride": 2, "training": true}, "extra_repr": "kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False"}, "Conv2d_2": {"type": "Conv2d", "parameters": {"weight": {"shape": [32, 16, 3, 3], "requires_grad": true}, "bias": {"shape": [32], "requires_grad": true}}, "attributes": {"call_super_init": false, "dilation": [1, 1], "dump_patches": false, "groups": 1, "in_channels": 16, "kernel_size": [3, 3], "out_channels": 32, "output_padding": [0, 0], "padding": [1, 1], "padding_mode": "zeros", "stride": [1, 1], "training": true, "transposed": false}, "extra_repr": "16, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)"}, "Upsample_1": {"type": "Upsample", "parameters": {}, "attributes": {"align_corners": true, "call_super_init": false, "dump_patches": false, "mode": "bilinear", "name": "Upsample", "scale_factor": 2.0, "training": true}, "extra_repr": "scale_factor=2.0, mode='bilinear'"}, "Conv2d_3": {"type": "Conv2d", "parameters": {"weight": {"shape": [16, 48, 3, 3], "requires_grad": true}, "bias": {"shape": [16], "requires_grad": true}}, "attributes": {"call_super_init": false, "dilation": [1, 1], "dump_patches": false, "groups": 1, "in_channels": 48, "kernel_size": [3, 3], "out_channels": 16, "output_padding": [0, 0], "padding": [1, 1], "padding_mode": "zeros", "stride": [1, 1], "training": true, "transposed": false}, "extra_repr": "48, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)"}, "Conv2d_4": {"type": "Conv2d", "parameters": {"weight": {"shape": [1, 16, 1, 1], "requires_grad": true}, "bias": {"shape": [1], "requires_grad": true}}, "attributes": {"call_super_init": false, "dilation": [1, 1], "dump_patches": false, "groups": 1, "in_channels": 16, "kernel_size": [1, 1], "out_channels": 1, "output_padding": [0, 0], "padding": [0, 0], "padding_mode": "zeros", "stride": [1, 1], "training": true, "transposed": false}, "extra_repr": "16, 1, kernel_size=(1, 1), stride=(1, 1)"}};
     const func_info = {"Conv2d_1": {"positional_args": [{"_type": "tensor", "shape": [1, 1, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_1": {"positional_args": [{"_type": "tensor", "shape": [1, 16, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "MaxPool2d_1": {"positional_args": [{"_type": "tensor", "shape": [1, 16, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "Conv2d_2": {"positional_args": [{"_type": "tensor", "shape": [1, 16, 32, 32], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_2": {"positional_args": [{"_type": "tensor", "shape": [1, 32, 32, 32], "dtype": "torch.float32"}], "keyword_args": {}}, "Upsample_1": {"positional_args": [{"_type": "tensor", "shape": [1, 32, 32, 32], "dtype": "torch.float32"}], "keyword_args": {}}, "cat_1": {"positional_args": [[{"_type": "tensor", "shape": [1, 16, 64, 64], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [1, 32, 64, 64], "dtype": "torch.float32"}]], "keyword_args": {"dim": 1}}, "Conv2d_3": {"positional_args": [{"_type": "tensor", "shape": [1, 48, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_3": {"positional_args": [{"_type": "tensor", "shape": [1, 16, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "Conv2d_4": {"positional_args": [{"_type": "tensor", "shape": [1, 16, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {};
@@ -987,7 +989,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         // Style the SVG
         d3.select(svgElement)
             .attr("width", "100%")
-            .attr("height", "600px")
+            .attr("height", "100%")
             .style("background-color", "#f9f9f9");
         
     }
@@ -997,7 +999,8 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
-        .style("background-color", "#f3f3eb");
+        .style("background-color", "#f3f3eb")
+        .style("height", "100%");
 
         const inner = svg.append("g");
 
@@ -1696,9 +1699,9 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             </div>
             <div class="left-column">
 
-<div class="code-box" id="codeBox">
-    <div class="code-box-header">Sample code (Not editable)</div>
-    <pre><code class="language-python">
+                <div class="code-box" id="codeBox">
+                    <div class="code-box-header">Sample code (Not editable)</div>
+                    <pre><code class="language-python">
 import torch
 import torch.nn as nn
 from torchvista import trace_model
@@ -1726,18 +1729,18 @@ example_input = torch.randn(1, 1, 64, 64)
 trace_model(model, example_input)
 
 </code></pre>
-</div>
+                </div>
 
-<div class="error-box" id="errorBox">
-    <div class="error-box-header">Error Output (if any)</div>
-
-</div>
+                <div class="error-box" id="errorBox">
+                    <div class="error-box-header">Error Output (if any)</div>
+                
+                </div>
 
             </div>
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container" style="height: 97%; overflow: auto; position: relative;">
+                <div id="graph-container">
                     <div id="graph" style="height: 100%"></div>
                     <div id="popup" class="popup" style="display: none;">
                         <div class="popup-header">

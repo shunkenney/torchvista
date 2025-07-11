@@ -88,7 +88,7 @@
             #graph-container_${unique_id} {
                 position: relative;
                 height: ${height}px;
-                overflow: auto;
+                overflow: hidden;
             }
 
             #graph_${unique_id} {
@@ -820,7 +820,7 @@
         // Style the SVG
         d3.select(svgElement)
             .attr("width", "100%")
-            .attr("height", "600px")
+            .attr("height", "100%")
             .style("background-color", "#f9f9f9");
         
     }

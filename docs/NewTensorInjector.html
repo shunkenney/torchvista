@@ -147,6 +147,8 @@
 
             #graph-container {
                 position: relative;
+                height: 95%;
+                overflow: hidden;
             }
             .popup {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -488,7 +490,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "__rmul___1", "dims": "(1, 3, 64, 64)", "edge_data_id": 5474466800}, {"target": "__rmul___1", "dims": "(1, 3, 64, 64)", "edge_data_id": 5474466800}], "failed": false, "node_type": "Input"}, "__rmul___1": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__rmul___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "__rmul___1", "dims": "(1, 3, 64, 64)", "edge_data_id": 5551062000}, {"target": "__rmul___1", "dims": "(1, 3, 64, 64)", "edge_data_id": 5551062000}], "failed": false, "node_type": "Input"}, "__rmul___1": {"edges": [], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__rmul___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {};
     const func_info = {"__rmul___1": {"positional_args": [{"_type": "tensor", "shape": [1, 3, 64, 64], "dtype": "torch.float32"}, 2], "keyword_args": {}}, "__setitem___1": {"positional_args": [{"_type": "tensor", "shape": [1, 3, 64, 64], "dtype": "torch.float32"}, [{"_type": "slice", "repr": "slice(None, None, None)"}, {"_type": "slice", "repr": "slice(None, None, None)"}, {"_type": "slice", "repr": "slice(None, None, None)"}, {"_type": "slice", "repr": "slice(None, None, None)"}], {"_type": "tensor", "shape": [1, 3, 64, 64], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {};
@@ -987,7 +989,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         // Style the SVG
         d3.select(svgElement)
             .attr("width", "100%")
-            .attr("height", "600px")
+            .attr("height", "100%")
             .style("background-color", "#f9f9f9");
         
     }
@@ -997,7 +999,8 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
-        .style("background-color", "#f3f3eb");
+        .style("background-color", "#f3f3eb")
+        .style("height", "100%");
 
         const inner = svg.append("g");
 
@@ -1696,9 +1699,9 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             </div>
             <div class="left-column">
 
-<div class="code-box" id="codeBox">
-    <div class="code-box-header">Sample code (Not editable)</div>
-    <pre><code class="language-python">
+                <div class="code-box" id="codeBox">
+                    <div class="code-box-header">Sample code (Not editable)</div>
+                    <pre><code class="language-python">
 import torch
 import torch.nn as nn
 from torchvista import trace_model
@@ -1726,18 +1729,18 @@ example_input = torch.randn(1, 3, 64, 64)
 trace_model(model, example_input)
 
 </code></pre>
-</div>
+                </div>
 
-<div class="error-box" id="errorBox">
-    <div class="error-box-header">Error Output (if any)</div>
-
-</div>
+                <div class="error-box" id="errorBox">
+                    <div class="error-box-header">Error Output (if any)</div>
+                
+                </div>
 
             </div>
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container" style="height: 97%; overflow: auto; position: relative;">
+                <div id="graph-container">
                     <div id="graph" style="height: 100%"></div>
                     <div id="popup" class="popup" style="display: none;">
                         <div class="popup-header">

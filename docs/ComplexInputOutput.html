@@ -147,6 +147,8 @@
 
             #graph-container {
                 position: relative;
+                height: 95%;
+                overflow: hidden;
             }
             .popup {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -488,7 +490,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11164008816}, {"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11164008816}, {"target": "__getitem___1", "dims": "(2, 5)", "edge_data_id": 11164008816}, {"target": "__getitem___1", "dims": "(2, 5)", "edge_data_id": 11164008816}, {"target": "relu_1", "dims": "(2, 5)", "edge_data_id": 11164008816}, {"target": "relu_1", "dims": "(2, 5)", "edge_data_id": 11164008816}], "failed": false, "node_type": "Input"}, "input_1": {"edges": [{"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11164009584}, {"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11164009584}, {"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11164009584}, {"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11164009584}], "failed": false, "node_type": "Input"}, "__mul___1": {"edges": [{"target": "__truediv___1", "dims": "(2, 5)", "edge_data_id": 11163925584}, {"target": "__truediv___1", "dims": "(2, 5)", "edge_data_id": 11163925584}], "failed": false, "node_type": "Operation"}, "__getitem___1": {"edges": [{"target": "__truediv___1", "dims": "(5)", "edge_data_id": 11163915216}, {"target": "__truediv___1", "dims": "(5)", "edge_data_id": 11163915216}], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__getitem___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__truediv___1": {"edges": [{"target": "output_0", "dims": "(2, 5)", "edge_data_id": 11163920304}], "failed": false, "node_type": "Operation"}, "relu_1": {"edges": [{"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11163915216}, {"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11163915216}], "failed": false, "node_type": "Operation"}, "__sub___1": {"edges": [{"target": "Linear_1", "dims": "(2, 5)", "edge_data_id": 11163925584}, {"target": "Linear_1", "dims": "(2, 5)", "edge_data_id": 11163925584}], "failed": false, "node_type": "Operation"}, "Linear_1": {"edges": [{"target": "output_1", "dims": "(2, 12)", "edge_data_id": 11163925968}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}, "output_1": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11302408688}, {"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11302408688}, {"target": "__getitem___1", "dims": "(2, 5)", "edge_data_id": 11302408688}, {"target": "__getitem___1", "dims": "(2, 5)", "edge_data_id": 11302408688}, {"target": "relu_1", "dims": "(2, 5)", "edge_data_id": 11302408688}, {"target": "relu_1", "dims": "(2, 5)", "edge_data_id": 11302408688}], "failed": false, "node_type": "Input"}, "input_1": {"edges": [{"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11302410992}, {"target": "__mul___1", "dims": "(2, 5)", "edge_data_id": 11302410992}, {"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11302410992}, {"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11302410992}], "failed": false, "node_type": "Input"}, "__mul___1": {"edges": [{"target": "__truediv___1", "dims": "(2, 5)", "edge_data_id": 11302420016}, {"target": "__truediv___1", "dims": "(2, 5)", "edge_data_id": 11302420016}], "failed": false, "node_type": "Operation"}, "__getitem___1": {"edges": [{"target": "__truediv___1", "dims": "(5)", "edge_data_id": 11302405616}, {"target": "__truediv___1", "dims": "(5)", "edge_data_id": 11302405616}], "failed": false, "node_type": "Operation"}, "scalar_0": {"edges": [{"target": "__getitem___1", "dims": "( )"}], "failed": false, "node_type": "Constant"}, "__truediv___1": {"edges": [{"target": "output_0", "dims": "(2, 5)", "edge_data_id": 11302414256}], "failed": false, "node_type": "Operation"}, "relu_1": {"edges": [{"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11302405616}, {"target": "__sub___1", "dims": "(2, 5)", "edge_data_id": 11302405616}], "failed": false, "node_type": "Operation"}, "__sub___1": {"edges": [{"target": "Linear_1", "dims": "(2, 5)", "edge_data_id": 11302420016}, {"target": "Linear_1", "dims": "(2, 5)", "edge_data_id": 11302420016}], "failed": false, "node_type": "Operation"}, "Linear_1": {"edges": [{"target": "output_1", "dims": "(2, 12)", "edge_data_id": 11302416464}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}, "output_1": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"Linear_1": {"type": "Linear", "parameters": {"weight": {"shape": [12, 5], "requires_grad": true}, "bias": {"shape": [12], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 5, "out_features": 12, "training": true}, "extra_repr": "in_features=5, out_features=12, bias=True"}};
     const func_info = {"__mul___1": {"positional_args": [{"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}], "keyword_args": {}}, "__getitem___1": {"positional_args": [{"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}, 0], "keyword_args": {}}, "__truediv___1": {"positional_args": [{"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [5], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_1": {"positional_args": [{"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}], "keyword_args": {}}, "__sub___1": {"positional_args": [{"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_1": {"positional_args": [{"_type": "tensor", "shape": [2, 5], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {};
@@ -987,7 +989,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         // Style the SVG
         d3.select(svgElement)
             .attr("width", "100%")
-            .attr("height", "600px")
+            .attr("height", "100%")
             .style("background-color", "#f9f9f9");
         
     }
@@ -997,7 +999,8 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
-        .style("background-color", "#f3f3eb");
+        .style("background-color", "#f3f3eb")
+        .style("height", "100%");
 
         const inner = svg.append("g");
 
@@ -1696,9 +1699,9 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             </div>
             <div class="left-column">
 
-<div class="code-box" id="codeBox">
-    <div class="code-box-header">Sample code (Not editable)</div>
-    <pre><code class="language-python">
+                <div class="code-box" id="codeBox">
+                    <div class="code-box-header">Sample code (Not editable)</div>
+                    <pre><code class="language-python">
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -1733,18 +1736,18 @@ example_input = {
 trace_model(model, example_input)
 
 </code></pre>
-</div>
+                </div>
 
-<div class="error-box" id="errorBox">
-    <div class="error-box-header">Error Output (if any)</div>
-
-</div>
+                <div class="error-box" id="errorBox">
+                    <div class="error-box-header">Error Output (if any)</div>
+                
+                </div>
 
             </div>
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container" style="height: 97%; overflow: auto; position: relative;">
+                <div id="graph-container">
                     <div id="graph" style="height: 100%"></div>
                     <div id="popup" class="popup" style="display: none;">
                         <div class="popup-header">

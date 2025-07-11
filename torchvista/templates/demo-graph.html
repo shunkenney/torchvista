@@ -147,6 +147,8 @@
 
             #graph-container {
                 position: relative;
+                height: 95%;
+                overflow: hidden;
             }
             .popup {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -887,7 +889,7 @@
         // Style the SVG
         d3.select(svgElement)
             .attr("width", "100%")
-            .attr("height", "600px")
+            .attr("height", "100%")
             .style("background-color", "#f9f9f9");
         
     }
@@ -897,7 +899,8 @@
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
-        .style("background-color", "#f3f3eb");
+        .style("background-color", "#f3f3eb")
+        .style("height", "100%");
 
         const inner = svg.append("g");
 
@@ -1596,21 +1599,21 @@
             </div>
             <div class="left-column">
 
-<div class="code-box" id="codeBox">
-    <div class="code-box-header">Sample code (Not editable)</div>
-    <pre><code class="language-python">${code_contents}</code></pre>
-</div>
+                <div class="code-box" id="codeBox">
+                    <div class="code-box-header">Sample code (Not editable)</div>
+                    <pre><code class="language-python">${code_contents}</code></pre>
+                </div>
 
-<div class="error-box" id="errorBox">
-    <div class="error-box-header">Error Output (if any)</div>
-${error_contents}
-</div>
+                <div class="error-box" id="errorBox">
+                    <div class="error-box-header">Error Output (if any)</div>
+                ${error_contents}
+                </div>
 
             </div>
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container" style="height: 97%; overflow: auto; position: relative;">
+                <div id="graph-container">
                     <div id="graph" style="height: 100%"></div>
                     <div id="popup" class="popup" style="display: none;">
                         <div class="popup-header">

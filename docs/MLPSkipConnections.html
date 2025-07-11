@@ -147,6 +147,8 @@
 
             #graph-container {
                 position: relative;
+                height: 95%;
+                overflow: hidden;
             }
             .popup {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -488,7 +490,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
     });
 
 
-    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(1, 64)", "edge_data_id": 5469257456}, {"target": "Linear_1", "dims": "(1, 64)", "edge_data_id": 5469257456}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "relu_1", "dims": "(1, 128)", "edge_data_id": 11164040560}, {"target": "relu_1", "dims": "(1, 128)", "edge_data_id": 11164040560}], "failed": false, "node_type": "Module"}, "relu_1": {"edges": [{"target": "Linear_2", "dims": "(1, 128)", "edge_data_id": 6135663408}, {"target": "Linear_2", "dims": "(1, 128)", "edge_data_id": 6135663408}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6135663408}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6135663408}], "failed": false, "node_type": "Operation"}, "Linear_2": {"edges": [{"target": "relu_2", "dims": "(1, 128)", "edge_data_id": 6135662832}, {"target": "relu_2", "dims": "(1, 128)", "edge_data_id": 6135662832}], "failed": false, "node_type": "Module"}, "relu_2": {"edges": [{"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6135661872}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6135661872}], "failed": false, "node_type": "Operation"}, "__add___1": {"edges": [{"target": "Linear_3", "dims": "(1, 128)", "edge_data_id": 6135662832}, {"target": "Linear_3", "dims": "(1, 128)", "edge_data_id": 6135662832}], "failed": false, "node_type": "Operation"}, "Linear_3": {"edges": [{"target": "relu_3", "dims": "(1, 64)", "edge_data_id": 6135663696}, {"target": "relu_3", "dims": "(1, 64)", "edge_data_id": 6135663696}], "failed": false, "node_type": "Module"}, "relu_3": {"edges": [{"target": "Linear_4", "dims": "(1, 64)", "edge_data_id": 6135662832}, {"target": "Linear_4", "dims": "(1, 64)", "edge_data_id": 6135662832}], "failed": false, "node_type": "Operation"}, "Linear_4": {"edges": [{"target": "output_0", "dims": "(1, 10)", "edge_data_id": 6135662256}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
+    const adj_list = {"input_0": {"edges": [{"target": "Linear_1", "dims": "(1, 64)", "edge_data_id": 5546786544}, {"target": "Linear_1", "dims": "(1, 64)", "edge_data_id": 5546786544}], "failed": false, "node_type": "Input"}, "Linear_1": {"edges": [{"target": "relu_1", "dims": "(1, 128)", "edge_data_id": 6123737296}, {"target": "relu_1", "dims": "(1, 128)", "edge_data_id": 6123737296}], "failed": false, "node_type": "Module"}, "relu_1": {"edges": [{"target": "Linear_2", "dims": "(1, 128)", "edge_data_id": 6129338992}, {"target": "Linear_2", "dims": "(1, 128)", "edge_data_id": 6129338992}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6129338992}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6129338992}], "failed": false, "node_type": "Operation"}, "Linear_2": {"edges": [{"target": "relu_2", "dims": "(1, 128)", "edge_data_id": 6129338224}, {"target": "relu_2", "dims": "(1, 128)", "edge_data_id": 6129338224}], "failed": false, "node_type": "Module"}, "relu_2": {"edges": [{"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6129337072}, {"target": "__add___1", "dims": "(1, 128)", "edge_data_id": 6129337072}], "failed": false, "node_type": "Operation"}, "__add___1": {"edges": [{"target": "Linear_3", "dims": "(1, 128)", "edge_data_id": 6129338224}, {"target": "Linear_3", "dims": "(1, 128)", "edge_data_id": 6129338224}], "failed": false, "node_type": "Operation"}, "Linear_3": {"edges": [{"target": "relu_3", "dims": "(1, 64)", "edge_data_id": 6129339280}, {"target": "relu_3", "dims": "(1, 64)", "edge_data_id": 6129339280}], "failed": false, "node_type": "Module"}, "relu_3": {"edges": [{"target": "Linear_4", "dims": "(1, 64)", "edge_data_id": 6129338224}, {"target": "Linear_4", "dims": "(1, 64)", "edge_data_id": 6129338224}], "failed": false, "node_type": "Operation"}, "Linear_4": {"edges": [{"target": "output_0", "dims": "(1, 10)", "edge_data_id": 6129337456}], "failed": false, "node_type": "Module"}, "output_0": {"edges": [], "failed": false, "node_type": "Output"}};
     const module_info = {"Linear_1": {"type": "Linear", "parameters": {"weight": {"shape": [128, 64], "requires_grad": true}, "bias": {"shape": [128], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 128, "training": true}, "extra_repr": "in_features=64, out_features=128, bias=True"}, "Linear_2": {"type": "Linear", "parameters": {"weight": {"shape": [128, 128], "requires_grad": true}, "bias": {"shape": [128], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 128, "out_features": 128, "training": true}, "extra_repr": "in_features=128, out_features=128, bias=True"}, "Linear_3": {"type": "Linear", "parameters": {"weight": {"shape": [64, 128], "requires_grad": true}, "bias": {"shape": [64], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 128, "out_features": 64, "training": true}, "extra_repr": "in_features=128, out_features=64, bias=True"}, "Linear_4": {"type": "Linear", "parameters": {"weight": {"shape": [10, 64], "requires_grad": true}, "bias": {"shape": [10], "requires_grad": true}}, "attributes": {"call_super_init": false, "dump_patches": false, "in_features": 64, "out_features": 10, "training": true}, "extra_repr": "in_features=64, out_features=10, bias=True"}};
     const func_info = {"Linear_1": {"positional_args": [{"_type": "tensor", "shape": [1, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_1": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_2": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_2": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "__add___1": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}, {"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_3": {"positional_args": [{"_type": "tensor", "shape": [1, 128], "dtype": "torch.float32"}], "keyword_args": {}}, "relu_3": {"positional_args": [{"_type": "tensor", "shape": [1, 64], "dtype": "torch.float32"}], "keyword_args": {}}, "Linear_4": {"positional_args": [{"_type": "tensor", "shape": [1, 64], "dtype": "torch.float32"}], "keyword_args": {}}};
     const parent_module_to_nodes = {};
@@ -987,7 +989,7 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         // Style the SVG
         d3.select(svgElement)
             .attr("width", "100%")
-            .attr("height", "600px")
+            .attr("height", "100%")
             .style("background-color", "#f9f9f9");
         
     }
@@ -997,7 +999,8 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
-        .style("background-color", "#f3f3eb");
+        .style("background-color", "#f3f3eb")
+        .style("height", "100%");
 
         const inner = svg.append("g");
 
@@ -1696,9 +1699,9 @@ i._setHSLA(null,e,1-t)}),this.settings.alpha&&a(r,this._domA,function(e,t){i._se
             </div>
             <div class="left-column">
 
-<div class="code-box" id="codeBox">
-    <div class="code-box-header">Sample code (Not editable)</div>
-    <pre><code class="language-python">
+                <div class="code-box" id="codeBox">
+                    <div class="code-box-header">Sample code (Not editable)</div>
+                    <pre><code class="language-python">
 import torch
 import torch.nn as nn
 from torchvista import trace_model
@@ -1723,18 +1726,18 @@ example_input = torch.randn(1, 64)
 trace_model(model, example_input)
 
 </code></pre>
-</div>
+                </div>
 
-<div class="error-box" id="errorBox">
-    <div class="error-box-header">Error Output (if any)</div>
-
-</div>
+                <div class="error-box" id="errorBox">
+                    <div class="error-box-header">Error Output (if any)</div>
+                
+                </div>
 
             </div>
     
             <div class="graph-view" id="graphContainer" style="height: 100%">
                 <div class="graph-box-header">Visualized Interactive Graph</div>
-                <div id="graph-container" style="height: 97%; overflow: auto; position: relative;">
+                <div id="graph-container">
                     <div id="graph" style="height: 100%"></div>
                     <div id="popup" class="popup" style="display: none;">
                         <div class="popup-header">
