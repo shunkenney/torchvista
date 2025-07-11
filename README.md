@@ -70,7 +70,7 @@ trace_model(model, example_input)
 ```
 ## API Reference: `trace_model`
 
-    trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=False, forced_module_tracing_depth=None)
+    trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=False, forced_module_tracing_depth=None, height=800)
 ### Parameters
 
 #### `model` (`torch.nn.Module`)
@@ -78,6 +78,11 @@ trace_model(model, example_input)
 
 #### `inputs` (`Any`)
 - Input(s) to be passed to the model. Can be a single input or a tuple of inputs.
+
+#### `height` (`int`, optional)
+- Height in px of the visualization canvas.
+- **Category:** Visual control
+- **Default:** `800`
 
 #### `collapse_modules_after_depth` (`int`, optional)
 - Maximum depth for expanding nested modules in the initial view. `0` means everything is collapsed.
