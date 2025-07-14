@@ -278,7 +278,17 @@
     </style>
     
     <script>
+        var _module = window.module;
+        var _exports = window.exports;
+        var _define = window.define;
+        
+        window.module = undefined;
+        window.exports = undefined;
+        window.define = undefined;
         ${d3_source}
+        window.module = _module;
+        window.exports = _exports;
+        window.define = _define;
     </script>
     <script>
         var _module = window.module;
