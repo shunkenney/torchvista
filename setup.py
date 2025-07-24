@@ -2,13 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
     name='torchvista',
-    version='0.1.8',
+    version='0.1.9',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'ipython>=7.0.0',
         'numpy>=1.18.0'
     ],
+    python_requires='>=3.8',
     package_data={
         'torchvista': ['templates/*.html', 'assets/*'],
     },
