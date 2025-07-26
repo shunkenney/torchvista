@@ -339,6 +339,7 @@
     const ancestor_map = ${ancestor_map};
     const collapse_modules_after_depth = ${collapse_modules_after_depth};
     const node_to_module_path = ${node_to_module_path};
+    const generateImage = ${generate_image};
     var collapsedContainers = new Set();
     const containerNodes = new Set();
     var adj_list_collapsed_nodes = {};
@@ -605,9 +606,13 @@
         }
     }
 
-    function generateDotFromProcessedData() {
+    function generateDotFromProcessedData(topDown = false) {
         let dotSource = 'digraph G {\n';
-        dotSource += '  rankdir=BT;\n';
+        if (topDown) {
+            dotSource += '  rankdir=TB;\n';
+        } else {
+            dotSource += '  rankdir=BT;\n';
+        }
         dotSource += '  node [shape=box];\n';
         dotSource += '  ranksep=0.5;\n';
         dotSource += '  nodesep=0.4;\n';
@@ -701,7 +706,7 @@
     // Updated generateDotSource function
     function generateDotSource() {
         processCollapsedGraph();
-        const dotSource = generateDotFromProcessedData();
+        const dotSource = generateDotFromProcessedData(generateImage);
         return dotSource;
     }
 
@@ -758,14 +763,14 @@
         // Extract the graph data with positions from Graphviz
         const extractedGraphData = extractGraphData(graphData);
 
-        
-        // Now create the graph with the Graphviz layout data
-        createGraph(extractedGraphData);
+        if (!generateImage) {
+            createGraph(extractedGraphData);
 
-        // Needed to get the right vp coverage when containers are expanded
-        calculateContainerNodeCounts();
-
-        // renderGraphvizImage(dotSource);
+            // Needed to get the right vp coverage when containers are expanded
+            calculateContainerNodeCounts();
+        } else {
+            renderGraphvizImage(dotSource);
+        }
     }
                 
     function initializeCollapsedContainersFromGraph() {
@@ -806,33 +811,54 @@
         return nodes.find(node => adj_list[node].failed);
     }
 
-
-
-    // Add this function to render the raw Graphviz visualization
     function renderGraphvizImage(dotSource) {
-        // Create a container for the Graphviz image
-        const graphvizContainer = d3.select("#graph-container_${unique_id}")
-            .append("div")
-            .attr("id", "graphviz-image-container_${unique_id}")
-            .style("margin-top", "20px")
-            .style("border-top", "1px solid #ccc")
-            .style("padding-top", "20px");
-      
-        graphvizContainer.append("h3")
-            .text("Original Graphviz Rendering")
-            .style("text-align", "center");
+        d3.select("#png-link-container_${unique_id}").remove();
         
-        // Use Viz.js to render the DOT source directly to SVG
-        svgElement = vizInstance.renderSVGElement(dotSource)
-        // Append the SVG element to the container
-        graphvizContainer.node().appendChild(svgElement);
-          
-        // Style the SVG
-        d3.select(svgElement)
-            .attr("width", "100%")
-            .attr("height", "100%")
-            .style("background-color", "#f9f9f9");
-        
+        try {
+            const svgString = vizInstance.renderString(dotSource, { format: 'svg' });
+            
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx.drawImage(img, 0, 0);
+                
+                canvas.toBlob(function(pngBlob) {
+                    const pngUrl = URL.createObjectURL(pngBlob);
+                    
+                    const parent = d3.select("#graph-container_${unique_id}").node().parentNode;
+                    const linkContainer = d3.select(parent)
+                        .insert("div", "#graph-container_${unique_id}")
+                        .attr("id", "png-link-container_${unique_id}")
+                        .style("text-align", "center")
+                        .style("padding", "10px")
+                        .style("border-bottom", "1px solid #ccc");
+                    
+                    linkContainer.append("a")
+                        .attr("href", pngUrl)
+                        .attr("target", "_blank")
+                        .style("display", "inline-block")
+                        .style("padding", "8px 16px")
+                        .style("background-color", "#007bff")
+                        .style("color", "white")
+                        .style("text-decoration", "none")
+                        .style("border-radius", "4px")
+                        .text("View PNG in New Tab");
+                }, 'image/png');
+                
+                URL.revokeObjectURL(svgUrl);
+            };
+            
+            img.src = svgUrl;
+            
+        } catch (error) {
+            console.error("Error generating PNG:", error);
+        }
     }
 
     function createGraph(graphvizData) {
