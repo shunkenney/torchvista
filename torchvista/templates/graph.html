@@ -607,13 +607,31 @@
     }
 
     function generateDotFromProcessedData(topDown = false) {
+        function getNodeColor(nodeName) {
+            if (adj_list_collapsed_nodes[nodeName]) {
+                const nodeData = adj_list_collapsed_nodes[nodeName];
+                if (nodeData.node_type === "Input") return "#FF9AFF";
+                if (nodeData.node_type === "Constant") return "#EBEBEB";
+                if (nodeData.node_type === "Output") return "#74e071";
+                if (nodeData.node_type === "Module") return "#8BDEDB";
+                if (nodeData.node_type === "Operation") return "#FEBC5A";
+            }
+            if (collapsedContainers.has(nodeName)) return "#8BDEDB";
+            return "#FEBC5A";
+        }
+
+        function getErrorColor(nodeName) {
+            if (adj_list[nodeName] && adj_list[nodeName].failed) return "#e00f0f";
+            return null;
+        }
         let dotSource = 'digraph G {\n';
         if (topDown) {
             dotSource += '  rankdir=TB;\n';
         } else {
             dotSource += '  rankdir=BT;\n';
         }
-        dotSource += '  node [shape=box];\n';
+        dotSource += '  node [shape=box, style=filled];\n';
+        dotSource += '  bgcolor="#f3f3eb";\n';
         dotSource += '  ranksep=0.5;\n';
         dotSource += '  nodesep=0.4;\n';
 
@@ -633,14 +651,21 @@
             // Check if this container is collapsed (appears as a regular node)
             if (collapsedContainers.has(containerName)) {
                 // For collapsed containers, create a normal node instead of a subgraph
-                dotSource += `${indent}"${containerName}";\n`;
+                const errorColor = getErrorColor(containerName);
+                const fillColor = errorColor || getNodeColor(containerName);
+                const displayName = graph_node_name_to_without_suffix[containerName] || containerName;
+                dotSource += `${indent}"${containerName}" [fillcolor="${fillColor}", label="${displayName}"];\n`;
                 return;
             }
             
             // Start subgraph for non-collapsed containers
             dotSource += `${indent}subgraph cluster_${containerName} {\n`;
-            dotSource += `${indent}  label="${containerName}";\n`;
+            const displayName = graph_node_name_to_without_suffix[containerName] || containerName;
+            dotSource += `${indent}  label="${displayName}";\n`;
+            dotSource += `${indent}  fontsize=10;\n`;
             dotSource += `${indent}  style=rounded;\n`;
+            dotSource += `${indent}  labelloc=t;\n`;
+            dotSource += `${indent}  labeljust=l;\n`;
 
             // Get all direct children
             const children = containerHierarchy[containerName] || [];
@@ -661,7 +686,10 @@
                     } else if (nodeData.node_type === "Input" || nodeData.node_type === "Output") {
                         dotSource += `${indent}  "${child}" [width=1.2, height=0.5];\n`;
                     } else {
-                        dotSource += `${indent}  "${child}";\n`;
+                        const errorColor = getErrorColor(child);
+                        const fillColor = errorColor || getNodeColor(child);
+                        const childDisplayName = graph_node_name_to_without_suffix[child] || child;
+                        dotSource += `${indent}  "${child}" [fillcolor="${fillColor}", label="${childDisplayName}"];\n`;
                     }
                 }
             }
@@ -678,11 +706,20 @@
         for (const [node, data] of Object.entries(adj_list_collapsed_nodes)) {
             if (!ancestor_map[node]) {
                 if (data.node_type === "Constant") {
-                    dotSource += `  "${node}" [width=0.7, height=0.3];\n`;
+                    const errorColor = getErrorColor(node);
+                    const fillColor = errorColor || getNodeColor(node);
+                    const nodeDisplayName = graph_node_name_to_without_suffix[node] || node;
+                    dotSource += `  "${node}" [width=0.7, height=0.3, fillcolor="${fillColor}", label="${nodeDisplayName}"];\n`;
                 } else if (data.node_type === "Input" || data.node_type === "Output") {
-                    dotSource += `  "${node}" [width=1.2, height=0.5];\n`;
+                    const errorColor = getErrorColor(node);
+                    const fillColor = errorColor || getNodeColor(node);
+                    const nodeDisplayName = graph_node_name_to_without_suffix[node] || node;
+                    dotSource += `  "${node}" [width=1.2, height=0.5, fillcolor="${fillColor}", label="${nodeDisplayName}"];\n`;
                 } else {
-                    dotSource += `  "${node}";\n`;
+                    const errorColor = getErrorColor(node);
+                    const fillColor = errorColor || getNodeColor(node);
+                    const nodeDisplayName = graph_node_name_to_without_suffix[node] || node;
+                    dotSource += `  "${node}" [fillcolor="${fillColor}", label="${nodeDisplayName}"];\n`;
                 }
             }
         }
@@ -811,54 +848,91 @@
         return nodes.find(node => adj_list[node].failed);
     }
 
+    
+
     function renderGraphvizImage(dotSource) {
+        // Remove existing link if it exists
         d3.select("#png-link-container_${unique_id}").remove();
         
-        try {
-            const svgString = vizInstance.renderString(dotSource, { format: 'svg' });
+        function showErrorMessage(error) {
+            const parent = d3.select("#graph-container_${unique_id}").node().parentNode;
+            const errorContainer = d3.select(parent)
+                .insert("div", "#graph-container_${unique_id}")
+                .attr("id", "png-link-container_${unique_id}")
+                .style("text-align", "center")
+                .style("padding", "10px")
+                .style("border-bottom", "1px solid #ccc");
             
+            errorContainer.append("div")
+                .style("padding", "8px 16px")
+                .style("background-color", "#dc3545")
+                .style("color", "white")
+                .style("border-radius", "4px")
+                .style("display", "inline-block")
+                .style("font-family", "monospace")
+                .style("white-space", "pre-wrap")
+                .style("text-align", "left")
+                .html(`<strong>Error:</strong><br>${error.stack || error.message || error}<br><br><strong>Note:</strong> Exporting large models as PNG is currently not supported. Please use generate_image=False, or raise an issue on https://github.com/sachinhosmani/torchvista/issues`);
+        }
+        
+        async function generatePNG() {
+            // Generate TB version for PNG export
+            processCollapsedGraph();
+            const tbDotSource = generateDotFromProcessedData('TB');
+            const svgString = vizInstance.renderString(tbDotSource, { format: 'svg' });
+            
+            // Convert SVG to PNG
             const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
             const svgUrl = URL.createObjectURL(svgBlob);
             
             const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                ctx.drawImage(img, 0, 0);
-                
-                canvas.toBlob(function(pngBlob) {
-                    const pngUrl = URL.createObjectURL(pngBlob);
-                    
-                    const parent = d3.select("#graph-container_${unique_id}").node().parentNode;
-                    const linkContainer = d3.select(parent)
-                        .insert("div", "#graph-container_${unique_id}")
-                        .attr("id", "png-link-container_${unique_id}")
-                        .style("text-align", "center")
-                        .style("padding", "10px")
-                        .style("border-bottom", "1px solid #ccc");
-                    
-                    linkContainer.append("a")
-                        .attr("href", pngUrl)
-                        .attr("target", "_blank")
-                        .style("display", "inline-block")
-                        .style("padding", "8px 16px")
-                        .style("background-color", "#007bff")
-                        .style("color", "white")
-                        .style("text-decoration", "none")
-                        .style("border-radius", "4px")
-                        .text("View PNG in New Tab");
-                }, 'image/png');
-                
-                URL.revokeObjectURL(svgUrl);
-            };
+            const imageLoaded = new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = svgUrl;
+            });
             
-            img.src = svgUrl;
+            await imageLoaded;
             
-        } catch (error) {
-            console.error("Error generating PNG:", error);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0);
+            
+            const pngBlob = await new Promise((resolve, reject) => {
+                canvas.toBlob(resolve, 'image/png');
+            });
+            
+            const pngUrl = URL.createObjectURL(pngBlob);
+            
+            // Create link container
+            const parent = d3.select("#graph-container_${unique_id}").node().parentNode;
+            const linkContainer = d3.select(parent)
+                .insert("div", "#graph-container_${unique_id}")
+                .attr("id", "png-link-container_${unique_id}")
+                .style("text-align", "center")
+                .style("padding", "10px")
+                .style("border-bottom", "1px solid #ccc");
+            
+            linkContainer.append("a")
+                .attr("href", pngUrl)
+                .attr("target", "_blank")
+                .style("display", "inline-block")
+                .style("padding", "8px 16px")
+                .style("background-color", "#007bff")
+                .style("color", "white")
+                .style("text-decoration", "none")
+                .style("border-radius", "4px")
+                .text("View PNG in New Tab");
+                
+            URL.revokeObjectURL(svgUrl);
         }
+        
+        generatePNG().catch(error => {
+            console.error("Error generating PNG:", error);
+            showErrorMessage(error);
+        });
     }
 
     function createGraph(graphvizData) {
