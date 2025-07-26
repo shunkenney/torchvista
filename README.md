@@ -70,7 +70,7 @@ trace_model(model, example_input)
 ```
 ## API Reference: `trace_model`
 
-    trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=False, forced_module_tracing_depth=None, height=800)
+    trace_model(model, inputs, max_module_expansion_depth=3, show_non_gradient_nodes=False, forced_module_tracing_depth=None, height=800, generate_image=False)
 ### Parameters
 
 #### `model` (`torch.nn.Module`)
