@@ -280,6 +280,7 @@
                 text-align: center;
                 padding: 10px;
                 border-bottom: 1px solid #ccc;
+                font-size: 14px;
             }
 
             #png-error-message_${unique_id} {
@@ -294,9 +295,9 @@
             }
 
             #png-link-container_${unique_id} {
-                text-align: center;
                 padding: 10px;
                 border-bottom: 1px solid #ccc;
+                font-size: 18px;
             }
 
             #png-download-button_${unique_id} {
@@ -895,7 +896,7 @@
             
             errorContainer.append("div")
                 .attr("id", "png-error-message_${unique_id}")
-                .html(`<strong>Error:</strong><br>${error.stack || error.message || error}<br><br><strong>Note:</strong> Exporting large models as PNG is currently not supported. Please use generate_image=False, or raise an issue on https://github.com/sachinhosmani/torchvista/issues`);
+                .html(`<strong>Error:</strong><br>${error.stack || error.message || error}<br><br><strong>Note:</strong> Exporting very large models as PNG is currently not supported. Please use generate_image=False, or raise an issue on https://github.com/sachinhosmani/torchvista/issues`);
         }
         
         async function generatePNG() {
