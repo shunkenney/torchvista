@@ -33,7 +33,7 @@ Note: As of now, it doesn't work properly in VSCode notebooks and this is being 
 
 ## Demos
 
-- Quick Google Colab tutorial 👉 [here](https://colab.research.google.com/drive/1wrWKhpvGiqHhE0Lb1HnFGeOcS4uBqGXw?usp=sharing#scrollTo=tUKHO2YFKi55) (must be logged in to Colab)
+- Quick Google Colab tutorial 👉 [here](https://colab.research.google.com/drive/1wrWKhpvGiqHhE0Lb1HnFGeOcS4uBqGXw?usp=sharing) (must be logged in to Colab)
 - Check out demos 👉 [here](https://sachinhosmani.github.io/torchvista/)
 
 ## ⚙️ Usage
@@ -79,11 +79,6 @@ trace_model(model, example_input)
 #### `inputs` (`Any`)
 - Input(s) to be passed to the model. Can be a single input or a tuple of inputs.
 
-#### `height` (`int`, optional)
-- Height in px of the visualization canvas.
-- **Category:** Visual control
-- **Default:** `800`
-
 #### `collapse_modules_after_depth` (`int`, optional)
 - Maximum depth for expanding nested modules in the initial view. `0` means everything is collapsed.
 - **Category:** Visual control
@@ -98,3 +93,13 @@ trace_model(model, example_input)
 - Maximum depth to which modules' internals are traced. `None` means only user-defined modules are traced, not pre-defined library modules.
 - **Category:** Tracing  
 - **Default:** `None`
+
+#### `height` (`int`, optional)
+- Height in px of the visualization canvas.
+- **Category:** Visual control
+- **Default:** `800`
+
+#### `generate_image` (`bool`, optional)
+- If True, it generates an image of the visualization instead of displaying it as an interactive visualization in the notebook.
+- **Category:** Visual control
+- **Default:** False
