@@ -275,6 +275,42 @@
                 ry: 8px;
                 stroke-dasharray: none;
             }
+
+            #png-error-container_${unique_id} {
+                text-align: center;
+                padding: 10px;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #png-error-message_${unique_id} {
+                padding: 8px 16px;
+                background-color: #dc3545;
+                color: white;
+                border-radius: 4px;
+                display: inline-block;
+                font-family: monospace;
+                white-space: pre-wrap;
+                text-align: left;
+            }
+
+            #png-link-container_${unique_id} {
+                text-align: center;
+                padding: 10px;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #png-download-button_${unique_id} {
+                display: inline-block;
+                padding: 8px 16px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+            }
+
+            #png-download-button_${unique_id}:hover {
+                background-color: #0056b3;
+            }
     </style>
     
     <script>
@@ -848,40 +884,25 @@
         return nodes.find(node => adj_list[node].failed);
     }
 
-    
-
     function renderGraphvizImage(dotSource) {
-        // Remove existing link if it exists
         d3.select("#png-link-container_${unique_id}").remove();
         
         function showErrorMessage(error) {
             const parent = d3.select("#graph-container_${unique_id}").node().parentNode;
             const errorContainer = d3.select(parent)
                 .insert("div", "#graph-container_${unique_id}")
-                .attr("id", "png-link-container_${unique_id}")
-                .style("text-align", "center")
-                .style("padding", "10px")
-                .style("border-bottom", "1px solid #ccc");
+                .attr("id", "png-error-container_${unique_id}");
             
             errorContainer.append("div")
-                .style("padding", "8px 16px")
-                .style("background-color", "#dc3545")
-                .style("color", "white")
-                .style("border-radius", "4px")
-                .style("display", "inline-block")
-                .style("font-family", "monospace")
-                .style("white-space", "pre-wrap")
-                .style("text-align", "left")
+                .attr("id", "png-error-message_${unique_id}")
                 .html(`<strong>Error:</strong><br>${error.stack || error.message || error}<br><br><strong>Note:</strong> Exporting large models as PNG is currently not supported. Please use generate_image=False, or raise an issue on https://github.com/sachinhosmani/torchvista/issues`);
         }
         
         async function generatePNG() {
-            // Generate TB version for PNG export
             processCollapsedGraph();
             const tbDotSource = generateDotFromProcessedData('TB');
             const svgString = vizInstance.renderString(tbDotSource, { format: 'svg' });
             
-            // Convert SVG to PNG
             const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
             const svgUrl = URL.createObjectURL(svgBlob);
             
@@ -902,7 +923,6 @@
 
             ctx.fillStyle = '#f3f3eb';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             ctx.drawImage(img, padding, padding);
             
             const pngBlob = await new Promise((resolve, reject) => {
@@ -915,20 +935,12 @@
             const parent = d3.select("#graph-container_${unique_id}").node().parentNode;
             const linkContainer = d3.select(parent)
                 .insert("div", "#graph-container_${unique_id}")
-                .attr("id", "png-link-container_${unique_id}")
-                .style("text-align", "center")
-                .style("padding", "10px")
-                .style("border-bottom", "1px solid #ccc");
+                .attr("id", "png-link-container_${unique_id}");
             
             linkContainer.append("a")
                 .attr("href", pngUrl)
                 .attr("target", "_blank")
-                .style("display", "inline-block")
-                .style("padding", "8px 16px")
-                .style("background-color", "#007bff")
-                .style("color", "white")
-                .style("text-decoration", "none")
-                .style("border-radius", "4px")
+                .attr("id", "png-download-button_${unique_id}")
                 .text("View PNG in New Tab");
                 
             URL.revokeObjectURL(svgUrl);
