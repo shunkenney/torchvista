@@ -8,6 +8,7 @@ from string import Template
 import uuid
 from collections import defaultdict
 from .overrides import CONTAINER_MODULES, FUNCTIONS
+import warnings
 
 import json
 from IPython.display import display, HTML
@@ -86,7 +87,9 @@ def get_all_nn_modules():
 
     return module_classes
 
-MODULES = get_all_nn_modules() - CONTAINER_MODULES
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", UserWarning)
+    MODULES = get_all_nn_modules() - CONTAINER_MODULES
 
 
 def process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes, forced_module_tracing_depth):
