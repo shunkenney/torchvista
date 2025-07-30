@@ -716,7 +716,8 @@ def plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_mod
         'height': height if not generate_image else 0,
         'generate_image': 'true' if generate_image else 'false',
     })
-    display(HTML(output))
+    
+    return output
 
 
 def _get_demo_html_str(model, inputs, code_contents, collapse_modules_after_depth=1, show_non_gradient_nodes=True, forced_module_tracing_depth=None):
@@ -787,9 +788,29 @@ def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradien
         process_graph(model, inputs, adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, node_to_ancestors, show_non_gradient_nodes=show_non_gradient_nodes, forced_module_tracing_depth=forced_module_tracing_depth)
     except Exception as e:
         exception = e
+        
+    # ---------------------------------------------
+    from flask import Flask, render_template_string
+    import threading
 
-    plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), collapse_modules_after_depth, height, generate_image)
+    def _start_flask_server(html, port=6006):
+        app = Flask(__name__)
 
+        @app.route("/")
+        def index():
+            return render_template_string(html)
+
+        threading.Thread(
+            target=lambda: app.run(port=port, debug=False, use_reloader=False),
+            daemon=True
+        ).start()
+
+        print(f"\n🚀 TorchVista visualization is available at: http://localhost:{port}\n")
+
+    # HTML を生成
+    html = plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), collapse_modules_after_depth, height, generate_image)
+    _start_flask_server(html, port=6006)
+    # ---------------------------------------------
 
     if exception is not None:
         raise exception
