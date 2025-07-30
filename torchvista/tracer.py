@@ -805,11 +805,12 @@ def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradien
             daemon=True
         ).start()
 
-        print(f"\n🚀 TorchVista visualization is available at: http://localhost:{port}\n")
-
     # HTML を生成
     html = plot_graph(adj_list, module_info, func_info, node_to_module_path, parent_module_to_nodes, parent_module_to_depth, graph_node_name_to_without_suffix, build_immediate_ancestor_map(node_to_ancestors, adj_list), collapse_modules_after_depth, height, generate_image)
     _start_flask_server(html, port=6006)
+    
+    print(f"\n🚀 TorchVista visualization is available at: http://localhost:{port}\n")
+    input("🔗 Press Enter to terminate the server and exit.")
     # ---------------------------------------------
 
     if exception is not None:
