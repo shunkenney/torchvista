@@ -195,6 +195,17 @@
                 fill: rgb(51, 51, 51);
             }
 
+            .info-button_${unique_id}:hover {
+                fill: #eee;
+                cursor: pointer;
+            }
+            .info-icon_${unique_id} {
+                pointer-events: none;
+                user-select: none;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                fill: rgb(51, 51, 51);
+            }
+
             /* Edge hover styles */
             .edge-group_${unique_id} path {
                pointer-events: stroke;
@@ -1251,13 +1262,6 @@
                 return `translate(${nodeData.position.x}, ${nodeData.position.y})`;
             });
         
-        // Filter nodes for click event - don't include input or output nodes
-        inner.selectAll(".node_${unique_id}")
-            .filter(function([nodeName]) {
-                return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")))
-            })
-            .on("click", showPopup);
-
         
         // Add rectangles for nodes
         nodes.append("rect")
@@ -1285,10 +1289,10 @@
             return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")));
         }).append("text")
         .attr("class", "type-indicator_${unique_id}")
-        .attr("text-anchor", "end")
-        .attr("dominant-baseline", "hanging")
+        .attr("text-anchor", "start")
+        .attr("dominant-baseline", "text-bottom")
         .attr("transform", function([nodeName, nodeData]) {
-            return `translate(${nodeData.width / 2 - 3}, ${-nodeData.height / 2 + 3})`;
+            return `translate(${-nodeData.width / 2 + 3}, ${nodeData.height / 2 - 3})`;
         })
         .text(function([nodeName]) {
             return (adj_list[nodeName] && adj_list[nodeName].node_type === "Module") || (collapsedContainers.has(nodeName)) ? "Module" : "Tensor Op";
@@ -1341,6 +1345,48 @@
             });
         });    
 
+        // Add info buttons to nodes (except input, output, constant)
+        inner.selectAll(".node_${unique_id}")
+        .filter(function([nodeName]) {
+            return !(((adj_list[nodeName] && adj_list[nodeName].node_type === "Output")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Input")) || ((adj_list[nodeName] && adj_list[nodeName].node_type === "Constant")))
+        })
+        .each(function([nodeName, nodeData]) {
+            const nodeGroup = d3.select(this);
+            const width = nodeData.width;
+            const height = nodeData.height;
+            
+            // Add info button circle
+            nodeGroup.append("circle")
+            .attr("class", "info-button_${unique_id}")
+            .attr("cx", width/2 - 8)
+            .attr("cy", -height/2 + 8)
+            .attr("r", 6)
+            .attr("fill", "#fff")
+            .attr("stroke", "#333")
+            .attr("stroke-width", 1)
+            .attr("cursor", "pointer");
+
+            // Add info button icon
+            nodeGroup.append("text")
+            .attr("class", "info-icon_${unique_id}")
+            .attr("x", width/2 - 8)
+            .attr("y", -height/2 + 8)
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", "8px")
+            .attr("font-weight", "bold")
+            .attr("cursor", "pointer")
+            .text("i");
+            
+        // Add click handler to info button
+            nodeGroup.selectAll(".info-button_${unique_id}, .info-icon_${unique_id}")
+            .on("click", function(event) {
+                event.stopPropagation();
+                const infoButton = nodeGroup.select(".info-button_${unique_id}").node();
+                showPopupFromInfoButton.call(nodeGroup.node(), event, [nodeName], infoButton);
+            });
+        });
+
         // Add hover effects
         nodes.each(function() {
             const nodeGroup = d3.select(this);
@@ -1385,13 +1431,13 @@
             // set a reference for later use during resizing
             container.jsonEditor = editor;
         }
-
-        function showPopup(event, [nodeName]) {
+        
+        function showPopupFromInfoButton(event, [nodeName], infoButtonElement = null) {
             event.stopPropagation();
             
             const clickedNodeElement = d3.select(this);
 
-            // Position the clicked node
+            // Position based on info button or node center
             const clickednodeData = graphvizData.nodes[nodeName];
             if (clickednodeData) {
                 const svgNode = svg.node();
@@ -1399,8 +1445,25 @@
                 const height = svgNode.clientHeight || 600;
                 
                 const currentTransform = d3.zoomTransform(svg.node());
-                const targetX = 0.4 * width - clickednodeData.position.x * currentTransform.k;
-                const targetY = 0.2 * height - clickednodeData.position.y * currentTransform.k;
+                
+                let targetX, targetY;
+                
+                if (infoButtonElement) {
+                    // Calculate info button position relative to node center
+                    const infoButtonOffsetX = clickednodeData.width / 2 - 8;
+                    const infoButtonOffsetY = -clickednodeData.height / 2 + 8;
+                    
+                    // Calculate where the info button should be positioned on screen
+                    const infoButtonWorldX = clickednodeData.position.x + infoButtonOffsetX;
+                    const infoButtonWorldY = clickednodeData.position.y + infoButtonOffsetY;
+                    
+                    targetX = 0.4 * width - infoButtonWorldX * currentTransform.k;
+                    targetY = 0.2 * height - infoButtonWorldY * currentTransform.k;
+                } else {
+                    // Original behavior - center the node
+                    targetX = 0.4 * width - clickednodeData.position.x * currentTransform.k;
+                    targetY = 0.2 * height - clickednodeData.position.y * currentTransform.k;
+                }
                 
                 svg.call(zoom.transform, d3.zoomIdentity
                     .translate(targetX, targetY)
@@ -1411,11 +1474,9 @@
             
             setTimeout(() => {
                 clickedNodeElement.classed("highlight-node_${unique_id}", false);
-            }, 2000); // Match the animation duration
-
+            }, 2000);
 
             const popup = d3.select("#popup_${unique_id}");
-            const clickedElement = d3.select(this).select("rect").node();
             const moduleTemplate = d3.select("#module-template_${unique_id}");
             const tensorOpTemplate = d3.select("#tensor-op-template_${unique_id}");
             const noInfoMessage = d3.select("#no-info_${unique_id}");
@@ -1456,18 +1517,27 @@
                 noInfoMessage.style("display", "block").classed("content-shown_${unique_id}", true);
             }
             
-            const boundingBox = clickedElement.getBoundingClientRect();
+            // Position popup based on info button or node center
+            let boundingBox, x, y;
             const containerRect = d3.select("#graph-container_${unique_id}").node().getBoundingClientRect();
             
-            const x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
-            const y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
+            if (infoButtonElement) {
+                boundingBox = infoButtonElement.getBoundingClientRect();
+                x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
+                y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
+            } else {
+                const clickedElement = d3.select(this).select("rect").node();
+                boundingBox = clickedElement.getBoundingClientRect();
+                x = boundingBox.left + boundingBox.width / 2 - containerRect.left;
+                y = boundingBox.top + boundingBox.height / 2 - containerRect.top;
+            }
             
             popup.style("left", `${x}px`)
             .style("top", `${y}px`)
             .style("display", "flex");
             d3.select("#popup-content_${unique_id}").node().scrollTop = 0;
         }
-        
+
         function closePopup() {
             d3.select("#popup_${unique_id}").style("display", "none");
         }
