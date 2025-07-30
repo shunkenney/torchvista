@@ -1,3 +1,5 @@
+# port forwarding機能がなく、HTML表示のみであり、displayなしのserverでは使えなかったため、少し変更。
+
 # torchvista
 
 An interactive tool to visualize the forward pass of a PyTorch model directly in the notebook—with a single line of code. Works with web-based notebooks like Jupyter, Google Colab and Kaggle.
