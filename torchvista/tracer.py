@@ -790,7 +790,7 @@ def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradien
         exception = e
         
     # ---------------------------------------------
-    from flask import Flask, render_template_string
+    from flask import Flask, Response
     import threading
 
     def _start_flask_server(html, port=6006):
@@ -798,7 +798,7 @@ def trace_model(model, inputs, max_module_expansion_depth=None, show_non_gradien
 
         @app.route("/")
         def index():
-            return render_template_string(html)
+            return Response(html, mimetype="text/html")  # ★テンプレート解釈しない
 
         threading.Thread(
             target=lambda: app.run(port=port, debug=False, use_reloader=False),
