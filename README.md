@@ -1,4 +1,8 @@
-# port forwarding機能がなく、HTML表示のみであり、displayなしのserverでは使えなかったため、少し変更。
+# Forked on 2025/7/30
+
+# 表示形式変更
+
+port forwarding機能がなく、HTML表示のみであり、displayなしのserverでは使えなかったため、少し変更。
 
 # torchvista
 
